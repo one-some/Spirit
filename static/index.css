@@ -1,0 +1,42 @@
+body {
+    color: white;
+    background-color: #181818;
+    font-family: helvetica;
+
+    display: flex;
+    flex-direction: column;
+}
+
+#topbar {
+    display: flex;
+}
+
+#searchbar {
+    background-color: #282828;
+    position: relative;
+    width: 40%;
+    height: 100%;
+}
+
+#searchbar input {
+    width: 100%;
+    height: 100%;
+    outline: none;
+}
+
+/* Suggestions */
+#search-suggestions {
+    position: absolute;
+    width: 100%;
+}
+
+#search-suggestions .suggestion {
+    width: 100%;
+    background-color: #232323;
+    margin: 0px 5px;
+}
+
+#search-suggestions .suggestion .bottom {
+    display: flex;
+    justify-content: space-between;
+}

@@ -1,6 +1,7 @@
 import sqlite3
 from dataclasses import dataclass
 from enum import Enum
+from random import randint
 
 def con():
     return sqlite3.connect("data.db")
@@ -32,11 +33,26 @@ class Sort(Enum):
 class Student:
     name: str
     points: int
+    grade: int = None
+
+    def __post_init__(self) -> None:
+        # TODO: THIS IS A HACK
+        self.grade = randint(9, 12)
     
     def to_json(self):
         return self.__dict__
 
 
+
+# TODO: string query -> Query Object -> SQL string -> people
+def get_students_matching(starting_with: str, limit=10):
+    return [
+        Student(*x)
+        for x in con().execute(
+            f"SELECT NAME,POINTS FROM STUDENTS WHERE NAME LIKE ? LIMIT ?;",
+            (f"%{starting_with}%", limit,)
+        )
+    ]
 
 def get_students(limit=50, sort=Sort.NAME_DESC):
     sq = Sort.to_query(sort)
