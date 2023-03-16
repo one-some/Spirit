@@ -86,7 +86,8 @@ body {
 /* Sidebar */
 #sidebar-cont {
     display: flex;
-    height: 100%;
+    flex-grow: 1;
+    min-height: 0;
 }
 
 #sidebar {
@@ -114,16 +115,24 @@ body {
     display: none;
 }
 
+[tab-id] {
+    height: 100%;
+}
+
 [tab-id="home"] {
     display: flex;
 }
 
 [tab-id="home"] > div {
-    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
 }
 
 #mini-leaderboard {
     width: 100%;
+    overflow-y: auto;
+    flex-grow: 1;
 }
 
 #mini-leaderboard .listing {
