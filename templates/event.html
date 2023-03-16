@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spirit</title>
+    <link rel="stylesheet" href="/static/index.css">
+    <script src="/static/util.js"></script>
+</head>
+<body>
+    {% include "topbar.html" %}
+    <div id="sidebar-cont">
+        {% include "sidebar.html" %}
+        <div id="content">
+            <h1>{{ event.name }}</h1>
+            {{ event.desc }}
+            {{ event.id }}
+        </div>
+    </div>
+</body>
+</html>
