@@ -9,11 +9,17 @@ function makeEntry(place, name, grade, points) {
     $e("span", cont, { innerText: points, classes: ["points"] });
 }
 
-for (const entry of [
-    [1, "Sam", 11, 8251],
-    [2, "Shelly", 12, 7251],
-    [3, "Bob", 9, 4343],
-    [4, "Jane", 10, 2343],
-]) {
-    makeEntry(...entry);
+
+async function init() {
+    let r = await fetch("/api/students.json?limit=25&sort=points_desc");
+    let j = await r.json();
+    console.log(j);
+
+    let place = 1;
+    for (const student of j) {
+        makeEntry(place, student.name, student.grade, student.points);
+        place++;
+    }
 }
+
+init();
