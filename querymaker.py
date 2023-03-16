@@ -3,15 +3,17 @@ from dataclasses import dataclass
 from enum import Enum
 from random import randint
 
+
 def con():
     return sqlite3.connect("data.db")
+
 
 class Sort(Enum):
     NAME_DESC = 0
     NAME_ASC = 1
     POINTS_DESC = 2
     POINTS_ASC = 3
-    
+
     def from_string(string):
         return {
             "name_desc": Sort.NAME_DESC,
@@ -39,26 +41,29 @@ class Student:
         return self.__dict__
 
 
-
 # TODO: string query -> Query Object -> SQL string -> people
 def get_students_matching(starting_with: str, limit=10):
     return [
         Student(*x)
         for x in con().execute(
             f"SELECT NAME,POINTS,GRADE FROM STUDENTS WHERE NAME LIKE ? LIMIT ?;",
-            (f"%{starting_with}%", limit,)
+            (
+                f"%{starting_with}%",
+                limit,
+            ),
         )
     ]
+
 
 def get_students(limit=50, sort=Sort.NAME_DESC):
     sq = Sort.to_query(sort)
     return [
         Student(*x)
         for x in con().execute(
-            f"SELECT NAME,POINTS,GRADE FROM STUDENTS ORDER BY {sq} LIMIT ?;",
-            (limit,)
+            f"SELECT NAME,POINTS,GRADE FROM STUDENTS ORDER BY {sq} LIMIT ?;", (limit,)
         )
     ]
+
 
 @dataclass
 class Event:
@@ -75,8 +80,24 @@ class Event:
             "desc": self.desc,
         }
 
+
 def get_event(event_id: int) -> Event:
-    return Event(*next(con().execute(
-        "SELECT ID,NAME,LOCATION,DESCRIPTION FROM EVENTS WHERE ID = ?;",
-        (event_id,)
-    )))
+    return Event(
+        *next(
+            con().execute(
+                "SELECT ID,NAME,LOCATION,DESCRIPTION FROM EVENTS WHERE ID = ?;",
+                (event_id,),
+            )
+        )
+    )
+
+
+def get_upcoming_events() -> Event:
+    # TODO: Dates
+
+    return [
+        Event(*x)
+        for x in con().execute(
+            "SELECT ID,NAME,LOCATION,DESCRIPTION FROM EVENTS;",
+        )
+    ]

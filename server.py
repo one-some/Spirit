@@ -36,5 +36,9 @@ def suggestions():
     print(query)
     return jsonify(querymaker.get_students_matching(query))
  
+@app.route("/api/events.json")
+def events():
+    return jsonify(querymaker.get_upcoming_events())
+ 
 if __name__ == "__main__":
     app.run()
