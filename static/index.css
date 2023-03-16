@@ -1,4 +1,32 @@
+:root {
+    --sidebar: #232323;
+    --sidebar-icon: #303030;
+
+    --topbar: #111111;
+
+    --leaderboard-listing: #232323;
+
+    --leaderboard-first: gold;
+    --leaderboard-second: gray;
+    --leaderboard-third: brown;
+}
+
+@font-face {
+    font-family: "Material Icons";
+    font-style: normal;
+    font-weight: 400;
+    src: url(/static/MaterialIcons-Regular.ttf) format("truetype");
+}
+
+.material-icons {
+    font-family: "Material Icons";
+    font-size: 1.4em;
+}
+
 body {
+    margin: 0px;
+    height: 100vh;
+
     color: white;
     background-color: #181818;
     font-family: helvetica;
@@ -9,19 +37,33 @@ body {
 
 #topbar {
     display: flex;
+    height: 64px;
+    background-color: var(--topbar);
+}
+
+#topbar > h1 {
+    margin-top: 12px;
+    margin-left: 15px;
 }
 
 #searchbar {
     background-color: #282828;
     position: relative;
     width: 40%;
-    height: 100%;
+    height: 32px;
+    border-radius: 180px;
+    padding: 5px 8px;
+    margin-top: 11px;
+    margin-left: 20px;
 }
 
 #searchbar input {
     width: 100%;
     height: 100%;
     outline: none;
+    background-color: transparent;
+    border: none;
+    color: white;
 }
 
 /* Suggestions */
@@ -39,4 +81,72 @@ body {
 #search-suggestions .suggestion .bottom {
     display: flex;
     justify-content: space-between;
+}
+
+/* Sidebar */
+#sidebar-cont {
+    display: flex;
+    height: 100%;
+}
+
+#sidebar {
+    background-color: var(--sidebar);
+}
+
+.sidebar-icon {
+    background-color: var(--sidebar-icon);
+    font-size: 1.8em;
+    cursor: pointer;
+    padding: 2px;
+    /*margin-bottom: 6px;*/
+}
+
+.sidebar-icon.selected {
+    filter: brightness(150%);
+}
+
+#content {
+    margin-left: 6px;
+    flex-grow: 1;
+}
+
+[tab-id]:not(.selected) {
+    display: none;
+}
+
+[tab-id="home"] {
+    display: flex;
+}
+
+[tab-id="home"] > div {
+    flex-grow: 1;
+}
+
+#mini-leaderboard {
+    width: 100%;
+}
+
+#mini-leaderboard .listing {
+    background-color: var(--leaderboard-listing);
+}
+
+#mini-leaderboard .listing .place {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 32px;
+    height: 48px;
+    width: 48px;
+}
+
+#mini-leaderboard .listing:nth-child(1) .place {
+    background-color: var(--leaderboard-first);
+}
+
+#mini-leaderboard .listing:nth-child(2) .place {
+    background-color: var(--leaderboard-second);
+}
+
+#mini-leaderboard .listing:nth-child(3) .place {
+    background-color: var(--leaderboard-third);
 }

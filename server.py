@@ -8,6 +8,15 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 def index():
     return render_template("index.html")
 
+@app.route("/event/<int:event_id>")
+def event(event_id: int):
+    event = querymaker.get_event(event_id).to_json()
+
+    return render_template(
+        "event.html",
+        event=event
+    )
+
 @app.route("/api/students.json")
 def students():
     sort = querymaker.Sort.from_string(request.args.get("sort", "name_desc"))

@@ -33,12 +33,8 @@ class Sort(Enum):
 class Student:
     name: str
     points: int
-    grade: int = None
+    grade: int
 
-    def __post_init__(self) -> None:
-        # TODO: THIS IS A HACK
-        self.grade = randint(9, 12)
-    
     def to_json(self):
         return self.__dict__
 
@@ -49,7 +45,7 @@ def get_students_matching(starting_with: str, limit=10):
     return [
         Student(*x)
         for x in con().execute(
-            f"SELECT NAME,POINTS FROM STUDENTS WHERE NAME LIKE ? LIMIT ?;",
+            f"SELECT NAME,POINTS,GRADE FROM STUDENTS WHERE NAME LIKE ? LIMIT ?;",
             (f"%{starting_with}%", limit,)
         )
     ]
@@ -59,7 +55,28 @@ def get_students(limit=50, sort=Sort.NAME_DESC):
     return [
         Student(*x)
         for x in con().execute(
-            f"SELECT NAME,POINTS FROM STUDENTS ORDER BY {sq} LIMIT ?;",
+            f"SELECT NAME,POINTS,GRADE FROM STUDENTS ORDER BY {sq} LIMIT ?;",
             (limit,)
         )
     ]
+
+@dataclass
+class Event:
+    id: int
+    name: str
+    location: str
+    desc: str
+
+    def to_json(self) -> dict:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "location": self.location,
+            "desc": self.desc,
+        }
+
+def get_event(event_id: int) -> Event:
+    return Event(*next(con().execute(
+        "SELECT ID,NAME,LOCATION,DESCRIPTION FROM EVENTS WHERE ID = ?;",
+        (event_id,)
+    )))

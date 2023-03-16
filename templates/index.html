@@ -2,20 +2,32 @@
 <html>
 <head>
     <title>Spirit</title>
-    <link rel="stylesheet" href="static/index.css">
-    <script src="static/util.js"></script>
+    <link rel="stylesheet" href="/static/index.css">
+    <script src="/static/util.js"></script>
 </head>
 <body>
-    <div id="topbar">
-        <h1>Spirit</h1>
-        <div id="searchbar">
-            <input id="search-input"></input>
-            <div id="search-suggestions"></div>
+    {% include "topbar.html" %}
+    <div id="sidebar-cont">
+        {% include "sidebar.html" %}
+        <div id="content">
+            <div tab-id="home">
+                <div class="left">
+                    <h1>Welcome, Evil Creature</h1>
+                    <h2>Leaderboard</h2>
+                    <div id="mini-leaderboard"></div>
+                </div>
+                <div class="right">
+                    <h2>Events</h2>
+                </div>
+            </div>
+            <div tab-id="events">
+                <h1>EVEEEEEEEnts</h1>
+            </div>
+            <div tab-id="leaderboard">
+                <h1>leaaAAADERBOARD</h1>
+            </div>
         </div>
     </div>
-    <div id="main">
-        <h1>lo and behold</h1>
-    </div>
-    <script src="static/search-suggest.js"></script>
+    <script src="/static/mini-leaderboard.js"></script>
 </body>
 </html>

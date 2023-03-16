@@ -4,6 +4,11 @@ const searchInput = $el("#search-input");
 searchInput.focus();
 
 searchInput.addEventListener("input", async function(event) {
+    if (!this.value) {
+        suggestionContainer.innerHTML = "";
+        return;
+    }
+
     let encoded = encodeURIComponent(this.value);
     let r = await fetch(`/api/suggest.json?q=${encoded}`);
     let j = await r.json();
