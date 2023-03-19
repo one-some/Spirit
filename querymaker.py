@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from enum import Enum
 from random import randint
 
+# TODO: Docs
+
 
 def con():
     return sqlite3.connect("data.db")
@@ -101,3 +103,7 @@ def get_upcoming_events() -> Event:
             "SELECT ID,NAME,LOCATION,DESCRIPTION FROM EVENTS;",
         )
     ]
+
+def get_random_student(grade: int) -> Student:
+    dat = next(con().execute("SELECT NAME,POINTS,GRADE FROM STUDENTS WHERE GRADE = ? AND POINTS > 0 ORDER BY RANDOM() LIMIT 1;", (grade,)))
+    return Student(*dat)

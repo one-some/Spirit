@@ -14,7 +14,7 @@
                 <div class="left">
                     <h1>Welcome, Evil Creature</h1>
                     <h2>Leaderboard</h2>
-                    <div id="mini-leaderboard"></div>
+                    <div id="mini-leaderboard" class="leaderboard"></div>
                 </div>
                 <div class="right">
                     <h2>Events</h2>
@@ -22,13 +22,27 @@
                 </div>
             </div>
             <div tab-id="events">
-                <h1>EVEEEEEEEnts</h1>
+                <h1>Events</h1>
             </div>
             <div tab-id="leaderboard">
-                <h1>leaaAAADERBOARD</h1>
+                <div class="left">
+                    <h1>Leaderboard</h1>
+                    <div id="leaderboard" class="leaderboard"></div>
+                    <div id="draw-bay">
+                        <span
+                            class="label"
+                            help-text="The student with the most accumulated points will be deemed the first place winner. Other winners are randomly drawn from event attendees of each grade level. The number of points a student has accumulated determines which prize they will recieve."
+                        >
+                            Draw Prizes
+                        </span>
+                        <button>Draw Prizes</button>
+                    </div>
+                </div>
+                <div class="right"></div>
             </div>
         </div>
     </div>
     <script src="/static/index.js"></script>
+    <script src="/static/leaderboard.js"></script>
 </body>
 </html>
