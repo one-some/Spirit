@@ -7,7 +7,7 @@ from random import randint
 
 
 def con():
-    return sqlite3.connect("data.db")
+    return sqlite3.connect("data/spirit.db")
 
 
 class Sort(Enum):
@@ -104,6 +104,12 @@ def get_upcoming_events() -> Event:
         )
     ]
 
+
 def get_random_student(grade: int) -> Student:
-    dat = next(con().execute("SELECT NAME,POINTS,GRADE FROM STUDENTS WHERE GRADE = ? AND POINTS > 0 ORDER BY RANDOM() LIMIT 1;", (grade,)))
+    dat = next(
+        con().execute(
+            "SELECT NAME,POINTS,GRADE FROM STUDENTS WHERE GRADE = ? AND POINTS > 0 ORDER BY RANDOM() LIMIT 1;",
+            (grade,),
+        )
+    )
     return Student(*dat)

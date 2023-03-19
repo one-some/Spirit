@@ -17,7 +17,6 @@ searchInput.addEventListener("input", async function(event) {
     suggestionContainer.innerHTML = "";
 
     for (const suggestion of j) {
-        console.log(suggestion);
         renderSuggestion(suggestion.name, suggestion.points, suggestion.grade);
     }
 });

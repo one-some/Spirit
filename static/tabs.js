@@ -9,15 +9,18 @@ function deselectTabs() {
 }
 
 for (const tabButton of document.querySelectorAll("[sidebar-button]")) {
-    let tabName = tabButton.getAttribute("sidebar-button");
-    tabButton.addEventListener("click", function() {
+    let tabID = tabButton.getAttribute("sidebar-button");
+    tabButton.addEventListener("click", function () {
         deselectTabs();
 
         let title = tabButton.getAttribute("title");
         if (title) document.title = `${title} - Spirit`;
 
+        let tabURL = { home: "/", events: "/events", leaderboard: "/leaderboard" }[tabID];
+        if (tabURL) window.history.pushState({}, null, tabURL);
+
         tabButton.classList.add("selected");
-        const tabContent = $el(`[tab-id="${tabName}"]`);
+        const tabContent = $el(`[tab-id="${tabID}"]`);
         tabContent.classList.add("selected");
     });
 }
@@ -31,6 +34,6 @@ let targetTab = {
 }[window.location.pathname] || "home";
 
 
-window.addEventListener("load", function() {
+window.addEventListener("load", function () {
     $el(`[sidebar-button="${targetTab}"]`).click();
 });

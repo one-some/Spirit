@@ -11,6 +11,14 @@
     --leaderboard-first: gold;
     --leaderboard-second: gray;
     --leaderboard-third: brown;
+
+    --modal-title-background: #0c6188;
+    --modal-content-background: var(--bg);
+    --modal-rounding: 6px;
+}
+
+.hidden {
+    display: none !important;
 }
 
 button {
@@ -45,15 +53,36 @@ body {
     flex-direction: column;
 }
 
+table .column-header {
+    font-weight: bold;
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.034);
+}
+
 #topbar {
     display: flex;
     height: 64px;
     background-color: var(--topbar);
 }
 
-#topbar > h1 {
+#topbar #logo {
     margin-top: 12px;
-    margin-left: 15px;
+    margin-left: 10px;
+    height: 32px;
+    user-select: none;
+    cursor: df;
+}
+
+#topbar #logo img {
+    height: 100%;
+}
+
+#topbar #logo h1 {
+    display: inline;
+    margin: 0px;
+    margin-left: 2px;
+    bottom: 7px;
+    position: relative;
 }
 
 #searchbar {
@@ -63,7 +92,8 @@ body {
     height: 32px;
     border-radius: 180px;
     padding: 5px 8px;
-    margin-top: 11px;
+    margin-top: 8px;
+    margin-bottom: 8px;
     margin-left: 20px;
 }
 
@@ -109,7 +139,7 @@ body {
     font-size: 1.8em;
     cursor: pointer;
     padding: 2px;
-    /*margin-bottom: 6px;*/
+    user-select: none;
 }
 
 .sidebar-icon.selected {
@@ -134,8 +164,8 @@ body {
     display: flex;
 }
 
-[tab-id="home"] > div,
-[tab-id="leaderboard"] > div {
+[tab-id="home"]>div,
+[tab-id="leaderboard"]>div {
     display: flex;
     flex-direction: column;
     flex: 1 1 0;
@@ -151,6 +181,11 @@ body {
     background-color: var(--leaderboard-listing);
     display: flex;
     justify-content: space-between;
+    transition: filter 0.1s;
+}
+
+.leaderboard .listing:hover {
+    filter: brightness(125%);
 }
 
 .leaderboard .listing .place {
@@ -209,20 +244,20 @@ body {
     margin-top: 14px;
 }
 
-#draw-bay > .label {
+#draw-bay>.label {
     position: absolute;
     top: -15px;
     left: 1em;
     background-color: var(--bg);
 }
 
-#draw-bay > p {
+#draw-bay>p {
     opacity: 0.9;
     font-size: 10px;
     margin: 0px;
 }
 
-#draw-bay > button {
+#draw-bay>button {
     display: block;
     width: 100%;
     height: 42px;
@@ -235,4 +270,67 @@ body {
     font-weight: normal;
     position: relative;
     top: 5px;
+}
+
+/* Modals */
+#modal-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100vw;
+    height: 100vh;
+
+    position: absolute;
+    left: 0px;
+    top: 0px;
+
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 120;
+}
+
+modal {
+    display: flex;
+    flex-direction: column;
+}
+
+modal .titlebar {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    height: 48px;
+
+    font-size: 20px;
+    font-weight: bold;
+
+    background-color: var(--modal-title-background);
+    border-radius: var(--modal-rounding) var(--modal-rounding) 0px 0px;
+
+    cursor: default;
+    user-select: none;
+}
+
+modal .titlebar span {
+    position: relative;
+    top: 3px;
+}
+
+modal-content {
+    display: block;
+    flex-grow: 1;
+
+    padding: 10px;
+    padding-top: 0px;
+
+    min-width: 50vw;
+    min-height: 40vh;
+
+    background-color: var(--modal-content-background);
+    border-radius: 0px 0px var(--modal-rounding) var(--modal-rounding);
+}
+
+#winner-cont table {
+    width: 100%;
 }

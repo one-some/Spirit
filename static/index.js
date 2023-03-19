@@ -1,8 +1,10 @@
+// TODO: Account
+const USER_NAME = "John";
+
 const miniLeaderboard = $el("#mini-leaderboard");
 const miniEvents = $el("#mini-events");
 
 function renderStudent(parent, place, student) {
-    console.log(student);
     const cont = $e("div", parent, { classes: ["listing"] });
     const left = $e("div", cont);
     const right = $e("div", cont);
@@ -19,7 +21,6 @@ function renderStudent(parent, place, student) {
 async function initLeaderboard() {
     let r = await fetch("/api/students.json?limit=25&sort=points_desc");
     let j = await r.json();
-    console.log(j);
 
     let place = 1;
     for (const student of j) {
@@ -51,3 +52,10 @@ async function init() {
 }
 
 init();
+
+
+// Greeting
+// TODO: Actually have correct time
+let greetingPossibilities = ["Good afternoon, %s", "Welcome, %s", "Greetings, %s"];
+let greeting = greetingPossibilities[Math.floor(Math.random() * greetingPossibilities.length)].replaceAll("%s", USER_NAME);
+$el("#greeting").innerText = greeting;

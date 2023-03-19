@@ -1,4 +1,4 @@
-function $e(tag, parent, attributes, insertionLocation=null) {
+function $e(tag, parent, attributes, insertionLocation = null) {
     let element = document.createElement(tag);
 
     if (!attributes) attributes = {};
@@ -50,3 +50,22 @@ function $e(tag, parent, attributes, insertionLocation=null) {
 }
 
 function $el(s) { return document.querySelector(s); }
+
+function $table(rows, parent, attributes = {}) {
+    const t = $e("table", parent, attributes);
+    const body = $e("tbody", t);
+
+    for (const [i, rowData] of Object.entries(rows)) {
+        let rowAttr = {};
+
+        // Squint equality as i is a string
+        if (i == 0) rowAttr["classes"] = ["column-header"]
+
+        const rowEl = $e("tr", body, rowAttr);
+        for (const speckOfData of rowData) {
+            $e("td", rowEl, { innerText: speckOfData });
+        }
+    }
+
+    return t;
+}
