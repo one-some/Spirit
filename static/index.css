@@ -29,6 +29,10 @@ button {
     appearance: none;
 }
 
+input {
+    color: white;
+}
+
 @font-face {
     font-family: "Material Icons";
     font-style: normal;
@@ -325,7 +329,7 @@ modal-content {
     padding-top: 0px;
 
     min-width: 50vw;
-    min-height: 40vh;
+    /*min-height: 40vh;*/
 
     background-color: var(--modal-content-background);
     border-radius: 0px 0px var(--modal-rounding) var(--modal-rounding);
@@ -333,4 +337,78 @@ modal-content {
 
 #winner-cont table {
     width: 100%;
+}
+
+.buttons {
+    display: flex;
+    justify-content: space-between;
+
+    width: 100%;
+}
+
+.button:nth-child(1) {
+    /* Hack */
+    margin-right: 10px;
+}
+
+.button {
+    display: flex;
+    flex: 1 1 0;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    height: 32px;
+    font-weight: bold;
+    background-color: #282828;
+}
+
+.button:hover {
+    filter: brightness(120%);
+}
+
+.button.primary {
+    background-color: var(--modal-title-background);
+}
+
+.up-down {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.prize {
+    height: 64px;
+}
+
+.inline-input {
+    appearance: none;
+    outline: none;
+    background-color: transparent;
+}
+
+.prize .points {
+    width: 64px;
+}
+
+.prize .delete-btn {
+    display: inline-block;
+    opacity: 0.7;
+    cursor: pointer;
+    position: relative;
+    top: 6px;
+    left: 2px;
+    transition: transform 0.2s;
+}
+
+.prize .delete-btn:hover {
+    opacity: 1.0 !important;
+    transform: scale(1.05);
+}
+
+[modal-id="prize-editor"] {
+    padding-left: 0px;
+    padding-right: 0px;
+}
 }

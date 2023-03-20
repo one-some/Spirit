@@ -17,11 +17,16 @@ for (const content of document.querySelectorAll("modal-content")) {
     modal.appendChild(content);
 }
 
-modalContainer.addEventListener("click", function () {
+function closeModals() {
     if (!currentModalEl) return;
 
     modalContainer.classList.add("hidden");
     currentModalEl.classList.add("hidden");
+}
+
+modalContainer.addEventListener("click", closeModals);
+document.addEventListener("keydown", function(event) {
+    if (event.key === "Escape") closeModals();
 });
 
 function getModalContent(modalID) {

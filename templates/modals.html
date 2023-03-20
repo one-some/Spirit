@@ -5,8 +5,25 @@
     </modal-content>
 
     <modal-content modal-id="no-prizes" modal-title="No Prizes">
-        <h2>Congratulations to the following winners:</h2>
-        <div id="winner-cont"></div>
+        <div class="up-down">
+            <p>The prize pool is empty! Please add prizes.</p>
+            <div class="buttons">
+                <div id="add-prizes-button" class="button primary">Add Prizes</div>
+                <div onclick="closeModals();" class="button">Cancel</div>
+            <div id="winner-cont"></div>
+        </div>
+    </modal-content>
+
+    <modal-content modal-id="prize-editor" modal-title="Prizes">
+        <div id="prize-container">
+            <div class="prize">
+                <span class="delete-btn material-icons">delete</span>
+                <input class="name inline-input" placeholder="Name">
+                <input class="desc inline-input" placeholder="Description">
+                <input class="points inline-input" placeholder="Points Required">
+            </div>
+        </div>
     </modal-content>
 </div>
 <script src="/static/modals.js"></script>
+<script>showModal("prize-editor");</script>

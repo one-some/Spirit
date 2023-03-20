@@ -12,6 +12,15 @@ async function init() {
 }
 
 $el("#draw-prizes-button").addEventListener("click", async function () {
+    let pr = await fetch("/api/prizes.json");
+    let prizes = await pr.json();
+
+    if (!prizes.length) {
+        console.log("No prizes!");
+        showModal("no-prizes");
+        return;
+    }
+
     let r = await fetch("/api/draw_results.json");
     let j = await r.json();
 
@@ -37,6 +46,11 @@ $el("#draw-prizes-button").addEventListener("click", async function () {
     $table(tDat, winnerCont);
 
     showModal("prize-winners");
-})
+});
+
+$el("#add-prizes-button").addEventListener("click", function() {
+    closeModals();
+    showModal("prize-editor");
+});
 
 init();
