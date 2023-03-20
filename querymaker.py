@@ -82,6 +82,18 @@ class Event:
             "desc": self.desc,
         }
 
+@dataclass
+class Prize:
+    name: str
+    desc: str
+    points_required: int
+
+    def to_json(self) -> dict:
+        return {
+            "name": self.name,
+            "desc": self.desc,
+            "points_required": self.points_required,
+        }
 
 def get_event(event_id: int) -> Event:
     return Event(
@@ -94,7 +106,7 @@ def get_event(event_id: int) -> Event:
     )
 
 
-def get_upcoming_events() -> Event:
+def get_upcoming_events() -> list[Event]:
     # TODO: Dates
 
     return [
@@ -113,3 +125,11 @@ def get_random_student(grade: int) -> Student:
         )
     )
     return Student(*dat)
+
+def get_prizes() -> list[Prize]:
+    return [
+        Prize(*x)
+        for x in con().execute(
+            "SELECT NAME,DESC,POINTS_REQUIRED FROM PRIZES;",
+        )
+    ]

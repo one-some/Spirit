@@ -81,6 +81,9 @@ def api_suggestions():
 def api_events():
     return jsonify(querymaker.get_upcoming_events())
 
+@app.route("/api/prizes.json")
+def api_prizes():
+    return jsonify(querymaker.get_prizes())
 
 if __name__ == "__main__":
     app.run()
