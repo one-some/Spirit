@@ -1,4 +1,6 @@
 const leaderboard = $el("#leaderboard");
+const prizeContainer = $el("#prize-container");
+const addPrizeCont = $el("#add-prize-cont");
 
 async function init() {
     let r = await fetch("/api/students.json?limit=25&sort=points_desc");
@@ -48,9 +50,17 @@ $el("#draw-prizes-button").addEventListener("click", async function () {
     showModal("prize-winners");
 });
 
-$el("#add-prizes-button").addEventListener("click", function() {
+$el("#add-prizes-button").addEventListener("click", function () {
     closeModals();
     showModal("prize-editor");
+});
+
+$el("#add-prize-cont .delete-btn").addEventListener("click", function () {
+    const prize = $e("div", prizeContainer, { classes: ["prize"] }, { before: addPrizeCont });
+    const deleteButton = $e("span", prize, { innerText: "delete", classes: ["delete-btn", "material-icons"] });
+    const nameInput = $e("input", prize, { placeholder: "Name", classes: ["name", "inline-input"] });
+    const descInput = $e("input", prize, { placeholder: "Description", classes: ["desc", "inline-input"] });
+    const pointsInput = $e("input", prize, { type: "number", placeholder: "Points Required", classes: ["name", "inline-input"] });
 });
 
 init();

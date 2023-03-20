@@ -379,7 +379,9 @@ modal-content {
 }
 
 .prize {
-    height: 64px;
+    display: flex;
+    height: 32px;
+    padding-right: 10px;
 }
 
 .inline-input {
@@ -388,23 +390,26 @@ modal-content {
     background-color: transparent;
 }
 
+.prize .desc {
+    flex-grow: 1;
+}
+
 .prize .points {
     width: 64px;
 }
 
 .prize .delete-btn {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     opacity: 0.7;
     cursor: pointer;
     position: relative;
-    top: 6px;
+    /* top: 6px; */
     left: 2px;
-    transition: transform 0.2s;
 }
 
 .prize .delete-btn:hover {
     opacity: 1.0 !important;
-    transform: scale(1.05);
 }
 
 [modal-id="prize-editor"] {
