@@ -60,7 +60,7 @@ $el("#add-prize-cont .delete-btn").addEventListener("click", function () {
     const deleteButton = $e("span", prize, { innerText: "delete", classes: ["delete-btn", "material-icons"] });
     const nameInput = $e("input", prize, { placeholder: "Name", classes: ["name", "inline-input"] });
     const descInput = $e("input", prize, { placeholder: "Description", classes: ["desc", "inline-input"] });
-    const pointsInput = $e("input", prize, { type: "number", placeholder: "Points Required", classes: ["name", "inline-input"] });
+    const pointsInput = $e("input", prize, { type: "number", placeholder: "Points Required", classes: ["points", "inline-input"] });
 });
 
 init();
