@@ -55,12 +55,100 @@ $el("#add-prizes-button").addEventListener("click", function () {
     showModal("prize-editor");
 });
 
-$el("#add-prize-cont .delete-btn").addEventListener("click", function () {
+function addPrizeRow() {
+    tryCommitPrizeData();
+
     const prize = $e("div", prizeContainer, { classes: ["prize"] }, { before: addPrizeCont });
     const deleteButton = $e("span", prize, { innerText: "delete", classes: ["delete-btn", "material-icons"] });
     const nameInput = $e("input", prize, { placeholder: "Name", classes: ["name", "inline-input"] });
     const descInput = $e("input", prize, { placeholder: "Description", classes: ["desc", "inline-input"] });
     const pointsInput = $e("input", prize, { type: "number", placeholder: "Points Required", classes: ["points", "inline-input"] });
-});
 
+    for (const input of [nameInput, descInput, pointsInput]) {
+        input.addEventListener("change", function() {
+            console.log("ouch");
+            tryCommitPrizeData();
+        });
+    }
+
+    deleteButton.addEventListener("click", function() {
+        // TODO: Confirmation
+
+        prize.remove();
+
+        // If we removed the last prize we need to add another one. The 1 is to account for the dummy one for adding
+        if (document.getElementsByClassName("prize").length === 1) addPrizeRow();
+
+        tryCommitPrizeData();
+    });
+}
+
+$el("#add-prize-cont .delete-btn").addEventListener("click", addPrizeRow);
+
+function cleanUserInput(input) {
+    return input.trim();
+}
+
+function getPrizeData() {
+    // Returns an array of prizes if data is valid, undefined otherwise.
+    let dat = [];
+    let dataInvalid = false;
+
+    // Mark all fields visually valid initially
+    for (const invalidEl of document.querySelectorAll(".bad-input")) {
+        invalidEl.classList.remove("bad-input");
+        invalidEl.setAttribute("title", invalidEl.getAttribute("og-title"));
+    }
+
+    // Look for data and check validity
+    for (const prizeEl of document.querySelectorAll("#prize-container > .prize")) {
+        if (prizeEl.id === "add-prize-cont") continue;
+
+        const [nameEl, descEl, pointsEl] = [
+            prizeEl.querySelector(".name"),
+            prizeEl.querySelector(".desc"),
+            prizeEl.querySelector(".points"),
+        ];
+
+        let prize = {
+            name: cleanUserInput(nameEl.value) || null,
+            desc: cleanUserInput(descEl.value) || null,
+            points: parseInt(cleanUserInput(pointsEl.value)),
+        };
+
+        // Check if data is valid; if not, mark the data as invalid and add a visual marker for the user. 
+        if (!prize.name) {
+            nameEl.classList.add("bad-input");
+            nameEl.setAttribute("old-title", nameEl.getAttribute("title"));
+            nameEl.setAttribute("title", "This field is required.");
+            dataInvalid = true;
+        }
+
+        if (!prize.points && prize.points !== 0) {
+            pointsEl.classList.add("bad-input");
+            pointsEl.setAttribute("old-title", pointsEl.getAttribute("title"));
+            pointsEl.setAttribute("title", "This field is required.");
+            dataInvalid = true;
+        }
+
+        dat.push(prize);
+    }
+
+    console.table(dat);
+
+    if (dataInvalid) return undefined;
+
+    return dat;
+}
+
+function tryCommitPrizeData() {
+    let dat = getPrizeData();
+
+    // Data is invalid, return.
+    if (!dat) return;
+
+    console.log("Pushing", dat);
+}
+
+addPrizeRow();
 init();

@@ -15,6 +15,8 @@
     --modal-title-background: #0c6188;
     --modal-content-background: var(--bg);
     --modal-rounding: 6px;
+
+    --alert-color: #c32a2a;
 }
 
 .hidden {
@@ -31,7 +33,18 @@ button {
 
 input {
     color: white;
+    transition: border-color 0.5s;
+    transition: color 0.5s;
 }
+
+input.bad-input {
+    border-color: var(--alert-color);
+    color: var(--alert-color);
+    color: var(--alert-color);
+}
+
+input::placeholder { transition: color 0.5s; }
+input.bad-input::placeholder { color: var(--alert-color); }
 
 @font-face {
     font-family: "Material Icons";
@@ -43,6 +56,7 @@ input {
 .material-icons {
     font-family: "Material Icons";
     font-size: 1.4em;
+    user-select: none;
 }
 
 body {
@@ -415,5 +429,4 @@ modal-content {
 [modal-id="prize-editor"] {
     padding-left: 0px;
     padding-right: 0px;
-}
 }
