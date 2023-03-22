@@ -85,5 +85,20 @@ def api_events():
 def api_prizes():
     return jsonify(querymaker.get_prizes())
 
+@app.route("/api/set_prizes.json", methods=["POST"])
+def api_set_prizes():
+    new_dat = []
+    for prize in request.json:
+        new_dat.append({
+            "name": prize["name"],
+            "desc": prize["desc"],
+            "points_required": prize["points"],
+        })
+
+    with open("data/prizes.json", "w") as file:
+        json.dump(new_dat, file)
+
+    return "Ok! :)"
+
 if __name__ == "__main__":
     app.run()

@@ -9,6 +9,10 @@ from random import randint
 def con():
     return sqlite3.connect("data/spirit.db")
 
+def prize_dat():
+    with open("data/prizes.json", "r") as file:
+        return json.load(file)
+
 
 class Sort(Enum):
     NAME_DESC = 0
@@ -127,9 +131,4 @@ def get_random_student(grade: int) -> Student:
     return Student(*dat)
 
 def get_prizes() -> list[Prize]:
-    return [
-        Prize(*x)
-        for x in con().execute(
-            "SELECT NAME,DESC,POINTS_REQUIRED FROM PRIZES;",
-        )
-    ]
+    return [Prize(x**) for x in prize_dat()]
