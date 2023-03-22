@@ -97,7 +97,10 @@ def api_set_prizes():
             "points_required": prize["points"],
         })
     
-    print(new_dat)
+    # print(new_dat)
+    print("--")
+    print("zz", json.dumps(new_dat))
+    print("--")
 
     with open("data/prizes.json", "w") as file:
         json.dump(new_dat, file)

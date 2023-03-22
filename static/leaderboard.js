@@ -176,6 +176,12 @@ async function tryCommitPrizeData() {
 function updatePrizeModal() {
     let prizesAdded = 0;
 
+    // Delete old
+    for (const prizeEl of document.querySelectorAll(".prize")) {
+        if (prizeEl.id === "add-prize-cont") continue;
+        prizeEl.remove();
+    }
+
     for (const prize of prizeData) {
         console.log("Adding prizes to modal:", prize);
         addPrizeRow(prize.name, prize.desc, prize.points_required);
