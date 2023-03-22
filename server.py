@@ -1,3 +1,4 @@
+import json
 import querymaker
 from flask import Flask, jsonify, request, render_template
 
@@ -5,16 +6,17 @@ from flask import Flask, jsonify, request, render_template
 
 
 def prize_from_points(points: int) -> str:
-    if points > 2000:
-        return "big pizza"
-    elif points > 1500:
-        return "medium pizza"
-    elif points > 1000:
-        return "small pizza"
-    elif points > 500:
-        return "itty bitty pizza"
-    else:
-        return "teeny tiny pizza"
+    prizes = sorted(
+        querymaker.get_prizes(),
+        key=lambda p: p.points_required,
+        reverse=True
+    )
+    print(prizes)
+
+    for prize in prizes:
+        if points >= prize.points_required:
+            return prize.name
+    return None
 
 
 # Routing
@@ -94,6 +96,8 @@ def api_set_prizes():
             "desc": prize["desc"],
             "points_required": prize["points"],
         })
+    
+    print(new_dat)
 
     with open("data/prizes.json", "w") as file:
         json.dump(new_dat, file)

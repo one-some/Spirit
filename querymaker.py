@@ -1,3 +1,4 @@
+import json
 import sqlite3
 from dataclasses import dataclass
 from enum import Enum
@@ -131,4 +132,4 @@ def get_random_student(grade: int) -> Student:
     return Student(*dat)
 
 def get_prizes() -> list[Prize]:
-    return [Prize(x**) for x in prize_dat()]
+    return [Prize(**x) for x in prize_dat()]

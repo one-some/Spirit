@@ -2,6 +2,9 @@ const leaderboard = $el("#leaderboard");
 const prizeContainer = $el("#prize-container");
 const addPrizeCont = $el("#add-prize-cont");
 
+let prizeCommitsLocked = true;
+let prizeData;
+
 async function init() {
     let r = await fetch("/api/students.json?limit=25&sort=points_desc");
     let j = await r.json();
@@ -11,17 +14,21 @@ async function init() {
         renderStudent(leaderboard, place, student)
         place++;
     }
+
+    let pr = await fetch("/api/prizes.json");
+    prizeData = await pr.json();
+    updatePrizeModal();
+    prizeCommitsLocked = false;
 }
 
 $el("#draw-prizes-button").addEventListener("click", async function () {
-    let pr = await fetch("/api/prizes.json");
-    let prizes = await pr.json();
-
-    if (!prizes.length) {
+    if (!prizeData.length) {
         console.log("No prizes!");
         showModal("no-prizes");
         return;
     }
+
+    updatePrizeModal();
 
     let r = await fetch("/api/draw_results.json");
     let j = await r.json();
@@ -55,23 +62,28 @@ $el("#add-prizes-button").addEventListener("click", function () {
     showModal("prize-editor");
 });
 
-function addPrizeRow() {
+$el("#edit-prizes-button").addEventListener("click", function () {
+    closeModals();
+    showModal("prize-editor");
+});
+
+function addPrizeRow(name = "", desc = "", points = null) {
     tryCommitPrizeData();
 
     const prize = $e("div", prizeContainer, { classes: ["prize"] }, { before: addPrizeCont });
     const deleteButton = $e("span", prize, { innerText: "delete", classes: ["delete-btn", "material-icons"] });
-    const nameInput = $e("input", prize, { placeholder: "Name", classes: ["name", "inline-input"] });
-    const descInput = $e("input", prize, { placeholder: "Description", classes: ["desc", "inline-input"] });
-    const pointsInput = $e("input", prize, { type: "number", placeholder: "Points Required", classes: ["points", "inline-input"] });
+    const nameInput = $e("input", prize, { value: name, placeholder: "Name", classes: ["name", "inline-input"] });
+    const descInput = $e("input", prize, { value: desc, placeholder: "Description", classes: ["desc", "inline-input"] });
+    const pointsInput = $e("input", prize, { value: points, type: "number", placeholder: "Points Required", classes: ["points", "inline-input"] });
 
     for (const input of [nameInput, descInput, pointsInput]) {
-        input.addEventListener("change", function() {
+        input.addEventListener("change", function () {
             console.log("ouch");
             tryCommitPrizeData();
         });
     }
 
-    deleteButton.addEventListener("click", function() {
+    deleteButton.addEventListener("click", function () {
         // TODO: Confirmation
 
         prize.remove();
@@ -83,7 +95,7 @@ function addPrizeRow() {
     });
 }
 
-$el("#add-prize-cont .delete-btn").addEventListener("click", addPrizeRow);
+$el("#add-prize-cont .delete-btn").addEventListener("click", () => addPrizeRow());
 
 function cleanUserInput(input) {
     return input.trim();
@@ -141,14 +153,36 @@ function getPrizeData() {
     return dat;
 }
 
-function tryCommitPrizeData() {
+async function tryCommitPrizeData() {
     let dat = getPrizeData();
+
+    // Prevent data races and other issues.
+    if (prizeCommitsLocked) return;
 
     // Data is invalid, return.
     if (!dat) return;
 
     console.log("Pushing", dat);
+
+    await fetch("/api/set_prizes.json", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(dat)
+    });
 }
 
-addPrizeRow();
+function updatePrizeModal() {
+    let prizesAdded = 0;
+
+    for (const prize of prizeData) {
+        console.log("Adding prizes to modal:", prize);
+        addPrizeRow(prize.name, prize.desc, prize.points_required);
+        prizesAdded++;
+    }
+
+    if (!prizesAdded) addPrizeRow();
+}
+
 init();
