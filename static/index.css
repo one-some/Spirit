@@ -31,10 +31,15 @@ button {
     appearance: none;
 }
 
-input {
+input, textarea {
     color: white;
     transition: border-color 0.5s;
     transition: color 0.5s;
+    background: black;
+}
+
+.daterangepicker {
+    color: black !important;
 }
 
 input.bad-input {
@@ -429,4 +434,13 @@ modal-content {
 [modal-id="prize-editor"] {
     padding-left: 0px;
     padding-right: 0px;
+}
+
+[modal-id="event-creator"] #event-name {
+    display: block;
+}
+
+[modal-id="event-creator"] #event-desc {
+    width: 100%;
+    resize: none;
 }

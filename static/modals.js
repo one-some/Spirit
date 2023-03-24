@@ -8,7 +8,7 @@ for (const content of document.querySelectorAll("modal-content")) {
     const titlebar = $e("div", modal, { classes: ["titlebar"] });
     const title = $e("span", titlebar, { innerText: content.getAttribute("modal-title") })
 
-    modal.addEventListener("click", function(event) {
+    modal.addEventListener("click", function (event) {
         // Do not hide window when clicking in it.
         event.stopPropagation();
     })
@@ -25,7 +25,7 @@ function closeModals() {
 }
 
 modalContainer.addEventListener("click", closeModals);
-document.addEventListener("keydown", function(event) {
+document.addEventListener("keydown", function (event) {
     if (event.key === "Escape") closeModals();
 });
 

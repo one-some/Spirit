@@ -10,6 +10,7 @@
             <div class="buttons">
                 <div id="add-prizes-button" class="button primary">Add Prizes</div>
                 <div onclick="closeModals();" class="button">Cancel</div>
+            </div>
             <div id="winner-cont"></div>
         </div>
     </modal-content>
@@ -21,6 +22,38 @@
             </div>
         </div>
     </modal-content>
+
+    <modal-content modal-id="event-creator" modal-title="New Event">
+        <input id="event-name" placeholder="Event Name">
+
+        <textarea id="event-desc"
+            placeholder="Write the description for the new event here. This could include things such as the reason for holding the event, special guests, or any other useful notes."></textarea>
+
+        <!-- TODO: Dynamic gps lookup -->
+        <input id="event-location" placeholder="Location">
+
+        <input id="event-daterange" name="datetimes">
+
+        <input id="event-points" type="number" placeholder="Points worth" title="How many points students will be given to attend this event.">
+
+        <div class="buttons">
+            <div id="create-event-button" class="button primary">Create Event</div>
+            <div onclick="closeModals();" class="button">Cancel</div>
+        </div>
+    </modal-content>
 </div>
 <script src="/static/modals.js"></script>
-<script>showModal("prize-editor");</script>
+
+<script>
+    $(function () {
+        $('input[name="datetimes"]').daterangepicker({
+            timePicker: true,
+            startDate: moment().startOf('hour'),
+            endDate: moment().startOf('hour').add(32, 'hour'),
+            locale: {
+                format: 'M/DD hh:mm A'
+            }
+        });
+    });
+</script>
+<script>showModal("event-creator");</script>
