@@ -466,3 +466,30 @@ modal-content {
 [modal-id="event-creator"] .buttons {
     margin-top: 6px;
 }
+
+#mini-events .listing {
+    margin-left: 4px;
+    margin-bottom: 12px;
+}
+
+#mini-events .listing .name {
+    font-weight: bold;
+    font-size: 24px;
+    display: block;
+}
+
+#mini-events .listing .desc {
+    display: block;
+    font-style: italic;
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+#mini-events .listing .location {
+    opacity: 0.8;
+}
+
+#mini-events .listing .location::before {
+    font-family: "Material Icons";
+    content: "location_on";
+}
