@@ -5,6 +5,8 @@ const addPrizeCont = $el("#add-prize-cont");
 let prizeCommitsLocked = true;
 let prizeData;
 
+const LEADERBOARD_DEBUG = false;
+
 async function init() {
     let r = await fetch("/api/students.json?limit=25&sort=points_desc");
     let j = await r.json();
@@ -23,7 +25,7 @@ async function init() {
 
 $el("#draw-prizes-button").addEventListener("click", async function () {
     if (!prizeData.length) {
-        console.log("No prizes!");
+        if (LEADERBOARD_DEBUG) console.log("No prizes!");
         showModal("no-prizes");
         return;
     }
@@ -78,7 +80,7 @@ function addPrizeRow(name = "", desc = "", points = null) {
 
     for (const input of [nameInput, descInput, pointsInput]) {
         input.addEventListener("change", function () {
-            console.log("ouch");
+            if (LEADERBOARD_DEBUG) console.log("ouch");
             tryCommitPrizeData();
         });
     }
@@ -146,7 +148,7 @@ function getPrizeData() {
         dat.push(prize);
     }
 
-    console.table(dat);
+    if (LEADERBOARD_DEBUG) console.table(dat);
 
     if (dataInvalid) return undefined;
 
@@ -162,7 +164,7 @@ async function tryCommitPrizeData() {
     // Data is invalid, return.
     if (!dat) return;
 
-    console.log("Pushing", dat);
+    if (LEADERBOARD_DEBUG) console.log("Pushing", dat);
 
     await fetch("/api/set_prizes.json", {
         method: "POST",
@@ -183,7 +185,7 @@ function updatePrizeModal() {
     }
 
     for (const prize of prizeData) {
-        console.log("Adding prizes to modal:", prize);
+        if (LEADERBOARD_DEBUG) console.log("Adding prizes to modal:", prize);
         addPrizeRow(prize.name, prize.desc, prize.points_required);
         prizesAdded++;
     }

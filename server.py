@@ -98,13 +98,17 @@ def api_set_prizes():
         })
     
     # print(new_dat)
-    print("--")
-    print("zz", json.dumps(new_dat))
-    print("--")
 
     with open("data/prizes.json", "w") as file:
         json.dump(new_dat, file)
 
+    return "Ok! :)"
+
+@app.route("/api/create_event.json", methods=["POST"])
+def api_create_event():
+    event = {k: request.json[k] for k in ["name", "desc", "location", "time", "points"]}
+
+    print(event)
     return "Ok! :)"
 
 if __name__ == "__main__":

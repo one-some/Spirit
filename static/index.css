@@ -38,14 +38,22 @@ input, textarea {
     background: black;
 }
 
-input.bad-input {
-    border-color: var(--alert-color);
+input.bad-input,
+textarea.bad-input {
+    border-color: var(--alert-color) !important;
     color: var(--alert-color);
     color: var(--alert-color);
 }
 
-input::placeholder { transition: color 0.5s; }
-input.bad-input::placeholder { color: var(--alert-color); }
+input::placeholder,
+textarea::placeholder {
+    transition: color 0.5s;
+}
+
+input.bad-input::placeholder,
+textarea.bad-input::placeholder {
+    color: var(--alert-color);
+}
 
 .daterangepicker {
     color: black !important;
