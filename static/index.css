@@ -38,10 +38,6 @@ input, textarea {
     background: black;
 }
 
-.daterangepicker {
-    color: black !important;
-}
-
 input.bad-input {
     border-color: var(--alert-color);
     color: var(--alert-color);
@@ -50,6 +46,17 @@ input.bad-input {
 
 input::placeholder { transition: color 0.5s; }
 input.bad-input::placeholder { color: var(--alert-color); }
+
+.daterangepicker {
+    color: black !important;
+}
+
+b.header {
+    display: block;
+    width: 100%;
+    margin-top: 5px;
+    margin-bottom: 1px;
+}
 
 @font-face {
     font-family: "Material Icons";
@@ -438,9 +445,16 @@ modal-content {
 
 [modal-id="event-creator"] #event-name {
     display: block;
+    margin-top: 5px;
+    font-size: 28px;
+    width: 100%;
 }
 
 [modal-id="event-creator"] #event-desc {
     width: 100%;
     resize: none;
+}
+
+[modal-id="event-creator"] .buttons {
+    margin-top: 6px;
 }
