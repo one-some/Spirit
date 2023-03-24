@@ -4,6 +4,8 @@ const ea_locationEl = $el("#event-location");
 const ea_timeEl = $el("#event-daterange");
 const ea_pointsEl  = $el("#event-points");
 
+let currentDateRange = {};
+
 for (const input of [ea_nameEl, ea_descEl, ea_locationEl, ea_timeEl, ea_pointsEl]) {
     input.addEventListener("input", function() {
         this.classList.remove("bad-input");
@@ -22,7 +24,9 @@ function getNewEventData() {
         name: ea_nameEl.value || null,
         desc: ea_descEl.value || null,
         location: ea_locationEl.value || null,
-        time: ea_timeEl.value || null,
+        time_start: currentDateRange.start,
+        time_end: currentDateRange.end,
+        //time: ea_timeEl.value || null,
         points: parseInt(ea_pointsEl.value),
     };
 
@@ -32,7 +36,7 @@ function getNewEventData() {
     if (!dat.name) invalidEls.push(ea_nameEl);
     if (!dat.desc) invalidEls.push(ea_descEl);
     if (!dat.location) invalidEls.push(ea_locationEl);
-    if (!dat.time) invalidEls.push(ea_timeEl);
+    if (!(dat.time_start || dat.time_end)) invalidEls.push(ea_timeEl);
     if (isNaN(dat.points) || dat.points < 0) invalidEls.push(ea_pointsEl);
 
     for (const el of invalidEls) {
@@ -49,6 +53,9 @@ $el("#create-event-button").addEventListener("click", async function () {
     console.log("HI")
     let dat = getNewEventData();
 
+    // Data is invalid. We've let the user know so just do nothing
+    if (!dat) return;
+
     await fetch("/api/create_event.json", {
         method: "POST",
         headers: {
@@ -57,5 +64,21 @@ $el("#create-event-button").addEventListener("click", async function () {
         body: JSON.stringify(dat)
     });
 
-    if (dat) closeModals();
+    closeModals();
+});
+
+// Date picker
+$(function () {
+    $('input[name="datetimes"]').daterangepicker({
+        opens: "right",
+        timePicker: true,
+        startDate: moment().startOf('hour'),
+        endDate: moment().startOf('hour').add(32, 'hour'),
+        autoApply: true,
+        locale: { format: 'M/DD hh:mm A' }
+    }, function(start, end, label) {
+        currentDateRange.start = Math.floor(start.unix() / 1000);
+        currentDateRange.end = Math.floor(end.unix() / 1000);
+        console.log("BOOM");
+    });
 });

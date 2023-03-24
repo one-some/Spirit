@@ -78,6 +78,9 @@ class Event:
     name: str
     location: str
     desc: str
+    points: int
+    time_start: int
+    time_end: int
 
     def to_json(self) -> dict:
         return {
@@ -85,6 +88,9 @@ class Event:
             "name": self.name,
             "location": self.location,
             "desc": self.desc,
+            "points": self.points,
+            "time_start": self.time_start,
+            "time_end": self.time_end,
         }
 
 @dataclass
@@ -112,12 +118,10 @@ def get_event(event_id: int) -> Event:
 
 
 def get_upcoming_events() -> list[Event]:
-    # TODO: Dates
-
     return [
         Event(*x)
         for x in con().execute(
-            "SELECT ID,NAME,LOCATION,DESCRIPTION FROM EVENTS;",
+            "SELECT ID,NAME,LOCATION,DESCRIPTION,POINTS,TIME_START,TIME_END FROM EVENTS;",
         )
     ]
 

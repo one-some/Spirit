@@ -106,9 +106,23 @@ def api_set_prizes():
 
 @app.route("/api/create_event.json", methods=["POST"])
 def api_create_event():
-    event = {k: request.json[k] for k in ["name", "desc", "location", "time", "points"]}
+    print(request.json)
 
-    print(event)
+    con = querymaker.con()
+
+    con.execute(
+        "INSERT INTO EVENTS(NAME, LOCATION, DESCRIPTION, POINTS, TIME_START, TIME_END) VALUES(?, ?, ?, ?, ?, ?);",
+        (
+            request.json["name"],
+            request.json["location"],
+            request.json["desc"],
+            request.json["points"],
+            request.json["time_start"],
+            request.json["time_end"],
+        )
+    )
+    con.commit()
+
     return "Ok! :)"
 
 if __name__ == "__main__":
