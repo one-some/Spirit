@@ -127,5 +127,28 @@ def api_create_event():
 
     return "Ok! :)"
 
+
+@app.route("/api/attend.json", methods=["POST"])
+def api_attend():
+    
+    print(request.json)
+    con = querymaker.con()
+
+    try:
+        con.execute("INSERT INTO STUDENT_ATTENDANCE(STUDENT_ID, EVENT_ID) VALUES((SELECT ID FROM STUDENTS WHERE NAME = ? LIMIT 1),(SELECT ID FROM EVENTS WHERE NAME = ?));",
+            (
+                request.json["student_name"],
+                request.json["event_name"],
+            )
+        )
+    except sqlite3.IntegrityError:
+        # Already exists
+        pass
+
+    con.commit()
+    querymaker.reindex_scores()
+
+    return "Ok! :)"
+
 if __name__ == "__main__":
     app.run()

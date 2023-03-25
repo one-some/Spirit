@@ -1,5 +1,5 @@
-const suggestionContainer = $el("#search-suggestions");
-const searchInput = $el("#search-input");
+const suggestionContainer = $el(".search-suggestions");
+const searchInput = $el(".search-input");
 
 searchInput.focus();
 
@@ -27,4 +27,9 @@ function renderSuggestion(name, points, grade) {
     const bottom = $e("div", suggestion, {classes: ["bottom"]});
     $e("span", bottom, {classes: ["grade"], innerText: `Grade: ${grade}`});
     $e("span", bottom, {classes: ["points"], innerText: `Points: ${points}`});
+
+    suggestion.addEventListener("click", function() {
+        suggestionContainer.innerHTML = "";
+        searchInput.value = name;
+    });
 }

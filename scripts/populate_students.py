@@ -46,7 +46,7 @@ for _ in range(STUDENT_COUNT):
     name = get_name()
     grade = random.randint(9, 12)
 
-    cur.execute("INSERT INTO STUDENTS(NAME, GRADE) VALUES(?, ?);", (name, grade))
+    cur.execute("INSERT INTO STUDENTS(NAME, GRADE, POINTS) VALUES(?, ?, 0);", (name, grade))
 
     student_id = cur.lastrowid
 
