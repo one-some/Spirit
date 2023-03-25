@@ -1,5 +1,5 @@
 // TODO: Account
-const USER_NAME = "John";
+const USER_NAME = "Mr. Doe";
 
 const miniLeaderboard = $el("#mini-leaderboard");
 
