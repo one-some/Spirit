@@ -1,6 +1,7 @@
 import json
 import querymaker
 from flask import Flask, jsonify, request, render_template
+import sqlite3
 
 # Helper functions
 

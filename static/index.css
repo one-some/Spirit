@@ -121,7 +121,20 @@ table .column-header {
 }
 
 h2 {
-    background-color: lightgray;
+    background-color: rgba(211, 211, 211, 0.5);
+    margin-left: 10px;
+    margin-bottom: 0px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    padding-left: 5px;
+    align-content: center;
+}
+
+.right h2 {
+    margin-left: 0px;
+}
+.left {
+    margin-bottom: 20px;
 }
 #topbar #logo h1 {
     display: inline;
@@ -225,6 +238,7 @@ h2 {
     width: 100%;
     overflow-y: auto;
     flex-grow: 1;
+    margin-left: 10px;
 }
 
 .leaderboard .listing {
@@ -245,18 +259,25 @@ h2 {
     font-size: 32px;
     height: 48px;
     width: 48px;
+    color: lightgray
 }
 
+.leaderboard .listing:nth-child(odd){
+    background-color: rgba(211, 211, 211, 0.5);
+}
 .leaderboard .listing:nth-child(1) .place {
     background-color: var(--leaderboard-first);
+    color: white
 }
 
 .leaderboard .listing:nth-child(2) .place {
     background-color: var(--leaderboard-second);
+    color: white
 }
 
 .leaderboard .listing:nth-child(3) .place {
     background-color: var(--leaderboard-third);
+    color: white
 }
 
 .leaderboard .listing:nth-child(1) {
@@ -277,6 +298,7 @@ h2 {
 
 .leaderboard .listing .name {
     font-size: 22px;
+    margin-left: 10px;
 }
 
 .leaderboard .listing .grade {
@@ -503,6 +525,10 @@ modal-content {
 #mini-events .listing {
     margin-left: 4px;
     margin-bottom: 12px;
+}
+
+#mini-events .listing:nth-child(even) {
+    background-color: rgba(211, 211, 211, 0.5);
 }
 
 #mini-events .listing .name {
