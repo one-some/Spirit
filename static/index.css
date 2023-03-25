@@ -1,18 +1,18 @@
 :root {
-    --bg: #181818;
+    --bg: white;
 
-    --sidebar: #232323;
-    --sidebar-icon: #303030;
+    --sidebar: #007ebd;
+    --sidebar-icon: #007ebd;
 
-    --topbar: #111111;
+    --topbar: #007ebd;
 
-    --leaderboard-listing: #232323;
+    --leaderboard-listing: white;
 
     --leaderboard-first: gold;
     --leaderboard-second: gray;
     --leaderboard-third: brown;
 
-    --modal-title-background: #0c6188;
+    --modal-title-background: #007ebd;
     --modal-content-background: var(--bg);
     --modal-rounding: 6px;
 
@@ -33,10 +33,10 @@ button {
 
 input,
 textarea {
-    color: white;
+    color: black;
     transition: border-color 0.5s;
     transition: color 0.5s;
-    background: black;
+    background: white;
 }
 
 input.bad-input,
@@ -57,7 +57,7 @@ textarea.bad-input::placeholder {
 }
 
 .daterangepicker {
-    color: black !important;
+    color: white !important;
 }
 
 b.header {
@@ -84,7 +84,7 @@ body {
     margin: 0px;
     height: 100vh;
 
-    color: white;
+    color: black;
     background-color: var(--bg);
     font-family: helvetica;
 
@@ -116,6 +116,13 @@ table .column-header {
     height: 100%;
 }
 
+#topbar h1 {
+    color: white;
+}
+
+h2 {
+    background-color: lightgray;
+}
 #topbar #logo h1 {
     display: inline;
     margin: 0px;
@@ -124,8 +131,8 @@ table .column-header {
     position: relative;
 }
 
-.searchbar {
-    background-color: #282828;
+#searchbar {
+    background-color: white;
     position: relative;
     width: calc(100% - 16px);
     height: 32px;
@@ -141,7 +148,7 @@ table .column-header {
     outline: none;
     background-color: transparent;
     border: none;
-    color: white;
+    color: black;
 }
 
 /* Suggestions */
@@ -153,7 +160,7 @@ table .column-header {
 
 .search-suggestions .suggestion {
     width: 100%;
-    background-color: #232323;
+    background-color: white;
     margin: 0px 5px;
     padding: 5px 5px;
     border-bottom: 1px solid gray;
@@ -178,6 +185,7 @@ table .column-header {
 
 .sidebar-icon {
     background-color: var(--sidebar-icon);
+    color: white;
     font-size: 1.8em;
     cursor: pointer;
     padding: 2px;
@@ -185,7 +193,7 @@ table .column-header {
 }
 
 .sidebar-icon.selected {
-    filter: brightness(150%);
+    background-color: #006a9e;
 }
 
 #content {
@@ -357,6 +365,7 @@ modal .titlebar {
 modal .titlebar span {
     position: relative;
     top: 3px;
+    color: white;
 }
 
 modal-content {
@@ -397,7 +406,12 @@ modal-content {
     cursor: pointer;
     height: 32px;
     font-weight: bold;
-    background-color: #282828;
+    background-color: #007ebd;
+    color: white;
+}
+
+#cancel {
+    background-color: var(--alert-color);
 }
 
 .button:hover {
