@@ -1,13 +1,18 @@
+const miniEvents = $el("#mini-events");
+const addEventButton = $el("#add-event-in-listing");
+
+const eventViewer = $el('[modal-id="event-viewer"]');
+
 const ea_nameEl = $el("#event-name");
 const ea_descEl = $el("#event-desc");
 const ea_locationEl = $el("#event-location");
 const ea_timeEl = $el("#event-daterange");
-const ea_pointsEl  = $el("#event-points");
+const ea_pointsEl = $el("#event-points");
 
 let currentDateRange = {};
 
 for (const input of [ea_nameEl, ea_descEl, ea_locationEl, ea_timeEl, ea_pointsEl]) {
-    input.addEventListener("input", function() {
+    input.addEventListener("input", function () {
         this.classList.remove("bad-input");
     });
 }
@@ -76,9 +81,46 @@ $(function () {
         endDate: moment().startOf('hour').add(32, 'hour'),
         autoApply: true,
         locale: { format: 'M/DD hh:mm A' }
-    }, function(start, end, label) {
+    }, function (start, end, label) {
         currentDateRange.start = Math.floor(start.unix() / 1000);
         currentDateRange.end = Math.floor(end.unix() / 1000);
         console.log("BOOM");
     });
 });
+
+addEventButton.addEventListener("click", function () {
+    showModal("event-creator");
+});
+
+
+function makeEvent(event) {
+    const cont = $e("div", miniEvents, { classes: ["listing"], }, { before: addEventButton });
+    $e("span", cont, { innerText: event.name, classes: ["name"] });
+    $e("span", cont, { innerText: event.desc, classes: ["desc"] });
+    $e("span", cont, { innerText: event.location, classes: ["location"] });
+    cont.addEventListener("click", function() {
+        editEvent(event);
+    })
+}
+
+function editEvent(eventData) {
+    eventViewer.querySelector("#event-name").value = eventData.name;
+    eventViewer.querySelector("#event-desc").value = eventData.desc;
+    eventViewer.querySelector("#event-location").value = eventData.location;
+    eventViewer.querySelector("#event-location").value = eventData.location;
+    eventViewer.querySelector("#event-points").value = eventData.points;
+    showModal("event-viewer");
+}
+
+
+async function initEvents() {
+    let r = await fetch("/api/events.json");
+    let j = await r.json();
+
+    for (const event of j) {
+        makeEvent(event);
+    }
+    editEvent(j[j.length - 1]);
+}
+
+initEvents();

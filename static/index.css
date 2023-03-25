@@ -31,7 +31,8 @@ button {
     appearance: none;
 }
 
-input, textarea {
+input,
+textarea {
     color: white;
     transition: border-color 0.5s;
     transition: color 0.5s;
@@ -451,19 +452,22 @@ modal-content {
     padding-right: 0px;
 }
 
-[modal-id="event-creator"] #event-name {
+[modal-id="event-creator"] #event-name,
+[modal-id="event-viewer"] #event-name {
     display: block;
     margin-top: 5px;
     font-size: 28px;
     width: 100%;
 }
 
-[modal-id="event-creator"] #event-desc {
+[modal-id="event-creator"] #event-desc,
+[modal-id="event-viewer"] #event-desc {
     width: 100%;
     resize: none;
 }
 
-[modal-id="event-creator"] .buttons {
+[modal-id="event-creator"] .buttons,
+[modal-id="event-viewer"] .buttons {
     margin-top: 6px;
 }
 
@@ -496,4 +500,50 @@ modal-content {
 
 .right {
     overflow-y: auto;
+}
+
+#add-event-in-listing {
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid rgb(158, 158, 158);
+    border-radius: 5px;
+    margin: 4px;
+}
+
+#add-event-in-listing .material-icons {
+    position: relative;
+    top: 3px;
+}
+
+#add-event-in-listing .text {
+    position: relative;
+    bottom: 3px;
+}
+
+[modal-id="event-viewer"] .header {
+    opacity: 0.7;
+}
+
+.split {
+    display: flex;
+}
+
+.split > div {
+    flex: 1 1 0;
+}
+
+#add-student-button {
+    flex-grow: 0;
+    min-height: 32px;
+    margin-left: 5px;
+}
+
+[modal-id="event-viewer"] .padding {
+    flex-grow: 1;
+}
+
+[modal-id="event-viewer"] .right {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }

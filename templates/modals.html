@@ -39,13 +39,46 @@
         <input id="event-daterange" name="datetimes">
 
         <b class="header">Points</b>
-        <input id="event-points" min="1" type="number" placeholder="Points worth" title="How many points students will be given to attend this event.">
+        <input id="event-points" min="1" type="number" placeholder="Points worth"
+            title="How many points students will be given to attend this event.">
 
         <div class="buttons">
             <div id="create-event-button" class="button primary">Create Event</div>
             <div onclick="closeModals();" class="button">Cancel</div>
         </div>
     </modal-content>
+
+    <modal-content modal-id="event-viewer" modal-title="Event">
+        <input id="event-name" placeholder="Event Name">
+
+        <b class="header">Description</b>
+        <textarea id="event-desc"
+            placeholder="Write the description for the new event here. This could include things such as the reason for holding the event, special guests, or any other useful notes."></textarea>
+
+        <div class="split">
+            <div class="left">
+                <!-- TODO: Dynamic gps lookup -->
+                <!-- https://developers.google.com/maps/documentation/javascript/examples/places-autocomplete -->
+                <b class="header">Location</b>
+                <input id="event-location" placeholder="Location">
+
+                <b class="header">Time</b>
+                <input id="event-daterange" name="datetimes">
+
+                <b class="header">Points</b>
+                <input id="event-points" min="1" type="number" placeholder="Points worth"
+                    title="How many points students will be given to attend this event.">
+
+            </div>
+            <div class="right">
+                <div class="padding"></div>
+                <div id="add-student-button" class="button primary">Add Attendee</div>
+            </div>
+        </div>
+        <div class="buttons">
+            <div id="save-event-button" class="button primary">Save Event</div>
+            <div onclick="closeModals();" class="button">Cancel</div>
+        </div>
+    </modal-content>
 </div>
 <script src="/static/modals.js"></script>
-<script>showModal("event-creator");</script>
