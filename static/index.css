@@ -493,3 +493,7 @@ modal-content {
     font-family: "Material Icons";
     content: "location_on";
 }
+
+.right {
+    overflow-y: auto;
+}

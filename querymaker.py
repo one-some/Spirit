@@ -155,21 +155,21 @@ def get_aggregate_stats() -> dict:
                 "SELECT SUM(POINTS) FROM STUDENTS WHERE GRADE = ?;",
                 (grade,),
             )
-        )
+        )[0]
 
         stats["attendance_ratio_by_grade"][grade] = next(
             con().execute(
                 "SELECT (SELECT COUNT() FROM STUDENTS WHERE GRADE = ? AND POINTS > 0) * 1.0 / (SELECT COUNT() FROM STUDENTS WHERE GRADE = ?) * 1.0;",
                 (grade, grade),
             )
-        )
+        )[0]
 
         stats["avg_attendances_by_grade"][grade] = next(
             con().execute(
                 "SELECT (SELECT COUNT() FROM STUDENT_ATTENDANCE WHERE STUDENT_ID IN (SELECT ID FROM STUDENTS WHERE GRADE = ?)) * 1.0 / (SELECT COUNT() FROM STUDENTS WHERE GRADE = ?) * 1.0;",
                 (grade, grade),
             )
-        )
+        )[0]
 
     return stats
 

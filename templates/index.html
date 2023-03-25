@@ -30,9 +30,9 @@
                     <div id="mini-events"></div>
                 </div>
             </div>
-            <div tab-id="events">
+            <!-- <div tab-id="events">
                 <h1>Events</h1>
-            </div>
+            </div> -->
             <div tab-id="leaderboard">
                 <div class="left">
                     <h1>Leaderboard</h1>
@@ -46,11 +46,17 @@
                         <button id="edit-prizes-button">Edit Prizes</button>
                     </div>
                 </div>
-                <div class="right"></div>
+                <div class="right">
+                    <h1>Statistics</h1>
+                    <canvas id="ch-att-ratio-by-grade"></canvas>
+                    <canvas id="ch-avg-att-by-grade"></canvas>
+                    <canvas id="ch-points-by-grade"></canvas>
+                </div>
             </div>
         </div>
     </div>
     {% include "modals.html" %}
+    <script src="/static/libs/chartjs/dist/chart.umd.js"></script>
     <script src="/static/index.js"></script>
     <script src="/static/leaderboard.js"></script>
     <script src="/static/events.js"></script>

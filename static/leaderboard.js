@@ -21,6 +21,8 @@ async function init() {
     prizeData = await pr.json();
     updatePrizeModal();
     prizeCommitsLocked = false;
+
+    await fetchStats();
 }
 
 $el("#draw-prizes-button").addEventListener("click", async function () {
@@ -191,6 +193,53 @@ function updatePrizeModal() {
     }
 
     if (!prizesAdded) addPrizeRow();
+}
+
+function formatGradeNum(num) {
+    return `${num}th Grade`;
+}
+
+async function fetchStats() {
+    let r = await fetch("/api/stats.json");
+    let j = await r.json();
+
+    const options = {
+        animated: false,
+        // responsive: true,
+    }
+
+    const colors = [
+        "#540a03",
+        "#2e5403",
+        "#034654",
+        "#3a0354",
+    ]
+
+    for (const chart of [
+        { id: "att-ratio-by-grade", type: "bar", key: "attendance_ratio_by_grade", label: "Attendance Percentage", map: x => Math.ceil(x * 100) },
+        { id: "avg-att-by-grade", type: "bar", key: "avg_attendances_by_grade", label: "Average Attendance Count", map: x => x.toFixed(2) },
+        { id: "points-by-grade", type: "pie", key: "points_by_grade", label: "Points By Grade", map: x => x.toFixed(2) },
+    ]) {
+        const canvas = $el(`#ch-${chart.id}`);
+        canvas.style.height = "150px";
+        new Chart(
+            canvas,
+            {
+                type: chart.type,
+                data: {
+                    labels: Object.keys(j[chart.key]).map(formatGradeNum),
+                    datasets: [
+                        {
+                            label: chart.label,
+                            data: Object.values(j[chart.key]).map(chart.map),
+                            backgroundColor: colors
+                        }
+                    ]
+                },
+                options: options,
+            }
+        );
+    }
 }
 
 init();
