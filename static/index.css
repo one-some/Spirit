@@ -124,19 +124,18 @@ table .column-header {
     position: relative;
 }
 
-#searchbar {
+.searchbar {
     background-color: #282828;
     position: relative;
-    width: 40%;
+    width: calc(100% - 16px);
     height: 32px;
     border-radius: 180px;
     padding: 5px 8px;
     margin-top: 8px;
     margin-bottom: 8px;
-    margin-left: 20px;
 }
 
-#searchbar input {
+.searchbar input {
     width: 100%;
     height: 100%;
     outline: none;
@@ -146,18 +145,22 @@ table .column-header {
 }
 
 /* Suggestions */
-#search-suggestions {
+.search-suggestions {
     position: absolute;
     width: 100%;
+    overflow-y: auto;
 }
 
-#search-suggestions .suggestion {
+.search-suggestions .suggestion {
     width: 100%;
     background-color: #232323;
     margin: 0px 5px;
+    padding: 5px 5px;
+    border-bottom: 1px solid gray;
+    cursor: pointer;
 }
 
-#search-suggestions .suggestion .bottom {
+.search-suggestions .suggestion .bottom {
     display: flex;
     justify-content: space-between;
 }
@@ -498,6 +501,10 @@ modal-content {
     content: "location_on";
 }
 
+#mini-events .listing {
+    cursor: pointer;
+}
+
 .right {
     overflow-y: auto;
 }
@@ -535,15 +542,19 @@ modal-content {
 #add-student-button {
     flex-grow: 0;
     min-height: 32px;
-    margin-left: 5px;
 }
 
 [modal-id="event-viewer"] .padding {
     flex-grow: 1;
 }
 
+[modal-id="event-viewer"] .left {
+    margin-right: 10px;
+}
+
 [modal-id="event-viewer"] .right {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    overflow-y: visible;
 }

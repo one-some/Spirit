@@ -10,6 +10,7 @@ const ea_timeEl = $el("#event-daterange");
 const ea_pointsEl = $el("#event-points");
 
 let currentDateRange = {};
+let currentEvent;
 
 for (const input of [ea_nameEl, ea_descEl, ea_locationEl, ea_timeEl, ea_pointsEl]) {
     input.addEventListener("input", function () {
@@ -104,6 +105,7 @@ function makeEvent(event) {
 }
 
 function editEvent(eventData) {
+    currentEvent = eventData;
     eventViewer.querySelector("#event-name").value = eventData.name;
     eventViewer.querySelector("#event-desc").value = eventData.desc;
     eventViewer.querySelector("#event-location").value = eventData.location;
@@ -111,6 +113,16 @@ function editEvent(eventData) {
     eventViewer.querySelector("#event-points").value = eventData.points;
     showModal("event-viewer");
 }
+
+$el("#add-student-button").addEventListener("click", async function() {
+    await fetch("/api/attend.json", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({student_name: $el(".search-input").value, event_name: currentEvent.name})
+    });
+});
 
 
 async function initEvents() {
