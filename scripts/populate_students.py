@@ -3,6 +3,7 @@ import sqlite3
 
 STUDENT_COUNT = 1629
 con = sqlite3.connect("data/spirit.db")
+cur = con.cursor()
 
 if (
     input(
@@ -20,14 +21,46 @@ with open("data/first-names.txt", "r") as file:
 with open("data/names.txt", "r") as file:
     last_names = file.read().split("\n")
 
+events = []
+
+for row in con.execute("SELECT ID,POINTS FROM EVENTS;").fetchall():
+    events.append({"id": row[0], "points": row[1]})
+
+# WIPE
+con.execute("DELETE FROM STUDENTS;")
+con.execute("DELETE FROM STUDENT_ATTENDANCE;")
+
 
 def get_name():
     return " ".join([random.choice(first_names), random.choice(last_names)])
 
 
+grade_thresh = {
+    9: random.randrange(0, 4),
+    10: random.randrange(0, 4),
+    11: random.randrange(0, 4),
+    12: random.randrange(0, 4),
+}
+
 for _ in range(STUDENT_COUNT):
     name = get_name()
-    points = random.randint(0, 3000)
-    con.execute("INSERT INTO STUDENTS(NAME, POINTS) VALUES(?, ?);", (name, points))
-    print(name, points)
+    grade = random.randint(9, 12)
+
+    cur.execute("INSERT INTO STUDENTS(NAME, GRADE) VALUES(?, ?);", (name, grade))
+
+    student_id = cur.lastrowid
+
+    for event in events:
+        if random.randint(0, 5) > grade_thresh[grade]:
+            continue
+
+        con.execute(
+            "INSERT INTO STUDENT_ATTENDANCE(STUDENT_ID, EVENT_ID) VALUES(?, ?);",
+            (
+                student_id,
+                event["id"],
+            ),
+        )
+
+    print(name)
 con.commit()

@@ -2,13 +2,13 @@ import json
 import sqlite3
 from dataclasses import dataclass
 from enum import Enum
-from random import randint
 
-# TODO: Docs
+GRADES = [9, 10, 11, 12]
 
 
 def con():
     return sqlite3.connect("data/spirit.db")
+
 
 def prize_dat():
     with open("data/prizes.json", "r") as file:
@@ -93,6 +93,7 @@ class Event:
             "time_end": self.time_end,
         }
 
+
 @dataclass
 class Prize:
     name: str
@@ -105,6 +106,7 @@ class Prize:
             "desc": self.desc,
             "points_required": self.points_required,
         }
+
 
 def get_event(event_id: int) -> Event:
     return Event(
@@ -135,5 +137,51 @@ def get_random_student(grade: int) -> Student:
     )
     return Student(*dat)
 
+
 def get_prizes() -> list[Prize]:
     return [Prize(**x) for x in prize_dat()]
+
+
+def get_aggregate_stats() -> dict:
+    stats = {
+        "points_by_grade": {},
+        "attendance_ratio_by_grade": {},
+        "avg_attendances_by_grade": {},
+    }
+
+    for grade in GRADES:
+        stats["points_by_grade"][grade] = next(
+            con().execute(
+                "SELECT SUM(POINTS) FROM STUDENTS WHERE GRADE = ?;",
+                (grade,),
+            )
+        )
+
+        stats["attendance_ratio_by_grade"][grade] = next(
+            con().execute(
+                "SELECT (SELECT COUNT() FROM STUDENTS WHERE GRADE = ? AND POINTS > 0) * 1.0 / (SELECT COUNT() FROM STUDENTS WHERE GRADE = ?) * 1.0;",
+                (grade, grade),
+            )
+        )
+
+        stats["avg_attendances_by_grade"][grade] = next(
+            con().execute(
+                "SELECT (SELECT COUNT() FROM STUDENT_ATTENDANCE WHERE STUDENT_ID IN (SELECT ID FROM STUDENTS WHERE GRADE = ?)) * 1.0 / (SELECT COUNT() FROM STUDENTS WHERE GRADE = ?) * 1.0;",
+                (grade, grade),
+            )
+        )
+
+    return stats
+
+
+def reindex_scores():
+    print("[db] Indexing scores...")
+    c = con()
+    c.execute(
+        "UPDATE STUDENTS SET POINTS = (SELECT SUM(EVENTS.POINTS) FROM EVENTS WHERE EVENTS.ID IN (SELECT EVENT_ID FROM STUDENT_ATTENDANCE WHERE STUDENT_ID = STUDENTS.ID));"
+    )
+    c.commit()
+    print("[db] Done!")
+
+
+reindex_scores()
