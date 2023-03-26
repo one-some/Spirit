@@ -71,6 +71,7 @@ $el("#create-event-button").addEventListener("click", async function () {
     });
 
     closeModals();
+    fetchEvents();
 });
 
 // Date picker
@@ -122,17 +123,21 @@ $el("#add-student-button").addEventListener("click", async function() {
         },
         body: JSON.stringify({student_name: $el(".search-input").value, event_name: currentEvent.name})
     });
+    fetchLeaderboard();
 });
 
 
-async function initEvents() {
+async function fetchEvents() {
     let r = await fetch("/api/events.json");
     let j = await r.json();
+
+    for (const el of miniEvents.querySelectorAll(".listing")) {
+        el.remove();
+    }
 
     for (const event of j) {
         makeEvent(event);
     }
-    editEvent(j[j.length - 1]);
 }
 
-initEvents();
+fetchEvents();

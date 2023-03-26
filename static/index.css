@@ -558,6 +558,7 @@ modal-content {
 }
 
 .right {
+    margin-left: 10px;
     overflow-y: auto;
 }
 
@@ -605,6 +606,7 @@ modal-content {
 }
 
 [modal-id="event-viewer"] .right {
+    margin-left: 0px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
