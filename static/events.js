@@ -112,10 +112,12 @@ function editEvent(eventData) {
     eventViewer.querySelector("#event-location").value = eventData.location;
     eventViewer.querySelector("#event-location").value = eventData.location;
     eventViewer.querySelector("#event-points").value = eventData.points;
+    eventViewer.querySelector(".search-input").value = "";
     showModal("event-viewer");
 }
 
 $el("#add-student-button").addEventListener("click", async function() {
+    eventViewer.querySelector(".search-input").value = "";
     await fetch("/api/attend.json", {
         method: "POST",
         headers: {
