@@ -57,7 +57,7 @@ textarea.bad-input::placeholder {
 }
 
 .daterangepicker {
-    color: white !important;
+    color: gray !important;
 }
 
 b.header {
