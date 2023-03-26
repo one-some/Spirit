@@ -1,6 +1,7 @@
 // TODO: Account
 const USER_NAME = "Mr. Doe";
 
+const leaderboard = $el("#leaderboard")
 const miniLeaderboard = $el("#mini-leaderboard");
 
 function renderStudent(parent, place, student) {
@@ -25,9 +26,14 @@ async function fetchLeaderboard() {
         el.remove();
     }
 
+    for (const el of document.querySelectorAll("#leaderboard .listing")) {
+        el.remove();
+    }
+
     let place = 1;
     for (const student of j) {
         renderStudent(miniLeaderboard, place, student);
+        renderStudent(leaderboard, place, student);
         place++;
     }
 }

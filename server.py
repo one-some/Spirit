@@ -1,16 +1,16 @@
 import json
-import querymaker
+import backup
 from flask import Flask, jsonify, request, render_template
 import sqlite3
+import querymaker
+from config import config, data_path
 
 # Helper functions
 
 
 def prize_from_points(points: int) -> str:
     prizes = sorted(
-        querymaker.get_prizes(),
-        key=lambda p: p.points_required,
-        reverse=True
+        querymaker.get_prizes(), key=lambda p: p.points_required, reverse=True
     )
     print(prizes)
 
@@ -84,28 +84,34 @@ def api_suggestions():
 def api_events():
     return jsonify(querymaker.get_upcoming_events())
 
+
 @app.route("/api/prizes.json")
 def api_prizes():
     return jsonify(querymaker.get_prizes())
+
 
 @app.route("/api/stats.json")
 def api_stats():
     return jsonify(querymaker.get_aggregate_stats())
 
+
 @app.route("/api/set_prizes.json", methods=["POST"])
 def api_set_prizes():
     new_dat = []
     for prize in request.json:
-        new_dat.append({
-            "name": prize["name"],
-            "desc": prize["desc"],
-            "points_required": prize["points"],
-        })
-    
-    with open("data/prizes.json", "w") as file:
+        new_dat.append(
+            {
+                "name": prize["name"],
+                "desc": prize["desc"],
+                "points_required": prize["points"],
+            }
+        )
+
+    with open(data_path("prizes.json"), "w") as file:
         json.dump(new_dat, file)
 
     return "Ok! :)"
+
 
 @app.route("/api/create_event.json", methods=["POST"])
 def api_create_event():
@@ -122,7 +128,7 @@ def api_create_event():
             request.json["points"],
             request.json["time_start"],
             request.json["time_end"],
-        )
+        ),
     )
     con.commit()
 
@@ -131,16 +137,16 @@ def api_create_event():
 
 @app.route("/api/attend.json", methods=["POST"])
 def api_attend():
-    
     print(request.json)
     con = querymaker.con()
 
     try:
-        con.execute("INSERT INTO STUDENT_ATTENDANCE(STUDENT_ID, EVENT_ID) VALUES((SELECT ID FROM STUDENTS WHERE NAME = ? LIMIT 1),(SELECT ID FROM EVENTS WHERE NAME = ?));",
+        con.execute(
+            "INSERT INTO STUDENT_ATTENDANCE(STUDENT_ID, EVENT_ID) VALUES((SELECT ID FROM STUDENTS WHERE NAME = ? LIMIT 1),(SELECT ID FROM EVENTS WHERE NAME = ?));",
             (
                 request.json["student_name"],
                 request.json["event_name"],
-            )
+            ),
         )
     except sqlite3.IntegrityError:
         # Already exists
@@ -152,4 +158,5 @@ def api_attend():
     return "Ok! :)"
 
 if __name__ == "__main__":
+    backup.start_backup_loop()
     app.run()

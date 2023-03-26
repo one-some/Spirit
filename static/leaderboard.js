@@ -1,4 +1,3 @@
-const leaderboard = $el("#leaderboard");
 const prizeContainer = $el("#prize-container");
 const addPrizeCont = $el("#add-prize-cont");
 
@@ -8,15 +7,6 @@ let prizeData;
 const LEADERBOARD_DEBUG = false;
 
 async function init() {
-    let r = await fetch("/api/students.json?limit=25&sort=points_desc");
-    let j = await r.json();
-
-    let place = 1;
-    for (const student of j) {
-        renderStudent(leaderboard, place, student)
-        place++;
-    }
-
     let pr = await fetch("/api/prizes.json");
     prizeData = await pr.json();
     updatePrizeModal();
