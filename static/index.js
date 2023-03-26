@@ -17,9 +17,13 @@ function renderStudent(parent, place, student) {
     });
 }
 
-async function initLeaderboard() {
+async function fetchLeaderboard() {
     let r = await fetch("/api/students.json?limit=25&sort=points_desc");
     let j = await r.json();
+
+    for (const el of document.querySelectorAll("#mini-leaderboard .listing")) {
+        el.remove();
+    }
 
     let place = 1;
     for (const student of j) {
@@ -29,7 +33,7 @@ async function initLeaderboard() {
 }
 
 async function init() {
-    initLeaderboard();
+    fetchLeaderboard();
 }
 
 init();

@@ -122,6 +122,7 @@ $el("#add-student-button").addEventListener("click", async function() {
         },
         body: JSON.stringify({student_name: $el(".search-input").value, event_name: currentEvent.name})
     });
+    fetchLeaderboard();
 });
 
 
@@ -132,7 +133,6 @@ async function initEvents() {
     for (const event of j) {
         makeEvent(event);
     }
-    editEvent(j[j.length - 1]);
 }
 
 initEvents();
