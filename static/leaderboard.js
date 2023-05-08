@@ -151,6 +151,7 @@ async function tryCommitPrizeData() {
     let dat = getPrizeData();
 
     // Prevent data races and other issues.
+    // Wow Gavin, that's really racist.
     if (prizeCommitsLocked) return;
 
     // Data is invalid, return.

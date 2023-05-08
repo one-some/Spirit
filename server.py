@@ -27,7 +27,7 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 
 @app.route("/")
-@app.route("/events")
+@app.route("/students")
 @app.route("/leaderboard")
 def index():
     return render_template("index.html")
@@ -156,6 +156,32 @@ def api_attend():
     querymaker.reindex_scores()
 
     return "Ok! :)"
+
+@app.route("/api/save_student.json", methods=["POST"])
+def save_student():
+    print(request.json)
+    con = querymaker.con()
+    con.execute(
+        '''UPDATE STUDENTS
+           SET NAME = ?,
+               GRADE = ?,
+               POINTS = ?
+            WHERE ROWID = ?;
+            ''',
+        (
+            request.json["student_name"],
+            request.json["student_grade"],
+            request.json["student_points"],
+            request.json["student_id"],
+        )
+    )
+
+    con.commit()
+
+    querymaker.reindex_scores()
+    
+    return "working?"
+
 
 if __name__ == "__main__":
     backup.start_backup_loop()

@@ -35,9 +35,26 @@
                     </div>
                 </div>
             </div>
-            <!-- <div tab-id="events">
-                <h1>Events</h1>
-            </div> -->
+            <div tab-id="students">
+                <div class="left">
+                    <h1>Students</h1>
+                    <div id="mini-leaderboard-students" class="leaderboard"></div>
+                </div>
+                <div class="right student-viewer">
+                    <h1>Info</h1>
+                    <b class="header" >Name</b>
+                    <input type="text" id="student-name">
+                    <b class="header" >Grade</b>
+                    <input type="number" id="student-grade">
+                    <b class="header" >Points</b>
+                    <input type="number" id="student-points">
+                    <button onclick="saveStudent()" class="button primary">Save</button>
+                    <button onclick="resetStudent()" class="button primary">Reset Changes</button>
+                    <button onclick="cancelStudent()" class="button primary">Cancel</button>
+                    <button onclick="deleteStudent()" class="button primary">Delete</button>
+
+                </div>
+            </div>
             <div tab-id="leaderboard">
                 <div class="left">
                     <h1>Leaderboard</h1>
@@ -65,6 +82,7 @@
     <script src="/static/index.js"></script>
     <script src="/static/leaderboard.js"></script>
     <script src="/static/events.js"></script>
+    <script src="/static/students.js"></script>
 </body>
 
 </html>

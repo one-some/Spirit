@@ -223,12 +223,14 @@ h2 {
 }
 
 [tab-id="home"],
-[tab-id="leaderboard"] {
+[tab-id="leaderboard"],
+[tab-id="students"] {
     display: flex;
 }
 
 [tab-id="home"]>div,
-[tab-id="leaderboard"]>div {
+[tab-id="leaderboard"]>div,
+[tab-id="students"]>div {
     display: flex;
     flex-direction: column;
     flex: 1 1 0;

@@ -43,6 +43,7 @@ class Student:
     name: str
     points: int
     grade: int
+    id: int
 
     def to_json(self):
         return self.__dict__
@@ -53,7 +54,7 @@ def get_students_matching(starting_with: str, limit=10):
     return [
         Student(*x)
         for x in con().execute(
-            f"SELECT NAME,POINTS,GRADE FROM STUDENTS WHERE NAME LIKE ? LIMIT ?;",
+            f"SELECT NAME,POINTS,GRADE,ROWID FROM STUDENTS WHERE NAME LIKE ? LIMIT ?;",
             (
                 f"%{starting_with}%",
                 limit,
@@ -67,7 +68,7 @@ def get_students(limit=50, sort=Sort.NAME_DESC):
     return [
         Student(*x)
         for x in con().execute(
-            f"SELECT NAME,POINTS,GRADE FROM STUDENTS ORDER BY {sq} LIMIT ?;", (limit,)
+            f"SELECT NAME,POINTS,GRADE,ROWID FROM STUDENTS ORDER BY {sq} LIMIT ?;", (limit,)
         )
     ]
 
@@ -131,7 +132,7 @@ def get_upcoming_events() -> list[Event]:
 def get_random_student(grade: int) -> Student:
     dat = next(
         con().execute(
-            "SELECT NAME,POINTS,GRADE FROM STUDENTS WHERE GRADE = ? AND POINTS > 0 ORDER BY RANDOM() LIMIT 1;",
+            "SELECT NAME,POINTS,GRADE,ROWID FROM STUDENTS WHERE GRADE = ? AND POINTS > 0 ORDER BY RANDOM() LIMIT 1;",
             (grade,),
         )
     )

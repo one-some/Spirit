@@ -16,7 +16,7 @@ for (const tabButton of document.querySelectorAll("[sidebar-button]")) {
         let title = tabButton.getAttribute("title");
         if (title) document.title = `${title} - Spirit`;
 
-        let tabURL = { home: "/", events: "/events", leaderboard: "/leaderboard" }[tabID];
+        let tabURL = { home: "/", students: "/students", leaderboard: "/leaderboard" }[tabID];
         if (tabURL) window.history.pushState({}, null, tabURL);
 
         tabButton.classList.add("selected");

@@ -3,6 +3,8 @@ const USER_NAME = "Mr. Doe";
 
 const leaderboard = $el("#leaderboard")
 const miniLeaderboard = $el("#mini-leaderboard");
+const leaderboardStudents = $el("#mini-leaderboard-students");
+const studentViewer = $el('.student-viewer');
 
 function renderStudent(parent, place, student) {
     const cont = $e("div", parent, { classes: ["listing"] });
@@ -16,7 +18,25 @@ function renderStudent(parent, place, student) {
         classes: ["points"],
         title: "Points"
     });
+    cont.addEventListener("click", function () {
+        console.log(student.id);
+        editStudent(student);
+    })
 }
+
+let currentStudent;
+
+function editStudent(studentData) {
+    currentStudent = studentData;
+    studentViewer.querySelector("#student-name").value = studentData.name;
+    studentViewer.querySelector("#student-points").value = studentData.points;
+    studentViewer.querySelector("#student-grade").value = studentData.grade;
+    console.log(studentViewer);
+    // showModal("student-viewer");
+}
+
+
+
 
 async function fetchLeaderboard() {
     let r = await fetch("/api/students.json?limit=25&sort=points_desc");
@@ -32,8 +52,10 @@ async function fetchLeaderboard() {
 
     let place = 1;
     for (const student of j) {
+        // We should consider using flask for this instead.
         renderStudent(miniLeaderboard, place, student);
         renderStudent(leaderboard, place, student);
+        renderStudent(leaderboardStudents, place, student);
         place++;
     }
 }
