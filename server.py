@@ -176,11 +176,27 @@ def save_student():
         )
     )
 
+@app.route("/api/new_save_student.json", methods=["POST"])
+def save_new_student():
+    print(request.json)
+    con = querymaker.con()
+    con.execute(
+        '''INSERT INTO STUDENTS (NAME, GRADE, POINTS)
+            VALUES
+                (?, ?, ?);
+            ''',
+        (
+            request.json["student_name"],
+            request.json["student_grade"],
+            request.json["student_points"],
+        )
+    )
+
     con.commit()
 
-    querymaker.reindex_scores()
+    # querymaker.reindex_scores()
     
-    return "working?"
+    return "Workjjing?"
 
 
 if __name__ == "__main__":

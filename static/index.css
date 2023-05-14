@@ -130,6 +130,18 @@ h2 {
     align-content: center;
 }
 
+.top-buttons {
+    content: 20px;
+    display: flex;
+}
+
+.bottom-buttons {
+    content: 20px;
+    display: flex;
+}
+
+
+
 .right h2 {
     margin-left: 0px;
 }
@@ -613,4 +625,22 @@ modal-content {
     flex-direction: column;
     justify-content: space-between;
     overflow-y: visible;
+}
+
+#student-editor-buttons {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-color: black;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+}
+
+#student-creator-buttons {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-color: black;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
 }

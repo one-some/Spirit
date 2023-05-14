@@ -5,6 +5,12 @@ const leaderboard = $el("#leaderboard")
 const miniLeaderboard = $el("#mini-leaderboard");
 const leaderboardStudents = $el("#mini-leaderboard-students");
 const studentViewer = $el('.student-viewer');
+const studentEditorButtons = $el('#student-editor-buttons');
+const studentCreatorButtons = $el("#student-creator-buttons");
+const studentDefaultButtons = $el("#student-default-buttons");
+
+studentEditorButtons.style.display = "none";
+studentCreatorButtons.style.display = "none";
 
 function renderStudent(parent, place, student) {
     const cont = $e("div", parent, { classes: ["listing"] });
@@ -19,7 +25,7 @@ function renderStudent(parent, place, student) {
         title: "Points"
     });
     cont.addEventListener("click", function () {
-        console.log(student.id);
+        studentEditorButtons.style.display = "block"
         editStudent(student);
     })
 }
@@ -31,7 +37,9 @@ function editStudent(studentData) {
     studentViewer.querySelector("#student-name").value = studentData.name;
     studentViewer.querySelector("#student-points").value = studentData.points;
     studentViewer.querySelector("#student-grade").value = studentData.grade;
-    console.log(studentViewer);
+    studentDefaultButtons.querySelector("#add-student").style.backgroundColor = "grey";
+    studentDefaultButtons.querySelector("#cancel").style.backgroundColor = "grey";
+    studentDefaultButtons.querySelector("#batch-add").style.backgroundColor = "grey";
     // showModal("student-viewer");
 }
 

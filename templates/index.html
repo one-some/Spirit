@@ -42,17 +42,41 @@
                 </div>
                 <div class="right student-viewer">
                     <h1>Info</h1>
-                    <b class="header" >Name</b>
-                    <input type="text" id="student-name">
+                    <b class="header">Name</b>
+                    <input type="text" placeholder="Select a student to edit" id="student-name">
                     <b class="header" >Grade</b>
-                    <input type="number" id="student-grade">
+                    <input type="number" placeholder="Select a student to edit" id="student-grade">
                     <b class="header" >Points</b>
-                    <input type="number" id="student-points">
-                    <button onclick="saveStudent()" class="button primary">Save</button>
-                    <button onclick="resetStudent()" class="button primary">Reset Changes</button>
-                    <button onclick="cancelStudent()" class="button primary">Cancel</button>
-                    <button onclick="deleteStudent()" class="button primary">Delete</button>
-
+                    <input type="number" placeholder="Select a student to edit" id="student-points">
+                    <div id="student-editor-buttons">
+                        <div class="top-buttons">
+                            <button onclick="saveStudent()" class="button primary">Save</button>
+                            <button onclick="resetStudent()" class="button primary">Reset Changes</button>
+                        
+                        </div>
+                        <div class="bottom-buttons">
+                            <button id="cancel" onclick="cancelStudent()" class="button primary">Cancel</button>
+                            <button id="cancel" onclick="deleteStudent()" class="button primary">Delete</button>
+                        </div>
+                    </div>
+                    <div id="student-creator-buttons">
+                        <div class="top-buttons">
+                            <button id="save-student" class="button primary">Save Student</button>
+                        </div>
+                        <div class="bottom-buttons">
+                            <button id="cancel" class="button primary">Cancel</button>
+                        </div>
+                    </div>
+                    <div id="student-default-buttons">
+                        <div class="top-buttons">
+                            <button id="add-student" class="button primary">Add Student</button>
+                            <button id="batch-add" class="button primary">Batch Add</button>
+                        </div>
+                        <div class="bottom-buttons">
+                            <button id="cancel" class="button primary">Delete Students</button>
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
             <div tab-id="leaderboard">
