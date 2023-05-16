@@ -458,7 +458,8 @@ modal-content {
     color: white;
 }
 
-#cancel {
+
+.cancel {
     background-color: var(--alert-color);
 }
 

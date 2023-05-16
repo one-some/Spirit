@@ -1,3 +1,5 @@
+var greyed = false;
+
 studentDefaultButtons.querySelector("#add-student").addEventListener("click", function () {
     addStudent();
 })
@@ -9,6 +11,11 @@ studentCreatorButtons.querySelector("#cancel").addEventListener("click", functio
 studentCreatorButtons.querySelector("#save-student").addEventListener("click", function () {
     saveNewStudent();
 })
+
+deleteStudentModal.querySelector("#delete").addEventListener("click", function () {
+    deleteStudent();
+})
+
 async function saveNewStudent () {
     await fetch("/api/new_save_student.json", {
         method: "POST",
@@ -23,13 +30,13 @@ async function saveNewStudent () {
     })
 }
 function addStudent(){
-    studentCreatorButtons.style.display = "block";
-    studentDefaultButtons.querySelector("#add-student").style.backgroundColor = "grey";
-    studentDefaultButtons.querySelector("#cancel").style.backgroundColor = "grey";
-    studentDefaultButtons.querySelector("#batch-add").style.backgroundColor = "grey";
-    studentViewer.querySelector("#student-name").value = "";
-    studentViewer.querySelector("#student-points").value = "";
-    studentViewer.querySelector("#student-grade").value = "";
+    if(greyed === false){
+        studentCreatorButtons.style.display = "block";
+        studentDefaultButtons.querySelector("#add-student").style.backgroundColor = "grey";
+        studentDefaultButtons.querySelector("#delete").style.backgroundColor = "grey";
+        studentDefaultButtons.querySelector("#batch-add").style.backgroundColor = "grey";
+        greyed = true;
+    }
 }
 
 
@@ -62,16 +69,35 @@ function cancelStudent() {
     studentViewer.querySelector("#student-grade").value = "";
     studentEditorButtons.style.display = "none";
     studentDefaultButtons.querySelector("#add-student").style.backgroundColor = "";
-    studentDefaultButtons.querySelector("#cancel").style.backgroundColor = "";
+    studentDefaultButtons.querySelector("#delete").style.backgroundColor = "";
     studentDefaultButtons.querySelector("#batch-add").style.backgroundColor = "";
+
+    greyed = false;
 }
 
 function cancelNewStudent() {
+    studentCreatorButtons.style.display = "none";
     studentViewer.querySelector("#student-name").value = "";
     studentViewer.querySelector("#student-points").value = "";
     studentViewer.querySelector("#student-grade").value = "";
-    studentCreatorButtons.style.display = "none";
     studentDefaultButtons.querySelector("#add-student").style.backgroundColor = "";
-    studentDefaultButtons.querySelector("#cancel").style.backgroundColor = "";
+    studentDefaultButtons.querySelector("#delete").style.backgroundColor = "";
     studentDefaultButtons.querySelector("#batch-add").style.backgroundColor = "";
+
+    greyed = false;
+}
+
+async function deleteStudent(){
+    await fetch("/api/delete_student.json", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            student_id: currentStudent.id
+        })
+    })
+    closeModals();
+    console.log(leaderboardStudents.children[currentStudent.place]);
+    leaderboardStudents.children[currentStudent.place - 1].remove();
 }

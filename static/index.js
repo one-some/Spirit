@@ -8,6 +8,7 @@ const studentViewer = $el('.student-viewer');
 const studentEditorButtons = $el('#student-editor-buttons');
 const studentCreatorButtons = $el("#student-creator-buttons");
 const studentDefaultButtons = $el("#student-default-buttons");
+const deleteStudentModal = $el("#confirm-delete");
 
 studentEditorButtons.style.display = "none";
 studentCreatorButtons.style.display = "none";
@@ -25,7 +26,6 @@ function renderStudent(parent, place, student) {
         title: "Points"
     });
     cont.addEventListener("click", function () {
-        studentEditorButtons.style.display = "block"
         editStudent(student);
     })
 }
@@ -33,14 +33,18 @@ function renderStudent(parent, place, student) {
 let currentStudent;
 
 function editStudent(studentData) {
-    currentStudent = studentData;
-    studentViewer.querySelector("#student-name").value = studentData.name;
-    studentViewer.querySelector("#student-points").value = studentData.points;
-    studentViewer.querySelector("#student-grade").value = studentData.grade;
-    studentDefaultButtons.querySelector("#add-student").style.backgroundColor = "grey";
-    studentDefaultButtons.querySelector("#cancel").style.backgroundColor = "grey";
-    studentDefaultButtons.querySelector("#batch-add").style.backgroundColor = "grey";
-    // showModal("student-viewer");
+
+    studentEditorButtons.style.display = "block"
+    if(greyed === false){
+        currentStudent = studentData;
+        studentViewer.querySelector("#student-name").value = studentData.name;
+        studentViewer.querySelector("#student-points").value = studentData.points;
+        studentViewer.querySelector("#student-grade").value = studentData.grade;
+        studentDefaultButtons.querySelector("#add-student").style.backgroundColor = "grey";
+        studentDefaultButtons.querySelector("#delete").style.backgroundColor = "grey";
+        studentDefaultButtons.querySelector("#batch-add").style.backgroundColor = "grey";
+        greyed = true;
+    }
 }
 
 
@@ -64,6 +68,7 @@ async function fetchLeaderboard() {
         renderStudent(miniLeaderboard, place, student);
         renderStudent(leaderboard, place, student);
         renderStudent(leaderboardStudents, place, student);
+        student.place = place;
         place++;
     }
 }

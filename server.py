@@ -163,7 +163,7 @@ def save_student():
     con = querymaker.con()
     con.execute(
         '''UPDATE STUDENTS
-           SET NAME = ?,
+            SET NAME = ?,
                GRADE = ?,
                POINTS = ?
             WHERE ROWID = ?;
@@ -175,6 +175,11 @@ def save_student():
             request.json["student_id"],
         )
     )
+
+    con.commit()
+
+    return "what is the point of these"
+
 
 @app.route("/api/new_save_student.json", methods=["POST"])
 def save_new_student():
@@ -197,6 +202,21 @@ def save_new_student():
     # querymaker.reindex_scores()
     
     return "Workjjing?"
+
+@app.route("/api/delete_student.json", methods=["POST"])
+def delete_student():
+    con = querymaker.con()
+    con.execute(
+        '''DELETE FROM STUDENTS
+           WHERE ROWID = ?;''',
+           (request.json["student_id"],)
+    )
+
+    con.commit()
+
+    
+    return "dude idk" #it keeps saying "500 : internal server error" and idk what to do
+
 
 
 if __name__ == "__main__":
