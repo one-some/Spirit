@@ -1,9 +1,15 @@
 import json
 import backup
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, redirect, url_for
 import sqlite3
 import querymaker
 from config import config, data_path
+import pandas as pd
+from werkzeug.utils import secure_filename
+import os
+
+from flask_wtf import FlaskForm
+from wtforms import FileField, SubmitField
 
 # Helper functions
 
@@ -213,12 +219,26 @@ def delete_student():
     )
 
     con.commit()
-
     
-    return "dude idk" #it keeps saying "500 : internal server error" and idk what to do
+    return "dude idk"
 
+class UploadFileForm(FlaskForm):
+    file = FileField("File")
+    submit = SubmitField("Upload File")
 
+@app.route("/api/batch_add", methods=["POST"])
+def batch_add():
+    con = querymaker.con()
+    # df = pd.read_excel(request, sheet_name=None)
+    # print(df)
+    f = request.files['file']
+    #filename = secure_filename(f.filename)
+    f.save(os.path.join('input', "csv.csv"))
+    df = pd.read_csv('input/csv.csv')
+    print(df)
+    df.to_sql("STUDENTS", con, if_exists='append', index=False)
+    return ('', 204)
 
 if __name__ == "__main__":
     backup.start_backup_loop()
-    app.run()
+    app.run(debug=True)

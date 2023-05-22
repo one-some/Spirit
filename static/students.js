@@ -16,6 +16,10 @@ deleteStudentModal.querySelector("#delete").addEventListener("click", function (
     deleteStudent();
 })
 
+// batchAddModal.querySelector("#upload").addEventListener("click", function() {
+//     batchAdd();
+// })
+
 async function saveNewStudent () {
     await fetch("/api/new_save_student.json", {
         method: "POST",
@@ -34,7 +38,7 @@ function addStudent(){
         studentCreatorButtons.style.display = "block";
         studentDefaultButtons.querySelector("#add-student").style.backgroundColor = "grey";
         studentDefaultButtons.querySelector("#delete").style.backgroundColor = "grey";
-        studentDefaultButtons.querySelector("#batch-add").style.backgroundColor = "grey";
+        studentDefaultButtons.querySelector("#batch-add-button").style.backgroundColor = "grey";
         greyed = true;
     }
 }
@@ -70,7 +74,7 @@ function cancelStudent() {
     studentEditorButtons.style.display = "none";
     studentDefaultButtons.querySelector("#add-student").style.backgroundColor = "";
     studentDefaultButtons.querySelector("#delete").style.backgroundColor = "";
-    studentDefaultButtons.querySelector("#batch-add").style.backgroundColor = "";
+    studentDefaultButtons.querySelector("#batch-add-button").style.backgroundColor = "";
 
     greyed = false;
 }
@@ -82,7 +86,7 @@ function cancelNewStudent() {
     studentViewer.querySelector("#student-grade").value = "";
     studentDefaultButtons.querySelector("#add-student").style.backgroundColor = "";
     studentDefaultButtons.querySelector("#delete").style.backgroundColor = "";
-    studentDefaultButtons.querySelector("#batch-add").style.backgroundColor = "";
+    studentDefaultButtons.querySelector("#batch-add-button").style.backgroundColor = "";
 
     greyed = false;
 }
@@ -101,3 +105,13 @@ async function deleteStudent(){
     console.log(leaderboardStudents.children[currentStudent.place]);
     leaderboardStudents.children[currentStudent.place - 1].remove();
 }
+
+// async function batchAdd() {
+//     file = batchAddModal.querySelector("#file");
+//     console.log("working");
+//     console.log(file);
+//     await fetch("/api/batch_add", {
+//         method: "POST",
+//         body: file
+//     });
+// }

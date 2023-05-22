@@ -9,6 +9,7 @@ const studentEditorButtons = $el('#student-editor-buttons');
 const studentCreatorButtons = $el("#student-creator-buttons");
 const studentDefaultButtons = $el("#student-default-buttons");
 const deleteStudentModal = $el("#confirm-delete");
+const batchAddModal = $el("#batch-add");
 
 studentEditorButtons.style.display = "none";
 studentCreatorButtons.style.display = "none";
@@ -42,7 +43,7 @@ function editStudent(studentData) {
         studentViewer.querySelector("#student-grade").value = studentData.grade;
         studentDefaultButtons.querySelector("#add-student").style.backgroundColor = "grey";
         studentDefaultButtons.querySelector("#delete").style.backgroundColor = "grey";
-        studentDefaultButtons.querySelector("#batch-add").style.backgroundColor = "grey";
+        studentDefaultButtons.querySelector("#batch-add-button").style.backgroundColor = "grey";
         greyed = true;
     }
 }

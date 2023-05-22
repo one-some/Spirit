@@ -102,7 +102,14 @@
         </div>
     </modal-content>
 
-
+    <modal-content modal-id="batch-add" id="batch-add" modal-title="Batch Add">
+        <h1>Import from Excel, Google Sheets, or CSV</h1>
+        <form action="/api/batch_add" method="POST" enctype="multipart/form-data">
+        <input id="file" name="file" type="file" />
+        <button id="upload" class="button primary">Upload</button>
+        </form>
+        <button id="cancel" class="button cancel" onclick="closeModals();">Cancel</button>
+    </modal-content>
     <!-- <modal-content modal-id="student-viewer" modal-title="Edit Student">
         <input id="student-name" placeholder="Student Name">
 
