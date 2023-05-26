@@ -16,9 +16,9 @@ deleteStudentModal.querySelector("#delete").addEventListener("click", function (
     deleteStudent();
 })
 
-// batchAddModal.querySelector("#upload").addEventListener("click", function() {
-//     batchAdd();
-// })
+batchAddModal.querySelector("#upload").addEventListener("click", function() {
+    batchAdd();
+})
 
 async function saveNewStudent () {
     await fetch("/api/new_save_student.json", {
@@ -32,6 +32,7 @@ async function saveNewStudent () {
             student_points: studentViewer.querySelector("#student-points").value
         })
     })
+    fetchLeaderboard()
 }
 function addStudent(){
     if(greyed === false){
@@ -57,7 +58,7 @@ async function saveStudent(){
             student_points: studentViewer.querySelector("#student-points").value
         })
     })
-    
+    fetchLeaderboard();
 }
 
 function resetStudent(){
@@ -102,16 +103,13 @@ async function deleteStudent(){
         })
     })
     closeModals();
-    console.log(leaderboardStudents.children[currentStudent.place]);
-    leaderboardStudents.children[currentStudent.place - 1].remove();
+    cancelStudent();
+    fetchLeaderboard();
 }
 
-// async function batchAdd() {
-//     file = batchAddModal.querySelector("#file");
-//     console.log("working");
-//     console.log(file);
-//     await fetch("/api/batch_add", {
-//         method: "POST",
-//         body: file
-//     });
-// }
+async function batchAdd() {
+    fetchLeaderboard();
+    console.log("refreshed leaderboard!")
+    closeModals();
+    
+}

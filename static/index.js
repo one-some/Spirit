@@ -62,6 +62,9 @@ async function fetchLeaderboard() {
     for (const el of document.querySelectorAll("#leaderboard .listing")) {
         el.remove();
     }
+    for (const el of document.querySelectorAll("#mini-leaderboard-students .listing")) {
+        el.remove();
+    }
 
     let place = 1;
     for (const student of j) {

@@ -4,12 +4,14 @@ from flask import Flask, jsonify, request, render_template, redirect, url_for
 import sqlite3
 import querymaker
 from config import config, data_path
-import pandas as pd
-from werkzeug.utils import secure_filename
-import os
+from pandas import read_csv as pd_read_csv
+from pandas import read_excel as pd_read_excel
+#from pandas import DataFrame
+# from werkzeug.utils import secure_filename
+from os import path as os_path
 
-from flask_wtf import FlaskForm
-from wtforms import FileField, SubmitField
+# from flask_wtf import FlaskForm
+# from wtforms import FileField, SubmitField
 
 # Helper functions
 
@@ -171,12 +173,14 @@ def save_student():
         '''UPDATE STUDENTS
             SET NAME = ?,
                GRADE = ?,
+               SURPLUS = ? - (POINTS - SURPLUS),
                POINTS = ?
             WHERE ROWID = ?;
             ''',
         (
             request.json["student_name"],
             request.json["student_grade"],
+            request.json["student_points"],
             request.json["student_points"],
             request.json["student_id"],
         )
@@ -192,13 +196,14 @@ def save_new_student():
     print(request.json)
     con = querymaker.con()
     con.execute(
-        '''INSERT INTO STUDENTS (NAME, GRADE, POINTS)
+        '''INSERT INTO STUDENTS (NAME, GRADE, POINTS, SURPLUS)
             VALUES
-                (?, ?, ?);
+                (?, ?, ?, ?);
             ''',
         (
             request.json["student_name"],
             request.json["student_grade"],
+            request.json["student_points"],
             request.json["student_points"],
         )
     )
@@ -222,20 +227,22 @@ def delete_student():
     
     return "dude idk"
 
-class UploadFileForm(FlaskForm):
-    file = FileField("File")
-    submit = SubmitField("Upload File")
+# class UploadFileForm(FlaskForm):
+#     file = FileField("File")
+#     submit = SubmitField("Upload File")
 
 @app.route("/api/batch_add", methods=["POST"])
 def batch_add():
     con = querymaker.con()
-    # df = pd.read_excel(request, sheet_name=None)
-    # print(df)
+                                                                        # df = pd.read_excel(request, sheet_name=None)
     f = request.files['file']
-    #filename = secure_filename(f.filename)
-    f.save(os.path.join('input', "csv.csv"))
-    df = pd.read_csv('input/csv.csv')
-    print(df)
+                                                                        #filename = secure_filename(f.filename)
+    f.save(os_path.join('input', "csv.csv"))
+    df = pd_read_csv('input/csv.csv')
+    df.rename(str.upper, axis='columns', inplace=True)
+    print("\n", df, "\n")
+    if 'SURPLUS' not in df.columns:
+        df['SURPLUS'] = df['POINTS']
     df.to_sql("STUDENTS", con, if_exists='append', index=False)
     return ('', 204)
 

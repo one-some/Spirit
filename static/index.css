@@ -645,3 +645,9 @@ modal-content {
     border-bottom-width: 1px;
     border-bottom-style: solid;
 }
+
+#upload.batch-add{
+    margin-right: 10px;
+    margin-left: 20px;
+    display: flex;
+}
