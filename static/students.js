@@ -1,3 +1,5 @@
+const batchCSVInput = batchAddModal.querySelector("#file");
+
 var greyed = false;
 
 studentDefaultButtons.querySelector("#add-student").addEventListener("click", function () {
@@ -16,9 +18,7 @@ deleteStudentModal.querySelector("#delete").addEventListener("click", function (
     deleteStudent();
 })
 
-batchAddModal.querySelector("#upload").addEventListener("click", function() {
-    batchAdd();
-})
+batchAddModal.querySelector("#upload").addEventListener("click", batchAdd);
 
 async function saveNewStudent () {
     await fetch("/api/new_save_student.json", {
@@ -108,8 +108,16 @@ async function deleteStudent(){
 }
 
 async function batchAdd() {
+    // Thanks to https://stackoverflow.com/a/40826943 :^)
+    const formData = new FormData();
+    formData.append("file", batchCSVInput.files[0]);
+
+    await fetch ("/api/batch_add", {
+        method: "POST",
+        body: formData,
+    });
+
     fetchLeaderboard();
     console.log("refreshed leaderboard!")
     closeModals();
-    
 }
