@@ -647,7 +647,29 @@ modal-content {
 }
 
 #upload.batch-add{
-    margin-right: 10px;
-    margin-left: 20px;
+    flex: 1 1 0;
+    content: 100px 20px;
     display: flex;
+}
+
+h1.login {
+    margin-top: 25px
+}
+
+.login{
+    display: grid;
+    margin-top: 0;
+    justify-content: center;
+}
+
+#login-content {
+    margin: 125px 450px 25px 450px;
+    background-color: white;
+    border-radius: 10%;
+    outline-width: 1px;
+    outline-color:black;
+}
+
+#login-body {
+    background-image: url('/static/edited_login_photo_background.jpg');
 }

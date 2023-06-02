@@ -37,9 +37,7 @@ async function saveNewStudent () {
 function addStudent(){
     if(greyed === false){
         studentCreatorButtons.style.display = "block";
-        studentDefaultButtons.querySelector("#add-student").style.backgroundColor = "grey";
-        studentDefaultButtons.querySelector("#delete").style.backgroundColor = "grey";
-        studentDefaultButtons.querySelector("#batch-add-button").style.backgroundColor = "grey";
+        studentDefaultButtons.style.display = "none"
         greyed = true;
     }
 }
@@ -73,9 +71,7 @@ function cancelStudent() {
     studentViewer.querySelector("#student-points").value = "";
     studentViewer.querySelector("#student-grade").value = "";
     studentEditorButtons.style.display = "none";
-    studentDefaultButtons.querySelector("#add-student").style.backgroundColor = "";
-    studentDefaultButtons.querySelector("#delete").style.backgroundColor = "";
-    studentDefaultButtons.querySelector("#batch-add-button").style.backgroundColor = "";
+    studentDefaultButtons.style.display = "block";
 
     greyed = false;
 }
@@ -85,10 +81,7 @@ function cancelNewStudent() {
     studentViewer.querySelector("#student-name").value = "";
     studentViewer.querySelector("#student-points").value = "";
     studentViewer.querySelector("#student-grade").value = "";
-    studentDefaultButtons.querySelector("#add-student").style.backgroundColor = "";
-    studentDefaultButtons.querySelector("#delete").style.backgroundColor = "";
-    studentDefaultButtons.querySelector("#batch-add-button").style.backgroundColor = "";
-
+    studentDefaultButtons.style.display = "block";
     greyed = false;
 }
 

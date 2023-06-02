@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Spirit - Login</title>
+    <link rel="stylesheet" href="/static/index.css">
+    <link rel="icon" href="/static/favicon.png">
+
+    <!-- Deps -->
+    <script src="/static/libs/jquery.min.js"></script>
+    <script src="/static/libs/moment.min.js"></script>
+    <!-- <script src="/static/libs/daterangepicker.min.js"></script> -->
+    <!-- <link rel="stylesheet" href="/static/libs/daterangepicker.css"> -->
+    <script src="/static/util.js"></script>
+</head>
+<body id="login-body">
+    {% include "topbar.html" %}
+    <div id="login-content">
+        <h1 class="login">Welcome to Spirit!</h1>
+        <form method="post" id="login" class="login">
+            <p><label for="username" class="login">Username or Email</label>
+            <p><input type=text  id="username" name=username>
+            <p><label for="password" class="login">Password</label>
+            <p><input type=password id="username" name=password>
+            <p><input type=submit id="submit-login" class="button primary" value=Login>
+        </form>
+        <a>Not trying to log in? Register here</a>
+    </div>
+</body>
+</html>

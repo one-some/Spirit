@@ -1,11 +1,12 @@
 import json
 import backup
-from flask import Flask, jsonify, request, render_template, redirect, url_for
+from flask import Flask, jsonify, request, render_template, redirect, url_for, session
 import sqlite3
 import querymaker
 from config import config, data_path
 from pandas import read_csv as pd_read_csv
 from pandas import read_excel as pd_read_excel
+import hashlib
 #from pandas import DataFrame
 # from werkzeug.utils import secure_filename
 from os import path as os_path
@@ -28,17 +29,76 @@ def prize_from_points(points: int) -> str:
     return None
 
 
+def hash(password: str):                   #hashes the password with hashlib, a default library. I don't know why the weird way of doing it.
+    sha256 = hashlib.sha256()
+    password = password.encode('utf-8')
+    sha256.update(password)
+    password = sha256.hexdigest()
+    return password
+
+
 # Routing
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
-
+app.secret_key = 'thisisanexamplesecretkey'
 
 @app.route("/")
 @app.route("/students")
 @app.route("/leaderboard")
 def index():
-    return render_template("index.html")
+    if 'username' in session:
+        return render_template("index.html")
+    return redirect(url_for('login'))
+
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    
+    if request.method == 'POST':
+
+        con = querymaker.con()
+        cur = con.cursor()
+
+        cur.execute("SELECT PASSWORD FROM USERS WHERE NAME = ?", (request.form['username'],))
+        stored_password = cur.fetchall()[0][0]
+
+        password = str(request.form['password'])
+        password = hash(password)
+        print(password)
+        
+        if password == stored_password:
+            session['username'] = request.form['username']
+            cur.execute('SELECT ROLE FROM USERS WHERE NAME = ?', (request.form['username'],))
+            role = cur.fetchall()[0][0]
+            cur.close()
+            if role == 'STUDENT':
+                return redirect(url_for('student'))
+            return redirect(url_for('index'))
+        return "INVALID USERNAME AND PASSWORD"
+    return render_template('login.html')
+
+# @app.route('/register', methods=['GET', 'POST'])
+# def register():
+#     if request.method == 'POST':                                                                                  # SAVING FOR LATER
+#         con = querymaker.con()
+#         con.execute("INSERT INTO USERS VALUES ?, ROWID, ?", (request.form['username'], request.form['password'],))
+#     return render_template('register.html')
+
+@app.route('/student')
+def student():
+    con = querymaker.con()
+    cur = con.cursor()
+    cur.execute('SELECT POINTS FROM STUDENTS WHERE NAME = ?', (session['username'],))
+    points = cur.fetchall()[0][0]
+    cur.close()
+    return render_template('student.html', points=points)
+
+@app.route("/logout", methods=['GET', 'POST'])
+def logout():
+    print(session)
+    session.pop('username', None)
+    print(session)
+    return redirect(url_for('login'))
 
 
 @app.route("/event/<int:event_id>")

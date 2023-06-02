@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spirit - Login</title>
+    <link rel="stylesheet" href="/static/index.css">
+    <link rel="icon" href="/static/favicon.png">
+
+    <!-- Deps -->
+    <script src="/static/libs/jquery.min.js"></script>
+    <script src="/static/libs/moment.min.js"></script>
+    <!-- <script src="/static/libs/daterangepicker.min.js"></script> -->
+    <!-- <link rel="stylesheet" href="/static/libs/daterangepicker.css"> -->
+    <script src="/static/util.js"></script>
+    
+    <title>Homepage - Spirit</title>
+</head>
+<body>
+    {% include "topbar.html" %}
+    <h1>You, {{ session['username'] }}, have {{ points }} points!</h1>
+    <script src="/static/index.js"></script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 // TODO: Account
-const USER_NAME = "Mr. Doe";
-
+// const USER_NAME = "Mr. Doe";
+const logoutbutton = $el("#logout");
 const leaderboard = $el("#leaderboard")
 const miniLeaderboard = $el("#mini-leaderboard");
 const leaderboardStudents = $el("#mini-leaderboard-students");
@@ -10,6 +10,15 @@ const studentCreatorButtons = $el("#student-creator-buttons");
 const studentDefaultButtons = $el("#student-default-buttons");
 const deleteStudentModal = $el("#confirm-delete");
 const batchAddModal = $el("#batch-add");
+
+logoutbutton.addEventListener('click', function () {
+    Logout();
+})
+
+async function Logout() {
+    await fetch("/logout");
+    window.location.replace("/login");
+}
 
 studentEditorButtons.style.display = "none";
 studentCreatorButtons.style.display = "none";
@@ -41,9 +50,7 @@ function editStudent(studentData) {
         studentViewer.querySelector("#student-name").value = studentData.name;
         studentViewer.querySelector("#student-points").value = studentData.points;
         studentViewer.querySelector("#student-grade").value = studentData.grade;
-        studentDefaultButtons.querySelector("#add-student").style.backgroundColor = "grey";
-        studentDefaultButtons.querySelector("#delete").style.backgroundColor = "grey";
-        studentDefaultButtons.querySelector("#batch-add-button").style.backgroundColor = "grey";
+        studentDefaultButtons.style.display = "none";
         greyed = true;
     }
 }
@@ -86,6 +93,6 @@ init();
 
 // Greeting
 // TODO: Actually have correct time
-let greetingPossibilities = ["Good afternoon, %s", "Welcome, %s", "Greetings, %s"];
-let greeting = greetingPossibilities[Math.floor(Math.random() * greetingPossibilities.length)].replaceAll("%s", USER_NAME);
-$el("#greeting").innerText = greeting;
+// let greetingPossibilities = ["Good afternoon, %s", "Welcome, %s", "Greetings, %s"];
+// let greeting = greetingPossibilities[Math.floor(Math.random() * greetingPossibilities.length)].replaceAll("%s", USER_NAME);
+// $el("#greeting").innerText = greeting;
