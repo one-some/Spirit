@@ -29,12 +29,11 @@ def prize_from_points(points: int) -> str:
     return None
 
 
-def hash(password: str):                   #hashes the password with hashlib, a default library. I don't know why the weird way of doing it.
+def sha256_hash(password: str):                   #hashes the password with hashlib, a default library. I don't know why the weird way of doing it.
     sha256 = hashlib.sha256()
     password = password.encode('utf-8')
     sha256.update(password)
-    password = sha256.hexdigest()
-    return password
+    return sha256.hexdigest()
 
 
 # Routing
@@ -56,25 +55,45 @@ def login():
     
     if request.method == 'POST':
 
+        try:
+            username = request.form["username"]
+        except KeyError:
+            # 400: Bad request
+            return "No username given!", 400
+
+        try:
+            # Be careful with this!
+            given_plaintext_password = request.form["password"]
+        except KeyError:
+            return "No password given!", 400
+        given_hashed_password = sha256_hash(given_plaintext_password)
+
         con = querymaker.con()
-        cur = con.cursor()
 
-        cur.execute("SELECT PASSWORD FROM USERS WHERE NAME = ?", (request.form['username'],))
-        stored_password = cur.fetchall()[0][0]
+        try:
+            valid_hashed_password = con.execute(
+                "SELECT PASSWORD FROM USERS WHERE NAME = ?",
+                (username,)
+            ).fetchone()[0]
+        except TypeError:
+            # TypeError: None is not subscriptable, as fetchone()
+            # will return None if it has nothing to fetch
+            return "Username not found in database!", 404
 
-        password = str(request.form['password'])
-        password = hash(password)
-        print(password)
+        print("Given Hash:", given_hashed_password)
         
-        if password == stored_password:
-            session['username'] = request.form['username']
-            cur.execute('SELECT ROLE FROM USERS WHERE NAME = ?', (request.form['username'],))
-            role = cur.fetchall()[0][0]
-            cur.close()
-            if role == 'STUDENT':
-                return redirect(url_for('student'))
-            return redirect(url_for('index'))
-        return "INVALID USERNAME AND PASSWORD"
+        if given_hashed_password != valid_hashed_password:
+            # 403: Not authorized
+            return "INVALID USERNAME AND PASSWORD", 403
+
+        session['username'] = username
+        role = con.execute('SELECT ROLE FROM USERS WHERE NAME = ?', (username,)).fetchone()[0]
+        # We can assume that this query will succeed since the last
+        # one confirmed there's a user with that name in the db
+
+        if role == 'STUDENT':
+            return redirect(url_for('student'))
+        return redirect(url_for('index'))
     return render_template('login.html')
 
 # @app.route('/register', methods=['GET', 'POST'])
@@ -87,10 +106,7 @@ def login():
 @app.route('/student')
 def student():
     con = querymaker.con()
-    cur = con.cursor()
-    cur.execute('SELECT POINTS FROM STUDENTS WHERE NAME = ?', (session['username'],))
-    points = cur.fetchall()[0][0]
-    cur.close()
+    points = con.execute('SELECT POINTS FROM STUDENTS WHERE NAME = ?', (session['username'],)).fetchone()[0]
     return render_template('student.html', points=points)
 
 @app.route("/logout", methods=['GET', 'POST'])
