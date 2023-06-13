@@ -2,6 +2,7 @@ import json
 import sqlite3
 from dataclasses import dataclass
 from enum import Enum
+from typing import Optional
 
 GRADES = [9, 10, 11, 12]
 
@@ -62,13 +63,49 @@ def get_students_matching(starting_with: str, limit=10):
         )
     ]
 
+@dataclass
+class WhereClause:
+    condition: str
+    args: list
 
-def get_students(limit=50, sort=Sort.NAME_DESC):
+def get_students(limit=50, sort=Sort.NAME_DESC, query: Optional[str] = None, grade_filters: dict = None):
+    # HACK: work around mutable type blehhhhing in non-default args
+    grade_filters = grade_filters or {}
+
     sq = Sort.to_query(sort)
+    where_clauses = []
+
+    if query:
+        where_clauses.append(
+            WhereClause(
+                condition="NAME LIKE ?",
+                args=[f"%{query}%"]
+            )
+        )
+    
+    for grade, allow in grade_filters.items():
+        if allow:
+            continue
+
+        where_clauses.append(
+            WhereClause(
+                condition="GRADE != ?",
+                args=[grade]
+            )
+        )
+
+    where_clause = ""
+    where_args = []
+    if where_clauses:
+        where_clause = "WHERE " + (" AND ".join([x.condition for x in where_clauses]))
+        for clause in where_clauses:
+            where_args += clause.args
+
     return [
         Student(*x)
         for x in con().execute(
-            f"SELECT NAME,POINTS,GRADE,ROWID FROM STUDENTS ORDER BY {sq} LIMIT ?;", (limit,)
+            f"SELECT NAME,POINTS,GRADE,ROWID FROM STUDENTS {where_clause} ORDER BY {sq} LIMIT ?;",
+            (*where_args, limit,)
         )
     ]
 

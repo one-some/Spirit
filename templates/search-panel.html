@@ -1,0 +1,11 @@
+<div id="search-panel">
+    <input id="search-input" placeholder="Search for students">
+    <div id="grade-filter">
+        {% for grade in [9, 10, 11, 12]%}
+            <div class="grade-filter-row">
+                <label for="search-grade-{{ grade }}th">{{ grade }}th Grade</label>
+                <input id="search-grade-{{ grade }}th" type="checkbox" checked>
+            </div>
+        {% endfor %}
+    </div>
+</div>

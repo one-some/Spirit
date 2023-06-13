@@ -815,3 +815,38 @@ h1.login {
         box-shadow: 0 0 0px black;
     }
 }
+
+/* Search Panel */
+
+#search-panel {
+    display: flex;
+    margin-left: 10px;
+    background-color: rgba(211, 211, 211, 0.5);
+}
+
+#search-input {
+    flex-grow: 1;
+}
+
+#grade-filter {
+    /* display: inline-block; */
+    display: inline-grid;
+    grid-template-columns: auto auto;
+}
+
+#grade-filter .grade-filter-row {
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    margin-right: 15px;
+}
+
+#grade-filter .grade-filter-row>* {
+    /* HACK: Weirdness going on here */
+    cursor: pointer;
+}
+
+#search-panel #grade-filter .grade-filter-row label {
+    margin-right: 15px;
+    user-select: none;
+}

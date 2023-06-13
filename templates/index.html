@@ -38,6 +38,7 @@
             <div tab-id="students">
                 <div class="left">
                     <h1>Students</h1>
+                    {% include "search-panel.html" %}
                     <div id="mini-leaderboard-students" class="leaderboard"></div>
                 </div>
                 <div class="right student-viewer">
@@ -120,7 +121,7 @@
             <div id="chat-messages">
             </div>
             <span id="typing-indicator"></span>
-            <input id="chat-input" placeholder="Ask a question"/>
+            <input id="chat-input" placeholder="Ask a question" />
         </div>
     </div>
 

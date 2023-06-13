@@ -127,6 +127,11 @@ def event(event_id: int):
 
 @app.route("/api/students.json")
 def api_students():
+    query = request.args.get("q", None)
+    grade_filters = {}
+    for grade in querymaker.GRADES:
+        grade_filters[grade] = request.args.get(f"show_{grade}th", "true") == "true"
+        
     sort = querymaker.Sort.from_string(request.args.get("sort", "name_desc"))
 
     try:
@@ -134,7 +139,7 @@ def api_students():
     except (ValueError, TypeError):
         limit = 100
 
-    return jsonify(querymaker.get_students(limit=limit, sort=sort))
+    return jsonify(querymaker.get_students(limit=limit, sort=sort, query=query, grade_filters=grade_filters))
 
 
 @app.route("/api/draw_results.json")
