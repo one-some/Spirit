@@ -19,7 +19,12 @@
 </head>
 <body>
     {% include "topbar.html" %}
-    <h1>You, {{ session['username'] }}, have {{ points }} points!</h1>
+    <h1>You, {{ session['username'] }}, have <span id="points">{{ points }}</span> points!</h1>
+    <h2>You are so close to your next milestone!</h2>
+    <div id="myProgress">
+        <div id="myBar"></div>
+    </div>
+    <script src="/static/student-page.js"></script>
     <script src="/static/index.js"></script>
 </body>
 </html>
