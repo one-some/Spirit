@@ -17,6 +17,10 @@
     --modal-rounding: 6px;
 
     --alert-color: #c32a2a;
+
+    --chat-bg: #e6e6e6;
+    --msg-color-bot: #9090ff;
+    --msg-color-user: #c7c7c7;
 }
 
 .hidden {
@@ -145,9 +149,11 @@ h2 {
 .right h2 {
     margin-left: 0px;
 }
+
 .left {
     margin-bottom: 20px;
 }
+
 #topbar #logo h1 {
     display: inline;
     margin: 0px;
@@ -276,9 +282,10 @@ h2 {
     color: lightgray
 }
 
-.leaderboard .listing:nth-child(odd){
+.leaderboard .listing:nth-child(odd) {
     background-color: rgba(211, 211, 211, 0.5);
 }
+
 .leaderboard .listing:nth-child(1) .place {
     background-color: var(--leaderboard-first);
     color: white
@@ -303,7 +310,8 @@ h2 {
 }
 
 .leaderboard .listing:nth-child(3) {
-    background-color: rgb(165, 87, 42, 0.247);;
+    background-color: rgb(165, 87, 42, 0.247);
+    ;
 }
 
 .leaderboard .listing .place {
@@ -603,7 +611,7 @@ modal-content {
     display: flex;
 }
 
-.split > div {
+.split>div {
     flex: 1 1 0;
 }
 
@@ -646,7 +654,7 @@ modal-content {
     border-bottom-style: solid;
 }
 
-#upload.batch-add{
+#upload.batch-add {
     flex: 1 1 0;
     content: 100px 20px;
     display: flex;
@@ -656,7 +664,7 @@ h1.login {
     margin-top: 25px
 }
 
-.login{
+.login {
     display: grid;
     margin-top: 0;
     justify-content: center;
@@ -667,9 +675,117 @@ h1.login {
     background-color: white;
     border-radius: 10%;
     outline-width: 1px;
-    outline-color:black;
+    outline-color: black;
 }
 
 #login-body {
     background-image: url('/static/edited_login_photo_background.jpg');
+}
+
+/* Interactive Q&A */
+#qna-container {
+    position: absolute;
+    right: 0px;
+    bottom: 0px;
+}
+
+#help-button {
+    background-color: red;
+    color: white;
+
+    border: 2px solid white;
+    border-radius: 120px;
+
+    width: 1em;
+    height: 1em;
+
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    padding: 10px;
+
+    cursor: pointer;
+}
+
+#qna-chat {
+    /* TODO: Be wary of these hard-coded pixel sizes... */
+    width: 300px;
+    height: 50vh;
+
+    display: flex;
+    flex-direction: column;
+}
+
+#chat-messages {
+    background-color: var(--chat-bg);
+    flex-grow: 1;
+}
+
+.chat-message-wrapper {
+    display: flex;
+    justify-content: space-between;
+}
+
+.chat-message {
+    display: inline-block;
+    margin-top: 5px;
+    margin-bottom: 5px;
+
+    padding-top: 5px;
+    padding-bottom: 3px;
+
+    padding-left: 7px;
+    padding-right: 7px;
+
+    /* TODO: Message tails? */
+    border-radius: 6px;
+
+    --opposing-margin: 50px;
+    --close-margin: 3px;
+}
+
+.chat-message.user {
+    background-color: var(--msg-color-user);
+    margin-left: var(--opposing-margin);
+    margin-right: var(--close-margin);
+
+    /* HACK: Kinda simulate message tails */
+    border-bottom-right-radius: 0px;
+}
+
+.chat-message.bot {
+    background-color: var(--msg-color-bot);
+    margin-right: var(--opposing-margin);
+    margin-left: var(--close-margin);
+
+    /* HACK: Kinda simulate message tails */
+    border-bottom-left-radius: 0px;
+}
+
+#chat-topbar {
+    color: white;
+    background-color: var(--sidebar);
+    position: relative;
+    text-align: center;
+    padding: 5px;
+    font-weight: bold;
+
+    --smoothing: 8px;
+
+    border-top-left-radius: var(--smoothing);
+    border-top-right-radius: var(--smoothing);
+}
+
+#close-qna-button {
+    position: absolute;
+    right: 2px;
+    top: 2px;
+    cursor: pointer;
+}
+
+#chat-input {
+    /* TODO: More styling? */
+    outline: none;
+    border: 1px solid gray;
+    border-right: none;
 }
