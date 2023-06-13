@@ -44,19 +44,20 @@
                     <h1>Info</h1>
                     <b class="header">Name</b>
                     <input type="text" placeholder="Select a student to edit" id="student-name">
-                    <b class="header" >Grade</b>
+                    <b class="header">Grade</b>
                     <input type="number" placeholder="Select a student to edit" id="student-grade">
-                    <b class="header" >Points</b>
+                    <b class="header">Points</b>
                     <input type="number" placeholder="Select a student to edit" id="student-points">
                     <div id="student-editor-buttons">
                         <div class="top-buttons">
                             <button onclick="saveStudent()" class="button primary">Save</button>
                             <button onclick="resetStudent()" class="button primary">Reset Changes</button>
-                        
+
                         </div>
                         <div class="bottom-buttons">
                             <button id="cancel" onclick="cancelStudent()" class="button cancel">Cancel</button>
-                            <button id="delete" onclick="showModal('confirm-delete')" class="button cancel">Delete</button>
+                            <button id="delete" onclick="showModal('confirm-delete')"
+                                class="button cancel">Delete</button>
                         </div>
                     </div>
                     <div id="student-creator-buttons">
@@ -70,13 +71,14 @@
                     <div id="student-default-buttons">
                         <div class="top-buttons">
                             <button id="add-student" class="button primary">Add Student</button>
-                            <button id="batch-add-button" class="button primary" onclick="showModal('batch-add')">Batch Add</button>
+                            <button id="batch-add-button" class="button primary" onclick="showModal('batch-add')">Batch
+                                Add</button>
                         </div>
                         <div class="bottom-buttons">
                             <button id="delete" class="button cancel">Delete Students</button>
                         </div>
                     </div>
-                    
+
                 </div>
             </div>
             <div tab-id="leaderboard">
@@ -99,14 +101,36 @@
                     <canvas id="ch-points-by-grade"></canvas>
                 </div>
             </div>
+            <div tab-id="documentation">
+                {% include "docs.html" %}
+            </div>
         </div>
     </div>
     {% include "modals.html" %}
+
+    <div id="qna-container">
+        <div id="help-button" class="material-icons" title="Interactive Help">
+            live_help
+        </div>
+        <div id="qna-chat" class="hidden">
+            <div id="chat-topbar">
+                <span>Interactive Help</span>
+                <span id="close-qna-button" class="material-icons">close</span>
+            </div>
+            <div id="chat-messages">
+            </div>
+            <span id="typing-indicator"></span>
+            <input id="chat-input" placeholder="Ask a question"/>
+        </div>
+    </div>
+
     <script src="/static/libs/chartjs/dist/chart.umd.js"></script>
     <script src="/static/index.js"></script>
     <script src="/static/leaderboard.js"></script>
     <script src="/static/events.js"></script>
     <script src="/static/students.js"></script>
+    <script src="/static/docs.js"></script>
+    <script src="/static/qna.js"></script>
 </body>
 
 </html>
