@@ -36,6 +36,7 @@ for (const tabButton of document.querySelectorAll("[sidebar-button]")) {
 let targetTab = {
     "/": "home",
     "/events": "events",
+    "/students": "students",
     "/leaderboard": "leaderboard",
     "/documentation": "documentation",
 }[window.location.pathname] || "home";
