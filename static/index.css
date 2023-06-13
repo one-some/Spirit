@@ -673,3 +673,19 @@ h1.login {
 #login-body {
     background-image: url('/static/edited_login_photo_background.jpg');
 }
+
+#myProgress {
+    width: 100%;
+    background-color: lightgrey;
+    border-radius: 500px;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+  
+  #myBar {
+    width: 1%;
+    border-radius: 500px;
+    height: 30px;
+    background-color: green;
+    border-radius: 20%;
+  }

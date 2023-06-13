@@ -58,34 +58,31 @@ function editStudent(studentData) {
 
 
 
-async function fetchLeaderboard() {
-    let r = await fetch("/api/students.json?limit=25&sort=points_desc");
+async function fetchLeaderboard(leaderboard_place, sort = "points_desc", limit = 25) {
+    let r = await fetch(`/api/students.json?limit=${limit}&sort=${sort}`);
     let j = await r.json();
 
-    for (const el of document.querySelectorAll("#mini-leaderboard .listing")) {
-        el.remove();
-    }
-
-    for (const el of document.querySelectorAll("#leaderboard .listing")) {
-        el.remove();
-    }
-    for (const el of document.querySelectorAll("#mini-leaderboard-students .listing")) {
+    for (const el of document.querySelectorAll(`${leaderboard_place.id} .listing`)) {
         el.remove();
     }
 
     let place = 1;
     for (const student of j) {
-        // We should consider using flask for this instead.
-        renderStudent(miniLeaderboard, place, student);
-        renderStudent(leaderboard, place, student);
-        renderStudent(leaderboardStudents, place, student);
+        renderStudent(leaderboard_place, place, student);
         student.place = place;
         place++;
     }
 }
 
 async function init() {
-    fetchLeaderboard();
+    if(window.location.pathname == "/"){
+        for (const el of document.querySelectorAll(".leaderboard")){
+        fetchLeaderboard(el);
+        }
+    }
+    else if(window.location.pathname = "student"){
+        
+    }
 }
 
 init();
