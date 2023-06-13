@@ -719,6 +719,7 @@ h1.login {
 #chat-messages {
     background-color: var(--chat-bg);
     flex-grow: 1;
+    overflow-y: auto;
 }
 
 .chat-message-wrapper {
@@ -788,4 +789,10 @@ h1.login {
     outline: none;
     border: 1px solid gray;
     border-right: none;
+}
+
+/* Typing indicator */
+#typing-indicator {
+    opacity: 0.8;
+    font-style: italic;
 }
