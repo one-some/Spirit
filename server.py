@@ -94,7 +94,7 @@ def login():
 
         if role == 'STUDENT':
             return redirect(url_for('student'))
-        return redirect(url_for('index'))
+        return redirect("/")
     return render_template('login.html')
 
 # @app.route('/register', methods=['GET', 'POST'])
