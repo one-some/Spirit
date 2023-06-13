@@ -23,6 +23,11 @@
     --msg-color-user: #c7c7c7;
 }
 
+a,
+a:active {
+    color: blue;
+}
+
 .hidden {
     display: none !important;
 }
@@ -795,4 +800,18 @@ h1.login {
 #typing-indicator {
     opacity: 0.8;
     font-style: italic;
+}
+
+.highlight {
+    animation: highlight-shadow 1.5s;
+}
+
+@keyframes highlight-shadow {
+    from {
+        box-shadow: 0 0 400px 500px white;
+    }
+
+    to {
+        box-shadow: 0 0 0px black;
+    }
 }

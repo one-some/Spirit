@@ -1,4 +1,9 @@
 const BOT_NAME = "Joe Bot";
+const BORING_ANSWER = "I'm not able to understand your request. Please try again, or <a href=\"/documentation\">consult the documentation</a>.";
+
+const DocumentationQueries = [
+    { match: /add.*student|new.*student|import.*student/i, reference: "adding-students" }
+]
 
 const Author = {
     BOT: 0,
@@ -11,6 +16,11 @@ const qnaChat = $el("#qna-chat");
 const chatMessageContainer = $el("#chat-messages");
 const chatInput = $el("#chat-input");
 const typingIndicator = $el("#typing-indicator");
+
+qnaChat.addEventListener("click", function (event) {
+    event.preventDefault();
+    chatInput.focus();
+});
 
 qnaOpenButton.addEventListener("click", function () {
     qnaOpenButton.classList.add("hidden");
@@ -40,7 +50,7 @@ chatInput.addEventListener("keydown", function (event) {
     }, 150);
 
     setTimeout(function () {
-        const botMessage = getBotResponse(chatInput.value);
+        const botMessage = getBotResponse(userPrompt);
         renderMessage(Author.BOT, botMessage);
         setTyping(false);
 
@@ -50,7 +60,16 @@ chatInput.addEventListener("keydown", function (event) {
 });
 
 function getBotResponse(message) {
-    return "WHAT"
+    for (const query of DocumentationQueries) {
+        console.log(query.match, message)
+        console.log(message.match(query.match));
+        if (!message.match(query.match)) continue;
+        const docChunk = $el(`#docs-${query.reference}`);
+        const href = `/documentation#${docChunk.id}`;
+        return `${docChunk.innerHTML}<hr>See <a href="${href}">the documentation</a> for more information.`;
+    }
+
+    return BORING_ANSWER;
 }
 
 function setTyping(isTyping) {
@@ -81,7 +100,19 @@ function renderMessage(author, content) {
     // HACK: Ugly align hack with flexbox. Blehhhhhhhhhh!
     const alignLeft = author === Author.BOT;
     if (!alignLeft) $e("spacer", messageWrapper);
-    $e("div", messageWrapper, { classes: ["chat-message", authorCSSClass], innerText: content });
+
+    const message = $e("div", messageWrapper, { classes: ["chat-message", authorCSSClass] });
+    if (author === Author.BOT) {
+        // Do not escape HTML for the bot as it needs to steal content from docs pages
+        message.innerHTML = content;
+
+        // And make documentation element references work
+        hookElementDescendantsForElementReferences(message);
+    } else {
+        // The user, on the other hand, is one shifty freak. Escape that input NOW!!!
+        message.innerText = content;
+    }
+
     if (alignLeft) $e("spacer", messageWrapper);
     messageWrapper.scrollIntoView();
 }
