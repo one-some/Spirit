@@ -118,8 +118,5 @@ function renderMessage(author, content) {
 }
 
 renderMessage(Author.BOT, "Hello, and welcome to Spirit!");
-renderMessage(Author.USER, "okay");
 renderMessage(Author.BOT, `I am ${BOT_NAME}, and my job is to help you navigate through using Spirit.`);
-renderMessage(Author.USER, "okay");
 renderMessage(Author.BOT, "Please ask any questions you may have!");
-renderMessage(Author.USER, "okay");
