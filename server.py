@@ -131,6 +131,11 @@ def event(event_id: int):
 
 @app.route("/api/students.json")
 def api_students():
+    query = request.args.get("q", None)
+    grade_filters = {}
+    for grade in querymaker.GRADES:
+        grade_filters[grade] = request.args.get(f"show_{grade}th", "true") == "true"
+        
     sort = querymaker.Sort.from_string(request.args.get("sort", "name_desc"))
     score = request.args.get("scorecondition")
     try:

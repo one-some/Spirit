@@ -1,4 +1,17 @@
 const batchCSVInput = batchAddModal.querySelector("#file");
+const studentSearchInput = $el("#search-input");
+const gradeCheckboxes = {
+    9: $el("#search-grade-9th"),
+    10: $el("#search-grade-10th"),
+    11: $el("#search-grade-11th"),
+    12: $el("#search-grade-12th"),
+}
+
+// Initalization in case reload kept old stuff
+studentSearchInput.value = "";
+for (const checkbox of Object.values(gradeCheckboxes)) {
+    checkbox.checked = true;
+}
 
 var greyed = false;
 
@@ -20,22 +33,22 @@ deleteStudentModal.querySelector("#delete").addEventListener("click", function (
 
 batchAddModal.querySelector("#upload").addEventListener("click", batchAdd);
 
-async function saveNewStudent () {
+async function saveNewStudent() {
     await fetch("/api/new_save_student.json", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            student_name: studentViewer.querySelector("#student-name").value, 
+            student_name: studentViewer.querySelector("#student-name").value,
             student_grade: studentViewer.querySelector("#student-grade").value,
             student_points: studentViewer.querySelector("#student-points").value
         })
     })
     fetchLeaderboard(limit, scoreCondition, rankCondition, sort);
 }
-function addStudent(){
-    if(greyed === false){
+function addStudent() {
+    if (greyed === false) {
         studentCreatorButtons.style.display = "block";
         studentDefaultButtons.style.display = "none"
         greyed = true;
@@ -43,7 +56,7 @@ function addStudent(){
 }
 
 
-async function saveStudent(){
+async function saveStudent() {
     await fetch("/api/save_student.json", {
         method: "POST",
         headers: {
@@ -51,7 +64,7 @@ async function saveStudent(){
         },
         body: JSON.stringify({
             student_id: currentStudent.id,
-            student_name: studentViewer.querySelector("#student-name").value, 
+            student_name: studentViewer.querySelector("#student-name").value,
             student_grade: studentViewer.querySelector("#student-grade").value,
             student_points: studentViewer.querySelector("#student-points").value
         })
@@ -59,7 +72,7 @@ async function saveStudent(){
     fetchLeaderboard(limit, scoreCondition, rankCondition, sort);
 }
 
-function resetStudent(){
+function resetStudent() {
     studentData = currentStudent;
     studentViewer.querySelector("#student-name").value = studentData.name;
     studentViewer.querySelector("#student-points").value = studentData.points;
@@ -85,7 +98,7 @@ function cancelNewStudent() {
     greyed = false;
 }
 
-async function deleteStudent(){
+async function deleteStudent() {
     await fetch("/api/delete_student.json", {
         method: "POST",
         headers: {
@@ -105,7 +118,7 @@ async function batchAdd() {
     const formData = new FormData();
     formData.append("file", batchCSVInput.files[0]);
 
-    await fetch ("/api/batch_add", {
+    await fetch("/api/batch_add", {
         method: "POST",
         body: formData,
     });
@@ -113,4 +126,47 @@ async function batchAdd() {
     fetchLeaderboard(limit, scoreCondition, rankCondition, sort);
     console.log("refreshed leaderboard!")
     closeModals();
+}
+
+async function updateStudentSearch() {
+    // TODO: Fix placement to use values from server instead of just nth result
+    let queryBits = [`q=${studentSearchInput.value}`, "limit=25", "sort=points_desc"];
+
+    for (const [grade, checkbox] of Object.entries(gradeCheckboxes)) {
+        console.log(grade, checkbox)
+        queryBits.push(`show_${grade}th=${checkbox.checked}`);
+    }
+
+    let r = await fetch("/api/students.json?" + queryBits.join("&"));
+    let j = await r.json();
+    console.log(r.url)
+
+    for (const el of document.querySelectorAll("#mini-leaderboard-students .listing")) {
+        el.remove();
+    }
+
+    // Stuff from index.js
+    let place = 1;
+    for (const student of j) {
+        renderStudent(leaderboardStudents, place, student);
+        student.place = place;
+        place++;
+    }
+}
+
+// Update search when user types
+studentSearchInput.addEventListener("input", updateStudentSearch);
+
+for (const checkbox of Object.values(gradeCheckboxes)) {
+    // Make it clickable all over it
+    checkbox.parentNode.addEventListener("click", function (event) {
+        // If the node is the label or the checkbox itself, clicking it
+        // like this will cancel out the actual click (which normally works).
+        // Only handle this if we're clicking the div.
+        if (event.target !== this) return;
+        checkbox.click();
+    });
+
+    // Update search when its changed
+    checkbox.addEventListener("change", updateStudentSearch);
 }

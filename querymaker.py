@@ -2,6 +2,7 @@ import json
 import sqlite3
 from dataclasses import dataclass
 from enum import Enum
+from typing import Optional
 
 GRADES = [9, 10, 11, 12]
 
@@ -62,6 +63,14 @@ def get_students_matching(starting_with: str, limit=10):
         )
     ]
 
+@dataclass
+class WhereClause:
+    condition: str
+    args: list
+
+def get_students(limit=50, sort=Sort.NAME_DESC, query: Optional[str] = None, grade_filters: dict = None):
+    # HACK: work around mutable type blehhhhing in non-default args
+    grade_filters = grade_filters or {}
 
 def get_students(limit=50, sort=Sort.NAME_DESC, score = ">0", rank = ""):
     sq = Sort.to_query(sort)
