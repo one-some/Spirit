@@ -63,12 +63,20 @@ def get_students_matching(starting_with: str, limit=10):
     ]
 
 
-def get_students(limit=50, sort=Sort.NAME_DESC):
+def get_students(limit=50, sort=Sort.NAME_DESC, score = ">0", rank = ""):
     sq = Sort.to_query(sort)
+    print(score)
+    if score[1] == "=":
+        scoreOperand = score[0:1]
+        score = score[2::]
+    else:
+        scoreOperand = score[0]
+        score = score[1::]
+    print(f"SELECT NAME,POINTS,GRADE,ROWID FROM STUDENTS WHERE POINTS {scoreOperand}{score} ORDER BY {sq} LIMIT ?;")
     return [
         Student(*x)
         for x in con().execute(
-            f"SELECT NAME,POINTS,GRADE,ROWID FROM STUDENTS ORDER BY {sq} LIMIT ?;", (limit,)
+            f"SELECT NAME,POINTS,GRADE,ROWID FROM STUDENTS WHERE POINTS {scoreOperand}? ORDER BY {sq} LIMIT ?;", (score, limit,)
         )
     ]
 

@@ -48,13 +48,15 @@ app.secret_key = 'thisisanexamplesecretkey'
 @app.route("/")
 @app.route("/documentation")
 def index():
+    print("\nat /\n")
     if 'username' in session:
+        print("\nin if statement at /\n")
         return render_template("index.html")
     return redirect(url_for('login'))
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
-    
+    print("\nat login\n")
     if request.method == 'POST':
 
         try:
@@ -107,6 +109,7 @@ def login():
 
 @app.route('/student')
 def student():
+    print("\nat student\n")
     con = querymaker.con()
     points = con.execute('SELECT POINTS FROM STUDENTS WHERE NAME = ?', (session['username'],)).fetchone()[0]
     return render_template('student.html', points=points)
@@ -129,13 +132,12 @@ def event(event_id: int):
 @app.route("/api/students.json")
 def api_students():
     sort = querymaker.Sort.from_string(request.args.get("sort", "name_desc"))
-
+    score = request.args.get("scorecondition")
     try:
         limit = min(300, int(request.args.get("limit")))
     except (ValueError, TypeError):
         limit = 100
-
-    return jsonify(querymaker.get_students(limit=limit, sort=sort))
+    return jsonify(querymaker.get_students(limit=limit, sort=sort, score=score))
 
 
 @app.route("/api/draw_results.json")

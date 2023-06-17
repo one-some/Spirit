@@ -32,7 +32,7 @@ async function saveNewStudent () {
             student_points: studentViewer.querySelector("#student-points").value
         })
     })
-    fetchLeaderboard()
+    fetchLeaderboard(limit, scoreCondition, rankCondition, sort);
 }
 function addStudent(){
     if(greyed === false){
@@ -56,7 +56,7 @@ async function saveStudent(){
             student_points: studentViewer.querySelector("#student-points").value
         })
     })
-    fetchLeaderboard();
+    fetchLeaderboard(limit, scoreCondition, rankCondition, sort);
 }
 
 function resetStudent(){
@@ -97,7 +97,7 @@ async function deleteStudent(){
     })
     closeModals();
     cancelStudent();
-    fetchLeaderboard();
+    fetchLeaderboard(limit, scoreCondition, rankCondition, sort);
 }
 
 async function batchAdd() {
@@ -110,7 +110,7 @@ async function batchAdd() {
         body: formData,
     });
 
-    fetchLeaderboard();
+    fetchLeaderboard(limit, scoreCondition, rankCondition, sort);
     console.log("refreshed leaderboard!")
     closeModals();
 }
