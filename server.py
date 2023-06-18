@@ -48,13 +48,17 @@ app.secret_key = "thisisanexamplesecretkey"
 
 @app.route("/students")
 @app.route("/leaderboard")
-@app.route("/")
 @app.route("/documentation")
+@app.route("/")
 def index():
     print("\nat /\n")
+    con = querymaker.con()
     if "username" in session:
-        print("\nin if statement at /\n")
-        return render_template("index.html")
+        print(con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0])
+        print(session["username"])
+        if con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0] == "TEACHER" or con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0] == "ADMINISTRATOR" :
+            print("\nin if statement at /\n")
+            return render_template("index.html")
     return redirect(url_for("login"))
 
 
@@ -101,7 +105,13 @@ def login():
 
         if role == "STUDENT":
             return redirect(url_for("student"))
-        return redirect("/")
+        return redirect(url_for("index"))
+    if "username" in session:
+        con = querymaker.con()
+        if con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0] == "TEACHER" or con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0] == "ADMINISTRATOR":
+            return redirect(url_for("index"))
+        print("\n", con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0], " at student\n")
+        return redirect(url_for("student"))
     return render_template("login.html")
 
 
@@ -115,12 +125,15 @@ def login():
 
 @app.route("/student")
 def student():
-    print("\nat student\n")
     con = querymaker.con()
-    points = con.execute(
-        "SELECT POINTS FROM STUDENTS WHERE NAME = ?", (session["username"],)
-    ).fetchone()[0]
-    return render_template("student.html", points=points)
+    if "username" in session and con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0] == "STUDENT":
+        print("\nat student\n")
+        
+        points = con.execute(
+            "SELECT POINTS FROM STUDENTS WHERE NAME = ?", (session["username"],)
+        ).fetchone()[0]
+        return render_template("student.html", points=points)
+    return redirect(url_for('login'))
 
 
 @app.route("/logout", methods=["GET", "POST"])
