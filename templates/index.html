@@ -22,21 +22,21 @@
             <div tab-id="home">
                 <div class="left">
                     <h1 id="greeting">Good afternoon, {{ session['username'] }}</h1>
-                        <h2>Leaderboard 
-                            <div id="dropdown" class="dropdown">
-                                <h2 class="dropbtn material-icons">sort</h2>
-                                <div class="dropdown-content">
-                                    <label for="score">Score</label>
-                                    <input type="text" id="score">
-                                    <label for="rank">Rank</label>
-                                    <input type="text" name="rank" id="rank">
-                                    <label for="limit">Limit</label>
-                                    <input type="number" min="1" id="limit">
-                                    <button class="button primary" onclick="applyFilters()">Apply</button>
-                                </div>
+                    <h2>Leaderboard
+                        <div id="dropdown" class="dropdown">
+                            <h2 class="dropbtn material-icons">sort</h2>
+                            <div class="dropdown-content">
+                                <label for="score">Score</label>
+                                <input type="text" id="score">
+                                <label for="rank">Rank</label>
+                                <input type="text" name="rank" id="rank">
+                                <label for="limit">Limit</label>
+                                <input type="number" min="1" id="limit">
+                                <button class="button primary" onclick="applyFilters()">Apply</button>
                             </div>
-                        </h2>
-                    
+                        </div>
+                    </h2>
+
                     <div id="mini-leaderboard" class="leaderboard"></div>
                 </div>
                 <div class="right">
@@ -53,6 +53,7 @@
                 <div class="left">
                     <h1>Students</h1>
                     <h2>Leaderboard</h2>
+                    {% include "search-panel.html" %}
                     <div id="mini-leaderboard-students" class="leaderboard"></div>
                 </div>
                 <div class="right student-viewer">

@@ -7,7 +7,8 @@ from config import config, data_path
 from pandas import read_csv as pd_read_csv
 from pandas import read_excel as pd_read_excel
 import hashlib
-#from pandas import DataFrame
+
+# from pandas import DataFrame
 # from werkzeug.utils import secure_filename
 from os import path as os_path
 
@@ -29,9 +30,11 @@ def prize_from_points(points: int) -> str:
     return None
 
 
-def sha256_hash(password: str):                   #hashes the password with hashlib, a default library. I don't know why the weird way of doing it.
+def sha256_hash(
+    password: str,
+):  # hashes the password with hashlib, a default library. I don't know why the weird way of doing it.
     sha256 = hashlib.sha256()
-    password = password.encode('utf-8')
+    password = password.encode("utf-8")
     sha256.update(password)
     return sha256.hexdigest()
 
@@ -40,7 +43,7 @@ def sha256_hash(password: str):                   #hashes the password with hash
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
-app.secret_key = 'thisisanexamplesecretkey'
+app.secret_key = "thisisanexamplesecretkey"
 
 
 @app.route("/students")
@@ -49,16 +52,16 @@ app.secret_key = 'thisisanexamplesecretkey'
 @app.route("/documentation")
 def index():
     print("\nat /\n")
-    if 'username' in session:
+    if "username" in session:
         print("\nin if statement at /\n")
         return render_template("index.html")
-    return redirect(url_for('login'))
+    return redirect(url_for("login"))
 
-@app.route("/login", methods=['GET', 'POST'])
+
+@app.route("/login", methods=["GET", "POST"])
 def login():
     print("\nat login\n")
-    if request.method == 'POST':
-
+    if request.method == "POST":
         try:
             username = request.form["username"]
         except KeyError:
@@ -76,8 +79,7 @@ def login():
 
         try:
             valid_hashed_password = con.execute(
-                "SELECT PASSWORD FROM USERS WHERE NAME = ?",
-                (username,)
+                "SELECT PASSWORD FROM USERS WHERE NAME = ?", (username,)
             ).fetchone()[0]
         except TypeError:
             # TypeError: None is not subscriptable, as fetchone()
@@ -85,20 +87,23 @@ def login():
             return "Username not found in database!", 404
 
         print("Given Hash:", given_hashed_password)
-        
+
         if given_hashed_password != valid_hashed_password:
             # 403: Not authorized
             return "INVALID USERNAME AND PASSWORD", 403
 
-        session['username'] = username
-        role = con.execute('SELECT ROLE FROM USERS WHERE NAME = ?', (username,)).fetchone()[0]
+        session["username"] = username
+        role = con.execute(
+            "SELECT ROLE FROM USERS WHERE NAME = ?", (username,)
+        ).fetchone()[0]
         # We can assume that this query will succeed since the last
         # one confirmed there's a user with that name in the db
 
-        if role == 'STUDENT':
-            return redirect(url_for('student'))
+        if role == "STUDENT":
+            return redirect(url_for("student"))
         return redirect("/")
-    return render_template('login.html')
+    return render_template("login.html")
+
 
 # @app.route('/register', methods=['GET', 'POST'])
 # def register():
@@ -107,19 +112,23 @@ def login():
 #         con.execute("INSERT INTO USERS VALUES ?, ROWID, ?", (request.form['username'], request.form['password'],))
 #     return render_template('register.html')
 
-@app.route('/student')
+
+@app.route("/student")
 def student():
     print("\nat student\n")
     con = querymaker.con()
-    points = con.execute('SELECT POINTS FROM STUDENTS WHERE NAME = ?', (session['username'],)).fetchone()[0]
-    return render_template('student.html', points=points)
+    points = con.execute(
+        "SELECT POINTS FROM STUDENTS WHERE NAME = ?", (session["username"],)
+    ).fetchone()[0]
+    return render_template("student.html", points=points)
 
-@app.route("/logout", methods=['GET', 'POST'])
+
+@app.route("/logout", methods=["GET", "POST"])
 def logout():
     print(session)
-    session.pop('username', None)
+    session.pop("username", None)
     print(session)
-    return redirect(url_for('login'))
+    return redirect(url_for("login"))
 
 
 @app.route("/event/<int:event_id>")
@@ -135,14 +144,22 @@ def api_students():
     grade_filters = {}
     for grade in querymaker.GRADES:
         grade_filters[grade] = request.args.get(f"show_{grade}th", "true") == "true"
-        
+
     sort = querymaker.Sort.from_string(request.args.get("sort", "name_desc"))
-    score = request.args.get("scorecondition")
+    score_condition = request.args.get("scorecondition")
     try:
         limit = min(300, int(request.args.get("limit")))
     except (ValueError, TypeError):
         limit = 100
-    return jsonify(querymaker.get_students(limit=limit, sort=sort, score=score))
+    return jsonify(
+        querymaker.get_students(
+            limit=limit,
+            sort=sort,
+            score_condition=score_condition,
+            query=query,
+            grade_filters=grade_filters,
+        )
+    )
 
 
 @app.route("/api/draw_results.json")
@@ -250,25 +267,26 @@ def api_attend():
 
     return "Ok! :)"
 
+
 @app.route("/api/save_student.json", methods=["POST"])
 def save_student():
     print(request.json)
     con = querymaker.con()
     con.execute(
-        '''UPDATE STUDENTS
+        """UPDATE STUDENTS
             SET NAME = ?,
                GRADE = ?,
                SURPLUS = ? - (POINTS - SURPLUS),
                POINTS = ?
             WHERE ROWID = ?;
-            ''',
+            """,
         (
             request.json["student_name"],
             request.json["student_grade"],
             request.json["student_points"],
             request.json["student_points"],
             request.json["student_id"],
-        )
+        ),
     )
 
     con.commit()
@@ -281,55 +299,59 @@ def save_new_student():
     print(request.json)
     con = querymaker.con()
     con.execute(
-        '''INSERT INTO STUDENTS (NAME, GRADE, POINTS, SURPLUS)
+        """INSERT INTO STUDENTS (NAME, GRADE, POINTS, SURPLUS)
             VALUES
                 (?, ?, ?, ?);
-            ''',
+            """,
         (
             request.json["student_name"],
             request.json["student_grade"],
             request.json["student_points"],
             request.json["student_points"],
-        )
+        ),
     )
 
     con.commit()
 
     # querymaker.reindex_scores()
-    
+
     return "Workjjing?"
+
 
 @app.route("/api/delete_student.json", methods=["POST"])
 def delete_student():
     con = querymaker.con()
     con.execute(
-        '''DELETE FROM STUDENTS
-           WHERE ROWID = ?;''',
-           (request.json["student_id"],)
+        """DELETE FROM STUDENTS
+           WHERE ROWID = ?;""",
+        (request.json["student_id"],),
     )
 
     con.commit()
-    
+
     return "dude idk"
+
 
 # class UploadFileForm(FlaskForm):
 #     file = FileField("File")
 #     submit = SubmitField("Upload File")
 
+
 @app.route("/api/batch_add", methods=["POST"])
 def batch_add():
     con = querymaker.con()
-                                                                        # df = pd.read_excel(request, sheet_name=None)
-    f = request.files['file']
-                                                                        #filename = secure_filename(f.filename)
-    f.save(os_path.join('input', "csv.csv"))
-    df = pd_read_csv('input/csv.csv')
-    df.rename(str.upper, axis='columns', inplace=True)
+    # df = pd.read_excel(request, sheet_name=None)
+    f = request.files["file"]
+    # filename = secure_filename(f.filename)
+    f.save(os_path.join("input", "csv.csv"))
+    df = pd_read_csv("input/csv.csv")
+    df.rename(str.upper, axis="columns", inplace=True)
     print("\n", df, "\n")
-    if 'SURPLUS' not in df.columns:
-        df['SURPLUS'] = df['POINTS']
-    df.to_sql("STUDENTS", con, if_exists='append', index=False)
-    return ('', 204)
+    if "SURPLUS" not in df.columns:
+        df["SURPLUS"] = df["POINTS"]
+    df.to_sql("STUDENTS", con, if_exists="append", index=False)
+    return ("", 204)
+
 
 if __name__ == "__main__":
     backup.start_backup_loop()

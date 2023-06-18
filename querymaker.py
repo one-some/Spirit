@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import sqlite3
 from dataclasses import dataclass
@@ -5,6 +7,7 @@ from enum import Enum
 from typing import Optional
 
 GRADES = [9, 10, 11, 12]
+VALID_INT_OPERANDS = ["<", "<=", ">", ">=", "="]
 
 
 def con():
@@ -22,7 +25,8 @@ class Sort(Enum):
     POINTS_DESC = 2
     POINTS_ASC = 3
 
-    def from_string(string):
+    @staticmethod
+    def from_string(string: str):
         return {
             "name_desc": Sort.NAME_DESC,
             "name_asc": Sort.NAME_ASC,
@@ -30,7 +34,8 @@ class Sort(Enum):
             "points_asc": Sort.POINTS_ASC,
         }.get(string, Sort.NAME_DESC)
 
-    def to_query(sort):
+    @staticmethod
+    def to_query(sort: Sort):
         return {
             Sort.NAME_DESC: "NAME DESC",
             Sort.NAME_ASC: "NAME ASC",
@@ -63,29 +68,70 @@ def get_students_matching(starting_with: str, limit=10):
         )
     ]
 
+
 @dataclass
 class WhereClause:
     condition: str
     args: list
 
-def get_students(limit=50, sort=Sort.NAME_DESC, query: Optional[str] = None, grade_filters: dict = None):
+
+def get_students(
+    limit: int = 50,
+    sort: Sort = Sort.NAME_DESC,
+    score_condition: str = ">0",
+    # Unused
+    rank_condition: str = "",
+    query: Optional[str] = None,
+    grade_filters: Optional[dict] = None,
+):
     # HACK: work around mutable type blehhhhing in non-default args
     grade_filters = grade_filters or {}
 
-def get_students(limit=50, sort=Sort.NAME_DESC, score = ">0", rank = ""):
     sq = Sort.to_query(sort)
-    print(score)
-    if score[1] == "=":
-        scoreOperand = score[0:1]
-        score = score[2::]
-    else:
-        scoreOperand = score[0]
-        score = score[1::]
-    print(f"SELECT NAME,POINTS,GRADE,ROWID FROM STUDENTS WHERE POINTS {scoreOperand}{score} ORDER BY {sq} LIMIT ?;")
+
+    where_clauses = []
+
+    if query:
+        where_clauses.append(WhereClause(condition="NAME LIKE ?", args=[f"%{query}%"]))
+
+    for grade, allow in grade_filters.items():
+        if allow:
+            continue
+
+        where_clauses.append(WhereClause(condition="GRADE != ?", args=[grade]))
+
+    if score_condition:
+        score_operand = score_condition[0]
+        # Don't want sql injection! All text inserted directly into the
+        # query must be super duper squeaky clean.
+        if score_operand not in VALID_INT_OPERANDS:
+            raise ValueError("Evil operand!")
+
+        try:
+            score_value = int(score_condition[1:])
+        except ValueError:
+            # Score is not an int! Possible SQL injection attempt!
+            raise
+
+        where_clauses.append(
+            WhereClause(condition=f"POINTS {score_operand} ?", args=[score_value])
+        )
+
+    where_clause = ""
+    where_args = []
+    if where_clauses:
+        where_clause = "WHERE " + (" AND ".join([x.condition for x in where_clauses]))
+        for clause in where_clauses:
+            where_args += clause.args
+
     return [
         Student(*x)
         for x in con().execute(
-            f"SELECT NAME,POINTS,GRADE,ROWID FROM STUDENTS WHERE POINTS {scoreOperand}? ORDER BY {sq} LIMIT ?;", (score, limit,)
+            f"SELECT NAME,POINTS,GRADE,ROWID FROM STUDENTS {where_clause} ORDER BY {sq} LIMIT ?;",
+            (
+                *where_args,
+                limit,
+            ),
         )
     ]
 
@@ -196,9 +242,9 @@ def reindex_scores():
     print("[db] Indexing scores...")
     c = con()
     c.execute(
-        '''UPDATE STUDENTS SET POINTS = (SELECT SUM(EVENTS.POINTS) FROM EVENTS WHERE EVENTS.ID IN (SELECT EVENT_ID FROM STUDENT_ATTENDANCE WHERE STUDENT_ID = STUDENTS.ID)) + SURPLUS;'''
+        """UPDATE STUDENTS SET POINTS = (SELECT SUM(EVENTS.POINTS) FROM EVENTS WHERE EVENTS.ID IN (SELECT EVENT_ID FROM STUDENT_ATTENDANCE WHERE STUDENT_ID = STUDENTS.ID)) + SURPLUS;"""
     )
-    c.execute('UPDATE STUDENTS SET POINTS = SURPLUS WHERE POINTS IS NULL;')
+    c.execute("UPDATE STUDENTS SET POINTS = SURPLUS WHERE POINTS IS NULL;")
     c.commit()
     print("[db] Done!")
 

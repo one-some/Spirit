@@ -5,7 +5,7 @@ const gradeCheckboxes = {
     10: $el("#search-grade-10th"),
     11: $el("#search-grade-11th"),
     12: $el("#search-grade-12th"),
-}
+};
 
 // Initalization in case reload kept old stuff
 studentSearchInput.value = "";
@@ -17,19 +17,19 @@ var greyed = false;
 
 studentDefaultButtons.querySelector("#add-student").addEventListener("click", function () {
     addStudent();
-})
+});
 
 studentCreatorButtons.querySelector("#cancel").addEventListener("click", function () {
     cancelNewStudent();
-})
+});
 
 studentCreatorButtons.querySelector("#save-student").addEventListener("click", function () {
     saveNewStudent();
-})
+});
 
 deleteStudentModal.querySelector("#delete").addEventListener("click", function () {
     deleteStudent();
-})
+});
 
 batchAddModal.querySelector("#upload").addEventListener("click", batchAdd);
 
@@ -44,13 +44,13 @@ async function saveNewStudent() {
             student_grade: studentViewer.querySelector("#student-grade").value,
             student_points: studentViewer.querySelector("#student-points").value
         })
-    })
+    });
     fetchLeaderboard(limit, scoreCondition, rankCondition, sort);
 }
 function addStudent() {
     if (greyed === false) {
         studentCreatorButtons.style.display = "block";
-        studentDefaultButtons.style.display = "none"
+        studentDefaultButtons.style.display = "none";
         greyed = true;
     }
 }
@@ -68,7 +68,7 @@ async function saveStudent() {
             student_grade: studentViewer.querySelector("#student-grade").value,
             student_points: studentViewer.querySelector("#student-points").value
         })
-    })
+    });
     fetchLeaderboard(limit, scoreCondition, rankCondition, sort);
 }
 
@@ -107,7 +107,7 @@ async function deleteStudent() {
         body: JSON.stringify({
             student_id: currentStudent.id
         })
-    })
+    });
     closeModals();
     cancelStudent();
     fetchLeaderboard(limit, scoreCondition, rankCondition, sort);
@@ -124,7 +124,7 @@ async function batchAdd() {
     });
 
     fetchLeaderboard(limit, scoreCondition, rankCondition, sort);
-    console.log("refreshed leaderboard!")
+    console.log("refreshed leaderboard!");
     closeModals();
 }
 
@@ -133,13 +133,13 @@ async function updateStudentSearch() {
     let queryBits = [`q=${studentSearchInput.value}`, "limit=25", "sort=points_desc"];
 
     for (const [grade, checkbox] of Object.entries(gradeCheckboxes)) {
-        console.log(grade, checkbox)
+        console.log(grade, checkbox);
         queryBits.push(`show_${grade}th=${checkbox.checked}`);
     }
 
     let r = await fetch("/api/students.json?" + queryBits.join("&"));
     let j = await r.json();
-    console.log(r.url)
+    console.log(r.url);
 
     for (const el of document.querySelectorAll("#mini-leaderboard-students .listing")) {
         el.remove();
