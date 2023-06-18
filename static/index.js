@@ -1,21 +1,25 @@
 // TODO: Account
 // const USER_NAME = "Mr. Doe";
-const logoutbutton = $el("#logout");
-const leaderboard = $el("#leaderboard")
+const logoutbutton = $el("#logout");                                // Refers to the logout button at the top next to the logo
+const leaderboard = $el("#leaderboard")                             // The next three refer to the three leaderboards on three tabs on the 
 const miniLeaderboard = $el("#mini-leaderboard");
 const leaderboardStudents = $el("#mini-leaderboard-students");
-const studentViewer = $el('.student-viewer');
-const studentEditorButtons = $el('#student-editor-buttons');
-const studentCreatorButtons = $el("#student-creator-buttons");
-const studentDefaultButtons = $el("#student-default-buttons");
-const deleteStudentModal = $el("#confirm-delete");
-const batchAddModal = $el("#batch-add");
+const studentViewer = $el('.student-viewer');                       // Refers to the right side of the student tab
+const studentEditorButtons = $el('#student-editor-buttons');        // Refers to the buttons that show up when you click on a student to edit it
+const studentCreatorButtons = $el("#student-creator-buttons");      // Refers to the buttons that pop up when you click "Add Student"
+const studentDefaultButtons = $el("#student-default-buttons");      // Refers to the buttons that are by default on the right side of the students tab for teachers
+const deleteStudentModal = $el("#confirm-delete");                  // Refers to the modal that pops up when you want to delete a student
+const batchAddModal = $el("#batch-add");                            // Refers to the modal that pops up when you want to add students from a list
+const sortButton = $el("#dropdown");                                // Refers to the menu that pops up when you want to filter the leaderboard
 
-const sortButton = $el("#dropdown");
+/* $el() is a function that searches for elements (see utils.js). The
+top ten lines of code are just assigning elements to constant variables
+so that do things with them later.    */
 
 sortButton.addEventListener("click", function () {
-    sortButton.querySelector(".dropdown-content").style.display = "block";
+    sortButton.querySelector(".dropdown-content").style.display = "block";          // Makes the webpage listen fro a click on the filter leaderboard button so the dropdown menu pops up
 })
+
 
 document.addEventListener("click", (function(event) { 
     var $target = $(event.target);
@@ -23,51 +27,61 @@ document.addEventListener("click", (function(event) {
     $('.dropdown-content').is(":visible")) {
       $('.dropdown-content').hide();
     }        
-  }))
+  }))                                                                              // Makes it so that the dropdown menu for filtering students disappears when you click outside of the menu
+
+
 
 function applyFilters () {
-    tempScore = document.getElementById("score").closest("#score").value;
+    tempScore = document.getElementById("score").closest("#score").value;               // Gets the value in the text boxes in the leaderboard filtering munu, in this case it is for the score filter
     let patterna = /^[><=][0-9][0-9]*$/;
-    let patternb = /^[><]=[0-9][0-9]*$/;
+    let patternb = /^[><]=[0-9][0-9]*$/;                                                // These are regex patterns for the leaderboard filtering
+                                                                                        // One is for inputs like ">300" and the other is for inputs like ">=300"
 
-
-    if (tempScore.match(patterna) || tempScore.match(patternb)){
-        scoreCondition = tempScore
+    if (tempScore.match(patterna) || tempScore.match(patternb)){                        
+        scoreCondition = tempScore                                                      // If the input is valid, ie they match the pattern, the input is assigned to a global variables
+    }                                                                                   // That is always for fetching the leaderboard. In this case the score found in the textbox is being
+    else if(tempScore == ""){                                                           // assigned to the global variable that is used in the fetchLeaderboard() function (see below), for filtering scores
+        scoreCondition = undefined;                                                     // If no input, the variable is left undefined and the fetchLeaderboard() function (see below), will use default values
     }
-    else if(tempScore == ""){}//do nothing if no input
     else{
-        document.getElementById("score").closest("#score").value = "Invalid Value!"
+        document.getElementById("score").closest("#score").value = "Invalid Value!"     // If the inputs do not match the pattern then an invalid message shows in the box and no filter for that category is applied
     }
 
-    tempRank = document.getElementById("rank").closest("#rank").value;
-
+    tempRank = document.getElementById("rank").closest("#rank").value;                  // This process is repeated for the input in the text box for rank
     if (tempRank.match(patterna) || tempRank.match(patternb)){
         rankCondition = tempRank
     }
-    else if(tempRank == ""){} // do nothing if no input
+    else if(tempRank == ""){
+        rankCondition = undefined;
+    }
     else{
         document.getElementById("rank").closest("#Rank").value = "Invalid Value!"
     }
-    if(limit = ""){} //do nothing if no input
-    else{
+
+    if(limit = ""){
+        limit = undefined;
+    }                                                                                   // The input for limit does not need checking since the html input type is set to number
+    else{                                                                               // Thus it is impossible for someone to put an invalid value.
         limit = document.getElementById("limit").closest("#limit").value;
     }
-    fetchLeaderboard(limit, scoreCondition, rankCondition);
+    fetchLeaderboard(limit, scoreCondition, rankCondition);                             // Updates the leaderboard (see below)
 }
-logoutbutton.addEventListener('click', function () {
-    Logout();
-})
+
 
 async function Logout() {
-    await fetch("/logout");
-    window.location.replace("/login");
-}
+    await fetch("/logout");             // Sends for the server which deletes your session and thus logs you out.
+    window.location.replace("/login");  // Takes you to the login page.
+}                                                                                       
 
-studentEditorButtons.style.display = "none";
-studentCreatorButtons.style.display = "none";
+studentEditorButtons.style.display = "none";        // Hides the buttons in the student tab that are not there by default.
+studentCreatorButtons.style.display = "none";       // They will appear when you click on a student to edit or click "Add Student" respectively
+                                                    // The function for these is in "students.js"
 
-function renderStudent(parent, place, student) {
-    const cont = $e("div", parent, { classes: ["listing"] });
+
+function renderStudent(parent, place, student) {                                    // This is the function that takes the response from the server when you do fetchLeaderboard(), which is 
+                                                                                    //
+
+    const cont = $e("div", parent, { classes: ["listing"] });                       
     const left = $e("div", cont);
     const right = $e("div", cont);
     $e("span", left, { innerText: place, classes: ["place"] });
