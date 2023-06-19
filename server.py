@@ -1,12 +1,13 @@
 import json
-import backup
-from flask import Flask, jsonify, request, render_template, redirect, url_for, session
 import sqlite3
-import querymaker
+import hashlib
 from config import config, data_path
 from pandas import read_csv as pd_read_csv
-from pandas import read_excel as pd_read_excel
-import hashlib
+from flask import Flask, jsonify, request, render_template, redirect, url_for, session
+
+import backup
+import audit_log
+import querymaker
 
 # from pandas import DataFrame
 # from werkzeug.utils import secure_filename
@@ -49,6 +50,7 @@ app.secret_key = "thisisanexamplesecretkey"
 @app.route("/students")
 @app.route("/leaderboard")
 @app.route("/documentation")
+@app.route("/audit-log")
 @app.route("/inbox")
 @app.route("/")
 def index():
@@ -230,6 +232,10 @@ def api_draw_results():
             "prize": prize_from_points(student.points),
         }
 
+    audit_data = {winner: result["student"] for winner, result in winners.items()}
+    audit_log.report_event(
+        user_name=session["username"], action="Draw results", details=audit_data
+    )
     return jsonify(winners)
 
 
@@ -255,6 +261,29 @@ def api_stats():
     return jsonify(querymaker.get_aggregate_stats())
 
 
+@app.route("/api/audit_log.json")
+def get_audit_log():
+    con = querymaker.con()
+
+    dat = []
+
+    for row in con.execute(
+        "SELECT rowid, time, user, action, details, rollback_id FROM audit_log ORDER BY time DESC LIMIT 100;"
+    ):
+        dat.append(
+            {
+                "event_id": row[0],
+                "time": row[1],
+                "user": row[2],
+                "action": row[3],
+                "details": json.loads(row[4]) if row[4] else None,
+                "has_checkpoint": bool(row[5]),
+            }
+        )
+
+    return jsonify(dat)
+
+
 @app.route("/api/set_prizes.json", methods=["POST"])
 def api_set_prizes():
     new_dat = []
@@ -270,6 +299,12 @@ def api_set_prizes():
     with open(data_path("prizes.json"), "w") as file:
         json.dump(new_dat, file)
 
+    audit_log.report_event(
+        user_name=session["username"],
+        action="Set prizes",
+        details=new_dat,
+    )
+
     return "Ok! :)"
 
 
@@ -277,8 +312,14 @@ def api_set_prizes():
 def api_create_event():
     print(request.json)
 
-    con = querymaker.con()
+    audit_log.report_event(
+        user_name=session["username"],
+        action="Create event",
+        details=request.json,
+        allow_rollback=True,
+    )
 
+    con = querymaker.con()
     con.execute(
         "INSERT INTO EVENTS(NAME, LOCATION, DESCRIPTION, POINTS, TIME_START, TIME_END) VALUES(?, ?, ?, ?, ?, ?);",
         (
@@ -299,28 +340,39 @@ def api_create_event():
 def api_attend():
     print(request.json)
     con = querymaker.con()
+    student, event = request.json["student_name"], request.json["event_name"]
 
     try:
         con.execute(
             "INSERT INTO STUDENT_ATTENDANCE(STUDENT_ID, EVENT_ID) VALUES((SELECT ID FROM USERS WHERE NAME = ? LIMIT 1),(SELECT ID FROM EVENTS WHERE NAME = ?));",
-            (
-                request.json["student_name"],
-                request.json["event_name"],
-            ),
+            (student, event),
         )
+
+        audit_log.report_event(
+            user_name=session["username"],
+            action="Mark attendance",
+            details={"student": student, "event": event},
+        )
+
+        con.commit()
+        querymaker.reindex_scores()
     except sqlite3.IntegrityError:
         # Already exists
         pass
-
-    con.commit()
-    querymaker.reindex_scores()
-
     return "Ok! :)"
 
 
 @app.route("/api/save_student.json", methods=["POST"])
 def save_student():
     print(request.json)
+
+    audit_log.report_event(
+        user_name=session["username"],
+        action="Edit student",
+        details=request.json,
+        allow_rollback=True,
+    )
+
     con = querymaker.con()
     con.execute(
         """UPDATE USERS
@@ -347,6 +399,13 @@ def save_student():
 @app.route("/api/new_save_student.json", methods=["POST"])
 def save_new_student():
     print(request.json)
+
+    audit_log.report_event(
+        user_name=session["username"],
+        action="Add student",
+        details=request.json,
+    )
+
     con = querymaker.con()
     con.execute(
         """INSERT INTO USERS (NAME, GRADE, POINTS, SURPLUS)
@@ -370,6 +429,13 @@ def save_new_student():
 
 @app.route("/api/delete_student.json", methods=["POST"])
 def delete_student():
+    audit_log.report_event(
+        user_name=session["username"],
+        action="Delete student",
+        details=request.json,
+        allow_rollback=True,
+    )
+
     con = querymaker.con()
     con.execute(
         """DELETE FROM USERS
@@ -389,6 +455,10 @@ def delete_student():
 
 @app.route("/api/batch_add", methods=["POST"])
 def batch_add():
+    audit_log.report_event(
+        user_name=session["username"], action="Batch add", allow_rollback=True
+    )
+
     con = querymaker.con()
     # df = pd.read_excel(request, sheet_name=None)
     f = request.files["file"]
@@ -409,7 +479,6 @@ def get_inbox():
     print(response)
     print(jsonify(response))
     return response
-    
 
 
 if __name__ == "__main__":

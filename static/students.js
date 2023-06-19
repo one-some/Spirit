@@ -27,11 +27,15 @@ studentCreatorButtons.querySelector("#save-student").addEventListener("click", f
     saveNewStudent();
 });
 
-deleteStudentModal.querySelector("#delete").addEventListener("click", function () {
-    deleteStudent();
-});
-
 batchAddModal.querySelector("#upload").addEventListener("click", batchAdd);
+
+$el("#delete-student-button").addEventListener("click", async function () {
+    const doIt = await modalConfirm("Are you sure you want to delete this student?", "Delete", "Cancel");
+
+    if (doIt) {
+        deleteStudent();
+    }
+});
 
 async function saveNewStudent() {
     await fetch("/api/new_save_student.json", {
@@ -96,6 +100,10 @@ function cancelNewStudent() {
     studentViewer.querySelector("#student-grade").value = "";
     studentDefaultButtons.style.display = "block";
     greyed = false;
+}
+
+async function promptDeleteStudent() {
+    const doIt = await modalConfirm("Are you sure you want to delete this student?", "Delete", "Cancel");
 }
 
 async function deleteStudent() {
