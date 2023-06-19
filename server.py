@@ -49,6 +49,7 @@ app.secret_key = "thisisanexamplesecretkey"
 @app.route("/students")
 @app.route("/leaderboard")
 @app.route("/documentation")
+@app.route("/audit-log")
 @app.route("/inbox")
 @app.route("/")
 def index():

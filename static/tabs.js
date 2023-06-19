@@ -15,7 +15,7 @@ function selectTab(tabID) {
     let title = tabButton.getAttribute("title");
     if (title) document.title = `${title} - Spirit`;
 
-    let tabURL = { home: "/", students: "/students", leaderboard: "/leaderboard", documentation: "/documentation", inbox: "/inbox" }[tabID];
+    let tabURL = { home: "/", students: "/students", leaderboard: "/leaderboard", documentation: "/documentation", "audit-log": "/audit-log", inbox: "/inbox" }[tabID];
     if (tabURL) window.history.pushState({}, null, tabURL);
 
     tabButton.classList.add("selected");
@@ -39,6 +39,7 @@ let targetTab = {
     "/students": "students",
     "/leaderboard": "leaderboard",
     "/documentation": "documentation",
+    "/audit-log": "audit-log",
     "/inbox": "inbox"
 }[window.location.pathname] || "home";
 
