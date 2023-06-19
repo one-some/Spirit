@@ -676,7 +676,7 @@ h1.login {
 }
 
 .login-register-box {
-    margin-top: 125px; 
+    margin-top: 125px;
     margin-bottom: 25px;
     align-self: center;
     width: 33%;
@@ -830,46 +830,52 @@ h1.login {
     border-radius: 500px;
     margin-left: 10px;
     margin-right: 10px;
-  }
-  
-  #myBar {
+}
+
+#myBar {
     width: 1%;
     border-radius: 500px;
     height: 30px;
     background-color: green;
     border-radius: 20%;
-  }
+}
 
-  .dropdown {
+.dropdown {
     font-size: 25px;
-    float: right;;
-  }
-  .dropdown {
+    float: right;
+    ;
+}
+
+.dropdown {
     position: relative;
     display: inline-block;
-  }
-  .dropbtn {
+}
+
+.dropbtn {
     margin-top: 0px;
     font-size: 25px;
-  }
-  .dropdown-content {
+}
+
+.dropdown-content {
     display: none;
     position: absolute;
     right: 0;
     background-color: #f9f9f9;
     min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     z-index: 1;
-  }
-  
-  .dropdown-content a {
+}
+
+.dropdown-content a {
     color: black;
     padding: 12px 16px;
     text-decoration: none;
     display: block;
-  }
-  
-  .dropdown:hover .dropbtn {filter: brightness(50%);}
+}
+
+.dropdown:hover .dropbtn {
+    filter: brightness(50%);
+}
 
 
 /* Search Panel */
@@ -929,3 +935,11 @@ h1 .choose-role-header {
 .box-content {
     margin-top: 15px;
 }
+
+/* Audit Log */
+#audit-log {
+    height: 100%;
+    overflow-x: auto;
+}
+
+.audit-log-entry {}
