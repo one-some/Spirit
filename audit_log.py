@@ -42,6 +42,7 @@ def report_event(
     details = details or {}
     con = querymaker.con()
 
+    rollback_id = None
     if allow_rollback:
         rollback_id = get_rollback_id()
         with sqlite3.connect(

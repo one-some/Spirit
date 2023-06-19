@@ -1,12 +1,13 @@
 import json
-import backup
-from flask import Flask, jsonify, request, render_template, redirect, url_for, session
 import sqlite3
-import querymaker
+import hashlib
 from config import config, data_path
 from pandas import read_csv as pd_read_csv
-from pandas import read_excel as pd_read_excel
-import hashlib
+from flask import Flask, jsonify, request, render_template, redirect, url_for, session
+
+import backup
+import audit_log
+import querymaker
 
 # from pandas import DataFrame
 # from werkzeug.utils import secure_filename
@@ -261,24 +262,26 @@ def api_stats():
 
 
 @app.route("/api/audit_log.json")
-def audit_log():
-    import time
-    import random
+def get_audit_log():
+    con = querymaker.con()
 
-    return jsonify(
-        [
+    dat = []
+
+    for row in con.execute(
+        "SELECT rowid, time, user, action, details, rollback_id FROM audit_log ORDER BY time DESC LIMIT 100;"
+    ):
+        dat.append(
             {
-                # TODO:
-                "event_id": int(time.time()),
-                "time": int(time.time()),
-                "user": "Total Box",
-                "action": "Marked Visit",
-                "details": {"student": "Bob McSponge", "event": "Squaredance Jamboree"},
-                "has_checkpoint": True,
+                "event_id": row[0],
+                "time": row[1],
+                "user": row[2],
+                "action": row[3],
+                "details": json.loads(row[4]) if row[4] else None,
+                "has_checkpoint": bool(row[5]),
             }
-        ]
-        * 100
-    )
+        )
+
+    return jsonify(dat)
 
 
 @app.route("/api/set_prizes.json", methods=["POST"])
@@ -301,7 +304,6 @@ def api_set_prizes():
         action="Set prizes",
         details=new_dat,
     )
-
 
     return "Ok! :)"
 
