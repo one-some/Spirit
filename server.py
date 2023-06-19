@@ -55,11 +55,11 @@ def index():
     print("\nat /\n")
     con = querymaker.con()
 
-    if "role" not in session:
+    try:
+        username = session["username"]
+        role = session["role"]
+    except KeyError:
         return redirect(url_for("login"))
-
-    username = session["username"]
-    role = session["role"]
 
     print(f"Role: {role}")
     print(f"Username: {username}")
@@ -120,8 +120,8 @@ def login():
             return redirect(url_for("student"))
         return redirect(url_for("index"))
 
-    if "role" in session:
-        if session["role"] in ["TEACHER", "ADMINISTRATOR"]:
+    if "username" in session:
+        if session.get("role") in ["TEACHER", "ADMINISTRATOR"]:
             return redirect(url_for("index"))
 
         print(
@@ -133,17 +133,25 @@ def login():
     return render_template("login.html")
 
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         con = querymaker.con()
-        print("\n","register-student" in request.form,"\n")
+        print("\n", "register-student" in request.form, "\n")
         print(request.form)
         if "register-student" in request.form:
-            con.execute("INSERT INTO REQUESTS(OPERATION, NAME, EMAIL, PASSWORD, SCHOOL_ID, ROLE) VALUES ('ADD', ?, ?, ?, ?, 'STUDENT')", (request.form["username"], request.form["email"], request.form["password"], request.form["school-id"],))
+            con.execute(
+                "INSERT INTO REQUESTS(OPERATION, NAME, EMAIL, PASSWORD, SCHOOL_ID, ROLE) VALUES ('ADD', ?, ?, ?, ?, 'STUDENT')",
+                (
+                    request.form["username"],
+                    request.form["email"],
+                    request.form["password"],
+                    request.form["school-id"],
+                ),
+            )
             con.commit()
         # con.execute("")
-    return render_template('register.html')
+    return render_template("register.html")
 
 
 @app.route("/student")
@@ -394,12 +402,14 @@ def batch_add():
     df.to_sql("USERS", con, if_exists="append", index=False)
     return ("", 204)
 
+
 @app.route("/api/get_inbox")
 def get_inbox():
     con = querymaker.con()
     print(querymaker.get_mail(session["username"]))
     return jsonify(querymaker.get_mail(session["username"]))
-    
+
+
 if __name__ == "__main__":
     backup.start_backup_loop()
     app.run(debug=True)
