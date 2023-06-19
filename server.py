@@ -427,9 +427,11 @@ def batch_add():
 
 @app.route("/api/get_inbox")
 def get_inbox():
-    con = querymaker.con()
-    print(querymaker.get_mail(session["username"]))
-    return jsonify(querymaker.get_mail(session["username"]))
+    response = querymaker.get_mail(session["username"])
+    print(response)
+    print(jsonify(response))
+    return response
+    
 
 
 if __name__ == "__main__":
