@@ -11,7 +11,7 @@ const studentDefaultButtons = $el("#student-default-buttons");      // Refers to
 const deleteStudentModal = $el("#confirm-delete");                  // Refers to the modal that pops up when you want to delete a student
 const batchAddModal = $el("#batch-add");                            // Refers to the modal that pops up when you want to add students from a list
 const sortButton = $el("#dropdown");                                // Refers to the menu that pops up when you want to filter the leaderboard
-
+const mailList = $el("#mail");
 /* $el() is a function that searches for elements (see utils.js). The
 top ten lines of code are just assigning elements to constant variables
 so that do things with them later.    */
@@ -136,12 +136,28 @@ async function fetchLeaderboard(limitf = 25, scoreconditionf = ">0", rankconditi
 }   }
 
 async function getInbox () {
-    return fetch("/api/get_inbox");
+    let r = await fetch("/api/get_inbox");
+    let j = await r.json();
+    console.log(j);
+    console.log(j[1]);
+    console.log(mailList);
+    for (const el of document.querySelectorAll("#mail")){
+        el.remove();
+    }
+    for (const request of j) {
+        makeMail(mailList, request);
+        console.log("hi");
+    }
+}
+
+async function makeMail(parent, request) {
+    listing = $e("div", parent, { classes : ["listing"]})
+    $e("span", parent, { innerText: request.operation})
 }
 
 async function init() {
     fetchLeaderboard(limit, scoreCondition, rankCondition, sort);
-    console.log(getInbox());
+    getInbox();
 }
 
 init();
