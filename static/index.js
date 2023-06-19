@@ -151,6 +151,8 @@ async function getInbox () {
 }
 
 async function makeMail(parent, request) {
+    console.log(request);
+    console.log(request[1])
     listing = $e("div", parent, { classes : ["listing"]})
     $e("span", parent, { innerText: request.operation})
 }

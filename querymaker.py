@@ -250,7 +250,7 @@ def reindex_scores():
 
 def get_mail(username):
     c = con()
-    school_id = c.execute(f"SELECT SCHOOL_ID FROM USERS WHERE NAME = '{username}'").fetchall()[0][0] # If you know how to make this one statement please show me
+    school_id = c.execute(f"SELECT SCHOOL_ID FROM USERS WHERE NAME = '{username}'").fetchall()[0] # If you know how to make this one statement please show me
     return c.execute(f"SELECT OPERATION, NAME, EMAIL, PASSWORD, ROLE FROM REQUESTS WHERE SCHOOL_ID = '{school_id}'").fetchall()
 
 reindex_scores()
