@@ -1,34 +1,24 @@
 <div id="sidebar">
-    <div
-        class="sidebar-icon material-icons"
-        title="Home"
-        sidebar-button="home"
-    >
+    <div class="sidebar-icon material-icons" title="Home" sidebar-button="home">
         home
     </div>
 
-    <div
-        class="sidebar-icon material-icons"
-        title="Students"
-        sidebar-button="students"
-    >
+    <div class="sidebar-icon material-icons" title="Students" sidebar-button="students">
         person
     </div>
 
-    <div
-        class="sidebar-icon material-icons"
-        title="Leaderboard"
-        sidebar-button="leaderboard"
-    >
+    <div class="sidebar-icon material-icons" title="Leaderboard" sidebar-button="leaderboard">
         leaderboard
     </div>
 
-    <div
-        class="sidebar-icon material-icons"
-        title="Documentation"
-        sidebar-button="documentation"
-    >
+    <div class="sidebar-icon material-icons" title="Documentation" sidebar-button="documentation">
         help
     </div>
+
+    {% if session["role"] == "ADMINISTRATOR" %}
+    <div class="sidebar-icon material-icons" title="Audit Log" sidebar-button="audit-log">
+        receipt_long
+    </div>
+    {% endif %}
 </div>
 <script src="/static/tabs.js"></script>

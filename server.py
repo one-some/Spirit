@@ -53,13 +53,28 @@ app.secret_key = "thisisanexamplesecretkey"
 def index():
     print("\nat /\n")
     con = querymaker.con()
-    if "username" in session:
-        print(con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0])
-        print(session["username"])
-        if con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0] == "TEACHER" or con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0] == "ADMINISTRATOR" :
-            print("\nin if statement at /\n")
-            return render_template("index.html")
-    return redirect(url_for("login"))
+
+    if "role" not in session:
+        return redirect(url_for("login"))
+
+    username = session["username"]
+    role = session["role"]
+
+    print(f"Role: {role}")
+    print(f"Username: {username}")
+
+    if not role:
+        print("No role!?!?! what???")
+        return redirect(url_for("login"))
+
+    if role in ["TEACHER", "ADMINISTRATOR"]:
+        return render_template("index.html")
+
+    return redirect(url_for("student"))
+    # if con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0] == "TEACHER" or con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0] == "ADMINISTRATOR" :
+    # if con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0] == "TEACHER" or con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0] == "ADMINISTRATOR" :
+    #     print("\nin if statement at /\n")
+    #     return render_template("index.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -100,17 +115,23 @@ def login():
         role = con.execute(
             "SELECT ROLE FROM USERS WHERE NAME = ?", (username,)
         ).fetchone()[0]
+        session["role"] = role
         # We can assume that this query will succeed since the last
         # one confirmed there's a user with that name in the db
 
         if role == "STUDENT":
             return redirect(url_for("student"))
         return redirect(url_for("index"))
-    if "username" in session:
-        con = querymaker.con()
-        if con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0] == "TEACHER" or con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0] == "ADMINISTRATOR":
+
+    if "role" in session:
+        if session["role"] in ["TEACHER", "ADMINISTRATOR"]:
             return redirect(url_for("index"))
-        print("\n", con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0], " at student\n")
+
+        print(
+            "\n",
+            session["role"],
+            " at student\n",
+        )
         return redirect(url_for("student"))
     return render_template("login.html")
 
@@ -126,14 +147,20 @@ def login():
 @app.route("/student")
 def student():
     con = querymaker.con()
-    if "username" in session and con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0] == "STUDENT":
+    if (
+        "username" in session
+        and con.execute(
+            "SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)
+        ).fetchone()[0]
+        == "STUDENT"
+    ):
         print("\nat student\n")
-        
+
         points = con.execute(
             "SELECT POINTS FROM STUDENTS WHERE NAME = ?", (session["username"],)
         ).fetchone()[0]
         return render_template("student.html", points=points)
-    return redirect(url_for('login'))
+    return redirect(url_for("login"))
 
 
 @app.route("/logout", methods=["GET", "POST"])

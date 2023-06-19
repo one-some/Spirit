@@ -121,6 +121,12 @@
             <div tab-id="documentation">
                 {% include "docs.html" %}
             </div>
+            {% if session["role"] == "ADMINISTRATOR" %}
+            <div tab-id="audit-log">
+                {% include "audit-log.html" %}
+            </div>
+            {% endif %}
+
         </div>
     </div>
     {% include "modals.html" %}
