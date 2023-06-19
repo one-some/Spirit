@@ -126,6 +126,12 @@
                 <h2>New Messages</h2>
                 <div id="mail"></div>
             </div>
+            {% if session["role"] == "ADMINISTRATOR" %}
+            <div tab-id="audit-log">
+                {% include "audit-log.html" %}
+            </div>
+            {% endif %}
+
         </div>
     </div>
     {% include "modals.html" %}
