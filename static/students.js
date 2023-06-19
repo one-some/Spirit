@@ -29,7 +29,7 @@ studentCreatorButtons.querySelector("#save-student").addEventListener("click", f
 
 batchAddModal.querySelector("#upload").addEventListener("click", batchAdd);
 
-$el("#student-default-buttons #delete").addEventListener("click", async function () {
+$el("#delete-student-button").addEventListener("click", async function () {
     const doIt = await modalConfirm("Are you sure you want to delete this student?", "Delete", "Cancel");
 
     if (doIt) {
@@ -100,6 +100,10 @@ function cancelNewStudent() {
     studentViewer.querySelector("#student-grade").value = "";
     studentDefaultButtons.style.display = "block";
     greyed = false;
+}
+
+async function promptDeleteStudent() {
+    const doIt = await modalConfirm("Are you sure you want to delete this student?", "Delete", "Cancel");
 }
 
 async function deleteStudent() {

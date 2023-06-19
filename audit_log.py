@@ -18,7 +18,9 @@ def get_rollback_id() -> str:
         str: The rollback ID generated
     """
     rollback_id = None
-    while (not rollback_id) or os.path.exists(ROLLBACK_DIR, rollback_id + ".db"):
+    while (not rollback_id) or os.path.exists(
+        os.path.join(ROLLBACK_DIR, rollback_id + ".db")
+    ):
         rollback_id = "".join(random.sample(ALPHABET, ROLLBACK_ID_LENGTH))
     return rollback_id
 
