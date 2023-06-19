@@ -71,10 +71,6 @@ def index():
         return render_template("index.html")
 
     return redirect(url_for("student"))
-    # if con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0] == "TEACHER" or con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0] == "ADMINISTRATOR" :
-    # if con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0] == "TEACHER" or con.execute("SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0] == "ADMINISTRATOR" :
-    #     print("\nin if statement at /\n")
-    #     return render_template("index.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
