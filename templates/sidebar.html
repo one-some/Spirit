@@ -14,5 +14,12 @@
     <div class="sidebar-icon material-icons" title="Documentation" sidebar-button="documentation">
         help
     </div>
+
+
+    {% if session["role"] == "ADMINISTRATOR" %}
+    <div class="sidebar-icon material-icons" title="Audit Log" sidebar-button="audit-log">
+        receipt_long
+    </div>
+    {% endif %}
 </div>
 <script src="/static/tabs.js"></script>
