@@ -256,6 +256,27 @@ def api_stats():
     return jsonify(querymaker.get_aggregate_stats())
 
 
+@app.route("/api/audit_log.json")
+def audit_log():
+    import time
+    import random
+
+    return jsonify(
+        [
+            {
+                # TODO:
+                "event_id": int(time.time()),
+                "time": int(time.time()),
+                "user": "Total Box",
+                "action": "Marked Visit",
+                "details": {"student": "Bob McSponge", "event": "Squaredance Jamboree"},
+                "has_checkpoint": True,
+            }
+        ]
+        * 100
+    )
+
+
 @app.route("/api/set_prizes.json", methods=["POST"])
 def api_set_prizes():
     new_dat = []

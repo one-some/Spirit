@@ -27,11 +27,15 @@ studentCreatorButtons.querySelector("#save-student").addEventListener("click", f
     saveNewStudent();
 });
 
-deleteStudentModal.querySelector("#delete").addEventListener("click", function () {
-    deleteStudent();
-});
-
 batchAddModal.querySelector("#upload").addEventListener("click", batchAdd);
+
+$el("#student-default-buttons #delete").addEventListener("click", async function () {
+    const doIt = await modalConfirm("Are you sure you want to delete this student?", "Delete", "Cancel");
+
+    if (doIt) {
+        deleteStudent();
+    }
+});
 
 async function saveNewStudent() {
     await fetch("/api/new_save_student.json", {
