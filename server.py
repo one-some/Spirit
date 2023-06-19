@@ -49,6 +49,7 @@ app.secret_key = "thisisanexamplesecretkey"
 @app.route("/students")
 @app.route("/leaderboard")
 @app.route("/documentation")
+@app.route("/inbox")
 @app.route("/")
 def index():
     print("\nat /\n")
@@ -115,12 +116,17 @@ def login():
     return render_template("login.html")
 
 
-# @app.route('/register', methods=['GET', 'POST'])
-# def register():
-#     if request.method == 'POST':                                                                                  # SAVING FOR LATER
-#         con = querymaker.con()
-#         con.execute("INSERT INTO USERS VALUES ?, ROWID, ?", (request.form['username'], request.form['password'],))
-#     return render_template('register.html')
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == "POST":
+        con = querymaker.con()
+        print("\n","register-student" in request.form,"\n")
+        print(request.form)
+        if "register-student" in request.form:
+            con.execute("INSERT INTO REQUESTS(OPERATION, NAME, EMAIL, PASSWORD, SCHOOL_ID, ROLE) VALUES ('ADD', ?, ?, ?, ?, 'STUDENT')", (request.form["username"], request.form["email"], request.form["password"], request.form["school-id"],))
+            con.commit()
+        # con.execute("")
+    return render_template('register.html')
 
 
 @app.route("/student")
@@ -130,7 +136,7 @@ def student():
         print("\nat student\n")
         
         points = con.execute(
-            "SELECT POINTS FROM STUDENTS WHERE NAME = ?", (session["username"],)
+            "SELECT POINTS FROM USERS WHERE NAME = ?", (session["username"],)
         ).fetchone()[0]
         return render_template("student.html", points=points)
     return redirect(url_for('login'))
@@ -265,7 +271,7 @@ def api_attend():
 
     try:
         con.execute(
-            "INSERT INTO STUDENT_ATTENDANCE(STUDENT_ID, EVENT_ID) VALUES((SELECT ID FROM STUDENTS WHERE NAME = ? LIMIT 1),(SELECT ID FROM EVENTS WHERE NAME = ?));",
+            "INSERT INTO STUDENT_ATTENDANCE(STUDENT_ID, EVENT_ID) VALUES((SELECT ID FROM USERS WHERE NAME = ? LIMIT 1),(SELECT ID FROM EVENTS WHERE NAME = ?));",
             (
                 request.json["student_name"],
                 request.json["event_name"],
@@ -286,7 +292,7 @@ def save_student():
     print(request.json)
     con = querymaker.con()
     con.execute(
-        """UPDATE STUDENTS
+        """UPDATE USERS
             SET NAME = ?,
                GRADE = ?,
                SURPLUS = ? - (POINTS - SURPLUS),
@@ -312,7 +318,7 @@ def save_new_student():
     print(request.json)
     con = querymaker.con()
     con.execute(
-        """INSERT INTO STUDENTS (NAME, GRADE, POINTS, SURPLUS)
+        """INSERT INTO USERS (NAME, GRADE, POINTS, SURPLUS)
             VALUES
                 (?, ?, ?, ?);
             """,
@@ -335,7 +341,7 @@ def save_new_student():
 def delete_student():
     con = querymaker.con()
     con.execute(
-        """DELETE FROM STUDENTS
+        """DELETE FROM USERS
            WHERE ROWID = ?;""",
         (request.json["student_id"],),
     )
@@ -362,10 +368,15 @@ def batch_add():
     print("\n", df, "\n")
     if "SURPLUS" not in df.columns:
         df["SURPLUS"] = df["POINTS"]
-    df.to_sql("STUDENTS", con, if_exists="append", index=False)
+    df.to_sql("USERS", con, if_exists="append", index=False)
     return ("", 204)
 
-
+@app.route("/api/get_inbox")
+def get_inbox():
+    con = querymaker.con()
+    print(querymaker.get_mail(session["username"]))
+    return jsonify(querymaker.get_mail(session["username"]))
+    
 if __name__ == "__main__":
     backup.start_backup_loop()
     app.run(debug=True)

@@ -675,12 +675,20 @@ h1.login {
     justify-content: center;
 }
 
-#login-content {
-    margin: 125px 450px 25px 450px;
+.login-register-box {
+    margin-top: 125px; 
+    margin-bottom: 25px;
+    align-self: center;
+    width: 33%;
     background-color: white;
     border-radius: 10%;
     outline-width: 1px;
     outline-color: black;
+    display: grid;
+}
+
+.link {
+    align-self: center;
 }
 
 #login-body {
@@ -897,4 +905,27 @@ h1.login {
 #search-panel #grade-filter .grade-filter-row label {
     margin-right: 15px;
     user-select: none;
+}
+
+.register {
+    display: none;
+}
+
+.register-button {
+    display: inline-block;
+}
+
+.choose-role-container {
+    align-content: center;
+    display: flex;
+    margin-bottom: 20px;
+}
+
+h1 .choose-role-header {
+    align-self: center;
+    margin: 0 0 0 0;
+}
+
+.box-content {
+    margin-top: 15px;
 }

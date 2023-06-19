@@ -14,16 +14,20 @@
 </head>
 <body id="login-body">
     {% include "topbar.html" %}
-    <div id="login-content">
-        <h1 class="login">Welcome to Spirit!</h1>
+
+    <div id="login-content" class="login-register-box">
+        <p><h1 class="login">Welcome to Spirit!</h1>
         <form method="post" id="login" class="login">
-            <p><label for="username" class="login">Username or Email</label>
-            <p><input type=text  id="username" name=username>
-            <p><label for="password" class="login">Password</label>
-            <p><input type=password id="username" name=password>
-            <p><input type=submit id="submit-login" class="button primary" value=Login>
+            <label for="username" class="login box-content">Username or Email</label>
+            <input type=text  id="username" class="box-content" name=username>
+            <label for="password" class="login box-content">Password</label>
+            <input type=password id="password" class="box-content" name=password>
+            <input type=submit id="submit-login" class="button primary box-content" value=Login>
         </form>
-        <a>Not trying to log in? Register here</a>
+        <a class="link" href="{{ url_for('register') }}">Register</a>
+        <a class="link">Forgot Password</a>
     </div>
+    
+    <script>$el("#logout").style.display = "none";</script>
 </body>
 </html>

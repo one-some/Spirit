@@ -135,8 +135,13 @@ async function fetchLeaderboard(limitf = 25, scoreconditionf = ">0", rankconditi
         }
 }   }
 
+async function getInbox () {
+    return fetch("/api/get_inbox");
+}
+
 async function init() {
     fetchLeaderboard(limit, scoreCondition, rankCondition, sort);
+    console.log(getInbox());
 }
 
 init();

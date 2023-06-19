@@ -60,7 +60,7 @@ def get_students_matching(starting_with: str, limit=10):
     return [
         Student(*x)
         for x in con().execute(
-            f"SELECT NAME,POINTS,GRADE,ROWID FROM STUDENTS WHERE NAME LIKE ? LIMIT ?;",
+            f"SELECT NAME,POINTS,GRADE,ROWID FROM USERS WHERE NAME LIKE ? LIMIT ?;",
             (
                 f"%{starting_with}%",
                 limit,
@@ -127,7 +127,7 @@ def get_students(
     return [
         Student(*x)
         for x in con().execute(
-            f"SELECT NAME,POINTS,GRADE,ROWID FROM STUDENTS {where_clause} ORDER BY {sq} LIMIT ?;",
+            f"SELECT NAME,POINTS,GRADE,ROWID FROM USERS {where_clause} ORDER BY {sq} LIMIT ?;",
             (
                 *where_args,
                 limit,
@@ -195,7 +195,7 @@ def get_upcoming_events() -> list[Event]:
 def get_random_student(grade: int) -> Student:
     dat = next(
         con().execute(
-            "SELECT NAME,POINTS,GRADE,ROWID FROM STUDENTS WHERE GRADE = ? AND POINTS > 0 ORDER BY RANDOM() LIMIT 1;",
+            "SELECT NAME,POINTS,GRADE,ROWID FROM USERS WHERE GRADE = ? AND POINTS > 0 ORDER BY RANDOM() LIMIT 1;",
             (grade,),
         )
     )
@@ -216,21 +216,21 @@ def get_aggregate_stats() -> dict:
     for grade in GRADES:
         stats["points_by_grade"][grade] = next(
             con().execute(
-                "SELECT SUM(POINTS) FROM STUDENTS WHERE GRADE = ?;",
+                "SELECT SUM(POINTS) FROM USERS WHERE GRADE = ?;",
                 (grade,),
             )
         )[0]
 
         stats["attendance_ratio_by_grade"][grade] = next(
             con().execute(
-                "SELECT (SELECT COUNT() FROM STUDENTS WHERE GRADE = ? AND POINTS > 0) * 1.0 / (SELECT COUNT() FROM STUDENTS WHERE GRADE = ?) * 1.0;",
+                "SELECT (SELECT COUNT() FROM USERS WHERE GRADE = ? AND POINTS > 0) * 1.0 / (SELECT COUNT() FROM USERS WHERE GRADE = ?) * 1.0;",
                 (grade, grade),
             )
         )[0]
 
         stats["avg_attendances_by_grade"][grade] = next(
             con().execute(
-                "SELECT (SELECT COUNT() FROM STUDENT_ATTENDANCE WHERE STUDENT_ID IN (SELECT ID FROM STUDENTS WHERE GRADE = ?)) * 1.0 / (SELECT COUNT() FROM STUDENTS WHERE GRADE = ?) * 1.0;",
+                "SELECT (SELECT COUNT() FROM STUDENT_ATTENDANCE WHERE STUDENT_ID IN (SELECT ID FROM USERS WHERE GRADE = ?)) * 1.0 / (SELECT COUNT() FROM USERS WHERE GRADE = ?) * 1.0;",
                 (grade, grade),
             )
         )[0]
@@ -242,11 +242,13 @@ def reindex_scores():
     print("[db] Indexing scores...")
     c = con()
     c.execute(
-        """UPDATE STUDENTS SET POINTS = (SELECT SUM(EVENTS.POINTS) FROM EVENTS WHERE EVENTS.ID IN (SELECT EVENT_ID FROM STUDENT_ATTENDANCE WHERE STUDENT_ID = STUDENTS.ID)) + SURPLUS;"""
+        """UPDATE USERS SET POINTS = (SELECT SUM(EVENTS.POINTS) FROM EVENTS WHERE EVENTS.ID IN (SELECT EVENT_ID FROM STUDENT_ATTENDANCE WHERE STUDENT_ID = USERS.ID)) + SURPLUS;"""
     )
-    c.execute("UPDATE STUDENTS SET POINTS = SURPLUS WHERE POINTS IS NULL;")
+    c.execute("UPDATE USERS SET POINTS = SURPLUS WHERE POINTS IS NULL;")
     c.commit()
     print("[db] Done!")
 
-
+def get_mail(username):
+    c = con()
+    return c.execute(f"SELECT OPERATION, NAME, EMAIL, PASSWORD, ROLE FROM REQUESTS WHERE SCHOOL_ID = (SELECT SCHOOL_ID FROM USERS WHERE NAME = '{username}')").fetchall()
 reindex_scores()
