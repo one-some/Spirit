@@ -49,6 +49,7 @@ async function saveNewStudent() {
             student_points: studentViewer.querySelector("#student-points").value
         })
     });
+    createNotification("Success!", "New student saved successfully.");
     fetchLeaderboard(limit, scoreCondition, rankCondition, sort);
 }
 function addStudent() {
@@ -73,6 +74,7 @@ async function saveStudent() {
             student_points: studentViewer.querySelector("#student-points").value
         })
     });
+    createNotification("Success!", "Student saved successfully.");
     fetchLeaderboard(limit, scoreCondition, rankCondition, sort);
 }
 
@@ -116,6 +118,7 @@ async function deleteStudent() {
             student_id: currentStudent.id
         })
     });
+    createNotification("Success!", "Student deleted successfully.");
     closeModals();
     cancelStudent();
     fetchLeaderboard(limit, scoreCondition, rankCondition, sort);
@@ -130,6 +133,8 @@ async function batchAdd() {
         method: "POST",
         body: formData,
     });
+
+    createNotification("Success!", "Students added successfully.");
 
     fetchLeaderboard(limit, scoreCondition, rankCondition, sort);
     console.log("refreshed leaderboard!");

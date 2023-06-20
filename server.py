@@ -1,3 +1,4 @@
+import math
 import json
 import sqlite3
 import hashlib
@@ -160,19 +161,22 @@ def register():
 @app.route("/student")
 def student():
     con = querymaker.con()
-    if (
-        "username" in session
-        and con.execute(
-            "SELECT ROLE FROM USERS WHERE NAME = ?", (session["username"],)
-        ).fetchone()[0]
-        == "STUDENT"
-    ):
+    if "username" in session and session.get("role") == "STUDENT":
         print("\nat student\n")
 
         points = con.execute(
             "SELECT POINTS FROM USERS WHERE NAME = ?", (session["username"],)
         ).fetchone()[0]
-        return render_template("student.html", points=points)
+
+        POINT_GOAL_INCREMENTS = 15000
+        point_goal = POINT_GOAL_INCREMENTS * math.ceil(points / POINT_GOAL_INCREMENTS)
+
+        return render_template(
+            "student.html",
+            pretty_points=f"{points:,}",
+            pretty_point_goal=f"{point_goal:,}",
+            progress_percent=(points / point_goal) * 100,
+        )
     return redirect(url_for("login"))
 
 
@@ -481,6 +485,7 @@ def get_inbox():
     print(jsonify(response))
     return jsonify(response)
 
+
 @app.route("/api/deny", methods=["POST"])
 def deny():
     c = querymaker.con()
@@ -500,11 +505,19 @@ def deny():
 
     if role in ["TEACHER", "ADMINISTRATOR"]:
         print("\n", request.json, "\n")
-        if c.execute(f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\"").fetchone()[0] == int(c.execute(f'SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = ?', (request.json["request_id"],)).fetchone()[0]):
+        if c.execute(
+        f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\""
+    ).fetchone()[0] == int(
+        c.execute(
+            f"SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = ?",
+            (request.json["request_id"],),
+        ).fetchone()[0]
+    ):
             c.execute("DELETE FROM REQUESTS WHERE ROWID = ?", (request.json["request_id"],))
             print("hi :)")
             c.commit()
-            return ("", 204 )
+            return ("", 204)
+
 
 @app.route("/api/accept_student_add", methods=["POST"])
 def accept_student_add():
@@ -524,12 +537,22 @@ def accept_student_add():
         return redirect(url_for("login"))
 
     if role in ["TEACHER", "ADMINISTRATOR"]:
-        if c.execute(f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\"").fetchone()[0] == int(c.execute(f'SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = \'{request.json["request_id"]}\'').fetchone()[0]):
-            c.execute("INSERT INTO USERS (NAME, GRADE, EMAIL, PASSWORD, ROLE) SELECT NAME, GRADE, EMAIL, PASSWORD, ROLE FROM REQUESTS WHERE ROWID = ?", (request.json["request_id"],))
+        if c.execute(
+        f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\""
+    ).fetchone()[0] == int(
+        c.execute(
+            f'SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = \'{request.json["request_id"]}\''
+        ).fetchone()[0]
+    ):
+            c.execute(
+            "INSERT INTO USERS (NAME, GRADE, EMAIL, PASSWORD, ROLE) SELECT NAME, GRADE, EMAIL, PASSWORD, ROLE FROM REQUESTS WHERE ROWID = ?",
+            (request.json["request_id"],),
+        )
             c.execute("DELETE FROM REQUESTS WHERE ROWID = ?", (request.json["request_id"],))
             c.commit()
-        return ("", 204) 
-    
+        return ("", 204)
+
+
 if __name__ == "__main__":
     backup.start_backup_loop()
     app.run(debug=True)
