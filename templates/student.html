@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spirit - Login</title>
     <link rel="stylesheet" href="/static/index.css">
+    <link rel="stylesheet" href="/static/student-page.css">
     <link rel="icon" href="/static/favicon.png">
 
     <!-- Deps -->
@@ -14,17 +16,48 @@
     <!-- <script src="/static/libs/daterangepicker.min.js"></script> -->
     <!-- <link rel="stylesheet" href="/static/libs/daterangepicker.css"> -->
     <script src="/static/util.js"></script>
-    
+
     <title>Homepage - Spirit</title>
 </head>
+
 <body>
     {% include "topbar.html" %}
-    <h1>You, {{ session['username'] }}, have <span id="points">{{ points }}</span> points!</h1>
-    <h2>You are so close to your next milestone!</h2>
-    <div id="myProgress">
-        <div id="myBar"></div>
+    <div class="split">
+        <div id="student-info-side">
+            <div id="si-taunt-overview">
+                <div id="si-overview-top">
+                    <span id="si-big-points">{{ pretty_points }}</span>
+                    <span id="si-pointer">{{ pretty_point_goal }}</span>
+                    <!-- So close friend -->
+                </div>
+                <div id="si-overview-bottom">
+                    <span id="si-points-label">Points</span>
+                    <div id="si-progress-container">
+                        <div id="si-progress">
+                            <div id="si-progress-completed" style="width: {{ progress_percent }}%;"></div>
+                        </div>
+                        <span id="si-carrot-on-stick">Just a bit further! You're so close to achieving your goal!</span>
+                    </div>
+                </div>
+            </div>
+            <div id="si-taunt-leaderboard">
+                wwwww
+            </div>
+            <div id="si-taunt-stats">
+                <span id="si-name">{{ session["username"] }}</span>
+                <span id="si-place">#2</span>
+                <span class="si-stat">Attended Events: 39212</span>
+                <span class="si-stat">Missed Events: 2</span>
+                <span class="si-stat">Points: {{ pretty_points }}</span>
+                <span class="si-stat">Distance to 1st Place: 31921</span>
+            </div>
+        </div>
+        <div id="event-side">
+            Event
+        </div>
     </div>
     <script src="/static/student-page.js"></script>
     <script src="/static/index.js"></script>
 </body>
+
 </html>
