@@ -139,10 +139,25 @@ def login():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
+        print(request.form.get("Create", "no value"), request.form.get("Create", 'no value') == 'on')
         con = querymaker.con()
-        print("\n", "register-student" in request.form, "\n")
-        print(request.form)
-        if "register-student" in request.form:
+
+        a = int(request.form["school-id"])
+        atype = type(a)
+        try:
+            c = con.execute("SELECT SCHOOL_ID FROM SCHOOLS WHERE SCHOOL_ID = ?", (request.form["school-id"],)).fetchall()[0][0]
+        except:
+            c = None
+        ctype = type(c)
+        n = "\n"
+
+        print(n, a, n, atype, n, c, n, ctype, n, a == c, n)
+
+
+        if request.form.get("Create", False) != "on":
+
+            print(request.form)
+
             con.execute(
                 "INSERT INTO REQUESTS(OPERATION, NAME, EMAIL, PASSWORD, SCHOOL_ID, ROLE, GRADE) VALUES ('ADD', ?, ?, ?, ?, ?, ?)",
                 (
@@ -151,11 +166,28 @@ def register():
                     sha256_hash(request.form["password"]),
                     request.form["school-id"],
                     request.form["role"],
-                    request.form.get("grade", "NULL"),
+                    request.form.get("grade", None),
                 ),
             )
             con.commit()
-        # con.execute("")
+            # con.execute("")
+
+        
+        elif request.form.get("Create", False) == "on" and int(request.form["school-id"]) != c:
+
+            con.execute("INSERT INTO USERS (NAME, EMAIL, PASSWORD, SCHOOL_ID, ROLE, GRADE) VALUES (?, ?, ?, ?, ?, ?)",
+                        (
+                            request.form["username"],
+                            request.form["email"],
+                            sha256_hash(request.form["password"]),
+                            request.form["school-id"],
+                            request.form["role"],
+                            None,
+                        ))
+            con.commit()
+            con.execute("INSERT INTO SCHOOLS (SCHOOL_ID, SCHOOL_NAME) VALUES (?, ?)", (request.form["school-id"], request.form["school-name"],))
+            con.commit()
+            print("went through for some reason")
     return render_template("register.html")
 
 
@@ -538,15 +570,21 @@ def accept_student_add():
         return redirect(url_for("login"))
 
     if role in ["TEACHER", "ADMINISTRATOR"]:
-        if c.execute(
+
+        a = c.execute(
         f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\""
-    ).fetchone()[0] == int(
+    ).fetchone()[0]
+        b = (
         c.execute(
             f'SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = \'{request.json["request_id"]}\''
-        ).fetchone()[0]
-    ):
+        ).fetchone()[0])
+        n = "\n\n"
+        print("HERE", n, "a: ", a, n, "type of a: ", type(a), n, "b: ", b, n, "type of b: ", type(b), n)
+
+
+        if c.execute(f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\"").fetchone()[0] == c.execute(f'SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = \'{request.json["request_id"]}\'').fetchone()[0]:
             c.execute(
-            "INSERT INTO USERS (NAME, GRADE, EMAIL, PASSWORD, ROLE) SELECT NAME, GRADE, EMAIL, PASSWORD, ROLE FROM REQUESTS WHERE ROWID = ?",
+            "INSERT INTO USERS (NAME, GRADE, EMAIL, PASSWORD, ROLE, SCHOOL_ID) SELECT NAME, GRADE, EMAIL, PASSWORD, ROLE, SCHOOL_ID FROM REQUESTS WHERE ROWID = ?",
             (request.json["request_id"],),
         )
             c.execute("DELETE FROM REQUESTS WHERE ROWID = ?", (request.json["request_id"],))
