@@ -484,21 +484,51 @@ def get_inbox():
 @app.route("/api/deny", methods=["POST"])
 def deny():
     c = querymaker.con()
-    print("\n", request.json, "\n")
-    if c.execute(f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\"").fetchone()[0] == int(c.execute(f'SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = ?', (request.json["request_id"],)).fetchone()[0]):
-        c.execute("DELETE FROM REQUESTS WHERE ROWID = ?", (request.json["request_id"],))
-        print("hi :)")
-        c.commit()
-    return ("", 204 )
+
+    try:
+        username = session["username"]
+        role = session["role"]
+    except KeyError:
+        return redirect(url_for("login"))
+
+    print(f"Role: {role}")
+    print(f"Username: {username}")
+
+    if not role:
+        print("No role!?!?! what???")
+        return redirect(url_for("login"))
+
+    if role in ["TEACHER", "ADMINISTRATOR"]:
+        print("\n", request.json, "\n")
+        if c.execute(f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\"").fetchone()[0] == int(c.execute(f'SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = ?', (request.json["request_id"],)).fetchone()[0]):
+            c.execute("DELETE FROM REQUESTS WHERE ROWID = ?", (request.json["request_id"],))
+            print("hi :)")
+            c.commit()
+            return ("", 204 )
 
 @app.route("/api/accept_student_add", methods=["POST"])
 def accept_student_add():
     c = querymaker.con()
-    if c.execute(f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\"").fetchone()[0] == int(c.execute(f'SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = \'{request.json["request_id"]}\'').fetchone()[0]):
-        c.execute("INSERT INTO USERS (NAME, GRADE, EMAIL, PASSWORD, ROLE) SELECT NAME, GRADE, EMAIL, PASSWORD, ROLE FROM REQUESTS WHERE ROWID = ?", (request.json["request_id"],))
-        c.execute("DELETE FROM REQUESTS WHERE ROWID = ?", (request.json["request_id"],))
-        c.commit()
-    return ("", 204) 
+
+    try:
+        username = session["username"]
+        role = session["role"]
+    except KeyError:
+        return redirect(url_for("login"))
+
+    print(f"Role: {role}")
+    print(f"Username: {username}")
+
+    if not role:
+        print("No role!?!?! what???")
+        return redirect(url_for("login"))
+
+    if role in ["TEACHER", "ADMINISTRATOR"]:
+        if c.execute(f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\"").fetchone()[0] == int(c.execute(f'SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = \'{request.json["request_id"]}\'').fetchone()[0]):
+            c.execute("INSERT INTO USERS (NAME, GRADE, EMAIL, PASSWORD, ROLE) SELECT NAME, GRADE, EMAIL, PASSWORD, ROLE FROM REQUESTS WHERE ROWID = ?", (request.json["request_id"],))
+            c.execute("DELETE FROM REQUESTS WHERE ROWID = ?", (request.json["request_id"],))
+            c.commit()
+        return ("", 204) 
     
 if __name__ == "__main__":
     backup.start_backup_loop()

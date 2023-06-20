@@ -46,11 +46,27 @@
     <div id="register-admin" class="login-register-box register">
         <p><h1 class="login">Welcome to Spirit!</h1>
         <form method="post" id="login" class="login">
-            <p><label for="username" class="login">Username or Email</label>
-            <p><input type=text  id="username" name=username>
-            <p><label for="password" class="login">Password</label>
-            <p><input type=password id="password" name=password>
-            <p><input type=submit id="submit-login" class="button primary" value=Login>
+            <label for="username" class="login box-content">Username</label>
+            <input type=text  id="username" class="box-content" name=username>
+
+            <label for="email" class="login box-content">Email</label>
+            <input type="text" id="email" class="box-content" name="email">
+
+            <label for="password" class="login box-content">Password</label>
+            <input type=password id="password" class="box-content" name=password>
+
+            <div class="login box-content" style="display: inline-block;">
+                <input type="checkbox" id="create-checkbox" name="Create" onclick="appear();">
+                <label for="Create">Create New School</label>
+            </div>
+
+            <label for="schoolname">School Name</label>
+            <input type="text" name="schoolname" id="school-name">
+
+            <label for="school-id" class="login box-content">School ID</label>
+            <input type="number" class="box-content" name="school-id" id="school-id">
+
+            <input type=submit id="submit-login" name="register-student" class="button primary box-content" value=Register>
         </form>
     </div>
 
