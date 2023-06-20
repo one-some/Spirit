@@ -99,6 +99,9 @@ body {
 
     display: flex;
     flex-direction: column;
+
+    /* Watch out for this later */
+    overflow-x: hidden;
 }
 
 table .column-header {
@@ -851,6 +854,20 @@ h1.login {
     display: inline-block;
 }
 
+.highlight {
+    animation: highlight-shadow 1.5s;
+}
+
+@keyframes highlight-shadow {
+    from {
+        box-shadow: 0 0 400px 500px white;
+    }
+
+    to {
+        box-shadow: 0 0 0px black;
+    }
+}
+
 .dropbtn {
     margin-top: 0px;
     font-size: 25px;
@@ -1002,6 +1019,50 @@ spacer {
     padding-left: 16px;
 }
 
+/* Notifications */
+#notification-container {
+    position: absolute;
+    right: 0px;
+    bottom: 0px;
+    height: 100%;
+    width: 256px;
+}
+
+.notification {
+    position: absolute;
+    bottom: 7px;
+    left: 100%;
+    width: 100%;
+    background-color: #dddddd;
+    border: 2px solid #bbbbbb;
+    padding: 2px 5px;
+    animation: notification-in-out 5s;
+    white-space: nowrap;
+}
+
+@keyframes notification-in-out {
+    0% {
+        left: 100%;
+    }
+
+    10%,
+    80% {
+        left: -20px;
+    }
+
+    90% {
+        left: 100%;
+    }
+}
+
+.n-title {
+    display: block;
+    font-weight: bold;
+}
+
+
+/* Mail */
+
 #mail {
     margin-left: 10px;
 }
@@ -1011,9 +1072,11 @@ spacer {
     padding-top: 5px;
     padding-bottom: 5px;
 }
+
 #mail .listing:hover {
     filter: brightness(110%);
 }
+
 #mail .bottom-text {
     font-weight: lighter;
     font-style: italic;
