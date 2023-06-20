@@ -144,13 +144,14 @@ def register():
         print(request.form)
         if "register-student" in request.form:
             con.execute(
-                "INSERT INTO REQUESTS(OPERATION, NAME, EMAIL, PASSWORD, SCHOOL_ID, ROLE, GRADE) VALUES ('ADD', ?, ?, ?, ?, 'STUDENT', ?)",
+                "INSERT INTO REQUESTS(OPERATION, NAME, EMAIL, PASSWORD, SCHOOL_ID, ROLE, GRADE) VALUES ('ADD', ?, ?, ?, ?, ?, ?)",
                 (
                     request.form["username"],
                     request.form["email"],
-                    request.form["password"],
+                    sha256_hash(request.form["password"]),
                     request.form["school-id"],
-                    request.form["grade"],
+                    request.form["role"],
+                    request.form.get("grade", "NULL"),
                 ),
             )
             con.commit()

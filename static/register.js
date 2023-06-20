@@ -12,10 +12,17 @@ function showAdminRegister() {
 
 function appear() {
 
-    console.log($el("#school-name").style.dislpay);
+    const schoolName = $el("#school-name")
+    console.log(schoolName.style.dislpay);
 
-    $el("#school-name").style.dislpay = 'none';
+    if(schoolName.style.dislpay == 'none'){
+        schoolName.style.display = 'block';
+    }
+    else{
+        schoolName.style.dislpay = 'none';
+    }
+    
 
-    console.log($el("#school-name").style.dislpay)
+    console.log(schoolName.style.dislpay)
 
 }
