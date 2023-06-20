@@ -248,9 +248,25 @@ def reindex_scores():
     c.commit()
     print("[db] Done!")
 
+@dataclass
+class Request:
+    operation: str
+    name: str
+    email: str
+    password: str
+    # school_id: int
+    role: str
+    id: int
+
+    def to_json(self) -> dict:
+        return self.__dict__
+
 def get_mail(username):
     c = con()
-    school_id = c.execute(f"SELECT SCHOOL_ID FROM USERS WHERE NAME = '{username}'").fetchall()[0] # If you know how to make this one statement please show me
-    return c.execute(f"SELECT OPERATION, NAME, EMAIL, PASSWORD, ROLE FROM REQUESTS WHERE SCHOOL_ID = '{school_id}'").fetchall()
+    school_id = c.execute(f"SELECT SCHOOL_ID FROM USERS WHERE NAME = '{username}'").fetchall()[0][0] # If you know how to make this one statement please show me
+    return [
+        Request(*x)
+        for x in c.execute(f"SELECT OPERATION, NAME, EMAIL, PASSWORD, ROLE, ROWID FROM REQUESTS WHERE SCHOOL_ID = '{school_id}'")
+    ]
 
 reindex_scores()

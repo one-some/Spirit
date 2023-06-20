@@ -1001,3 +1001,25 @@ spacer {
 #audit-details {
     padding-left: 16px;
 }
+
+#mail {
+    margin-left: 10px;
+}
+
+#mail .listing {
+    font-weight: bold;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+#mail .listing:hover {
+    filter: brightness(110%);
+}
+#mail .bottom-text {
+    font-weight: lighter;
+    font-style: italic;
+    color: grey;
+}
+
+#mail .listing:nth-child(even) {
+    background-color: rgba(211, 211, 211, 0.5);
+}

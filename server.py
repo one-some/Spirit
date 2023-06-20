@@ -143,12 +143,13 @@ def register():
         print(request.form)
         if "register-student" in request.form:
             con.execute(
-                "INSERT INTO REQUESTS(OPERATION, NAME, EMAIL, PASSWORD, SCHOOL_ID, ROLE) VALUES ('ADD', ?, ?, ?, ?, 'STUDENT')",
+                "INSERT INTO REQUESTS(OPERATION, NAME, EMAIL, PASSWORD, SCHOOL_ID, ROLE, GRADE) VALUES ('ADD', ?, ?, ?, ?, 'STUDENT', ?)",
                 (
                     request.form["username"],
                     request.form["email"],
                     request.form["password"],
                     request.form["school-id"],
+                    request.form["grade"],
                 ),
             )
             con.commit()
@@ -478,9 +479,27 @@ def get_inbox():
     response = querymaker.get_mail(session["username"])
     print(response)
     print(jsonify(response))
-    return response
+    return jsonify(response)
 
+@app.route("/api/deny", methods=["POST"])
+def deny():
+    c = querymaker.con()
+    print("\n", request.json, "\n")
+    if c.execute(f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\"").fetchone()[0] == int(c.execute(f'SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = ?', (request.json["request_id"],)).fetchone()[0]):
+        c.execute("DELETE FROM REQUESTS WHERE ROWID = ?", (request.json["request_id"],))
+        print("hi :)")
+        c.commit()
+    return ("", 204 )
 
+@app.route("/api/accept_student_add", methods=["POST"])
+def accept_student_add():
+    c = querymaker.con()
+    if c.execute(f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\"").fetchone()[0] == int(c.execute(f'SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = \'{request.json["request_id"]}\'').fetchone()[0]):
+        c.execute("INSERT INTO USERS (NAME, GRADE, EMAIL, PASSWORD, ROLE) SELECT NAME, GRADE, EMAIL, PASSWORD, ROLE FROM REQUESTS WHERE ROWID = ?", (request.json["request_id"],))
+        c.execute("DELETE FROM REQUESTS WHERE ROWID = ?", (request.json["request_id"],))
+        c.commit()
+    return ("", 204) 
+    
 if __name__ == "__main__":
     backup.start_backup_loop()
     app.run(debug=True)

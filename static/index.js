@@ -141,7 +141,7 @@ async function getInbox() {
     console.log(j);
     console.log(j[1]);
     console.log(mailList);
-    for (const el of document.querySelectorAll("#mail")) {
+    for (const el of document.querySelectorAll("#mail .listing")) {
         el.remove();
     }
     for (const request of j) {
@@ -152,7 +152,56 @@ async function getInbox() {
 
 async function makeMail(parent, request) {
     listing = $e("div", parent, { classes: ["listing"] });
-    $e("span", parent, { innerText: request.operation });
+    right = $e("div", listing)
+    let acceptButton = $e("button", listing, { innerText: "check", classes: ["mail-confirm", "material-icons"]})
+    acceptButton.addEventListener("click", function () {
+        confirmOrDenyAddStudent(request.id, "accept");
+        getInbox();
+        listing.remove();
+    })
+    let denybutton = $e("button", listing, { innerText: "close", classes: ["mail-deny", "material-icons"]})
+    denybutton.addEventListener("click", function () {
+        confirmOrDenyAddStudent(request.id, "deny");
+        getInbox();
+    })
+    $e("span", right, { innerText: request.operation + " "});
+    $e("span", right, { innerText: request.role });
+    bottomText = $e("div", right, { classes: ['bottom-text']})
+    $e("span", bottomText, { innerText: "Name: " + request.name + "; " });
+    $e("span", bottomText, { innerText: "Email: " + request.email + "; "});
+    $e("span", bottomText, { innerText: "Password: " + request.password + ";" });
+}
+
+async function confirmOrDenyAddStudent(ID, approval) {
+    if (approval == "deny") {
+        await fetch("/api/deny", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                request_id: ID,
+            })
+        });
+        console.log(JSON.stringify({
+            request_id: ID,
+        }))
+    }
+    else if(approval == "accept"){
+        await fetch("/api/accept_student_add", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                request_id: ID,
+            })
+        });
+        console.log(JSON.stringify({
+            request_id: ID,
+        }))
+    }
+    
 }
 
 async function init() {
