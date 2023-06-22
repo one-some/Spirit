@@ -587,6 +587,23 @@ modal-content {
     opacity: 0.7;
 }
 
+#mini-events .event-bottom {
+    display: flex;
+    justify-content: space-between;
+}
+
+#mini-events .listing .interest {
+    margin-right: 12px;;
+}
+
+#mini-events .listing .interest::before {
+    font-family: "Material Icons";
+    content: "group";
+    position: relative;
+    top: 2px;
+    right: 1px;
+}
+
 #mini-events .listing .location {
     opacity: 0.8;
 }
@@ -1038,6 +1055,7 @@ spacer {
     bottom: 0px;
     height: 100%;
     width: 256px;
+    pointer-events: none;
 }
 
 .notification {

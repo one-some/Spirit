@@ -51,12 +51,21 @@ function makeEvent(event) {
     const cont = $e("div", eventContainer, { classes: ["listing"], });
     $e("span", cont, { innerText: event.name, classes: ["name"] });
     $e("span", cont, { innerText: event.desc, classes: ["desc"] });
-    const bottom = $e("div", cont, {classes: ["event-bottom"]});
+    const bottom = $e("div", cont, { classes: ["event-bottom"] });
     $e("span", bottom, { innerText: event.location, classes: ["location"] });
     const imGoingButton = $e("button", bottom, { innerText: "I'm Going!" });
 
-    imGoingButton.addEventListener("click", function() {
-        imGoingButton.classList.toggle("going")
+    let interested = event.interested;
+    imGoingButton.classList.toggle("going", interested);
+
+    imGoingButton.addEventListener("click", async function () {
+        interested = !interested;
+        imGoingButton.classList.toggle("going", interested);
+        await fetch(`/api/events/${event.id}/interest.json`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ interested: interested })
+        });
     });
 }
 

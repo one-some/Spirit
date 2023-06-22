@@ -56,7 +56,7 @@ function getNewEventData() {
 }
 
 $el("#create-event-button").addEventListener("click", async function () {
-    console.log("HI")
+    console.log("HI");
     let dat = getNewEventData();
 
     // Data is invalid. We've let the user know so just do nothing
@@ -99,10 +99,16 @@ function makeEvent(event) {
     const cont = $e("div", miniEvents, { classes: ["listing"], }, { before: addEventButton });
     $e("span", cont, { innerText: event.name, classes: ["name"] });
     $e("span", cont, { innerText: event.desc, classes: ["desc"] });
-    $e("span", cont, { innerText: event.location, classes: ["location"] });
-    cont.addEventListener("click", function() {
+    const bottom = $e("div", cont, { classes: ["event-bottom"] });
+    $e("span", bottom, { innerText: event.location, classes: ["location"] });
+
+    $e("span", bottom, {
+        innerText: `${event.interested_count || "No"} student${event.interested_count !== 1 ? 's' : ''} interested`,
+        classes: ["interest"]
+    });
+    cont.addEventListener("click", function () {
         editEvent(event);
-    })
+    });
 }
 
 function editEvent(eventData) {
@@ -116,15 +122,15 @@ function editEvent(eventData) {
     showModal("event-viewer");
 }
 
-$el("#add-student-button").addEventListener("click", async function() {
+$el("#add-student-button").addEventListener("click", async function () {
     await fetch("/api/attend.json", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({student_name: $el(".search-input").value, event_name: currentEvent.name})
+        body: JSON.stringify({ student_name: $el(".search-input").value, event_name: currentEvent.name })
     });
-    console.log($el(".search-input").value)
+    console.log($el(".search-input").value);
     eventViewer.querySelector(".search-input").value = "";
     fetchLeaderboard();
 });
