@@ -412,7 +412,7 @@ def api_create_event():
             request.json["name"],
             request.json["location"],
             request.json["desc"],
-            request.json["points"],
+            int(request.json["points"]),
             request.json["time_start"],
             request.json["time_end"],
         ),
@@ -470,9 +470,9 @@ def save_student():
             """,
         (
             request.json["student_name"],
-            request.json["student_grade"],
-            request.json["student_points"],
-            request.json["student_points"],
+            int(request.json["student_grade"]),
+            int(request.json["student_points"]),
+            int(request.json["student_points"]),
             request.json["student_id"],
         ),
     )
@@ -500,9 +500,9 @@ def save_new_student():
             """,
         (
             request.json["student_name"],
-            request.json["student_grade"],
-            request.json["student_points"],
-            request.json["student_points"],
+            int(request.json["student_grade"]),
+            int(request.json["student_points"]),
+            int(request.json["student_points"]),
         ),
     )
 

@@ -54,7 +54,7 @@ def report_event(
 
     con.execute(
         "INSERT INTO audit_log(time, user, action, details, rollback_id) VALUES(UNIXEPOCH(), ?, ?, ?, ?)",
-        (user_name, action, json.dumps(details) if details else None, rollback_id),
+        (user_name, action, json.dumps(details, default=lambda x: x.__dict__) if details else None, rollback_id),
     )
     con.commit()
     con.close()

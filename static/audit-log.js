@@ -11,6 +11,8 @@ async function tryRevertAuditEvent(eventId) {
 }
 
 function showAuditEventDetails(entry) {
+    if (!entry.details) return;
+
     const date = new Date(entry.time * 1000);
     let actionDeets = [];
 
