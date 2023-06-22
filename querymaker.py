@@ -25,12 +25,9 @@ class Connection(sqlite3.Connection):
         params = params or tuple()
         return self.execute(query, params).fetchone()
 
-con_singleton = Connection()
-
 # Old holdover. TODO: Get rid of!
 def con():
-    return con_singleton
-
+    return Connection()
 
 def prize_dat():
     with open("data/prizes.json", "r") as file:

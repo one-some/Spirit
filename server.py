@@ -58,8 +58,6 @@ app.secret_key = "thisisanexamplesecretkey"
 @app.route("/")
 def index():
     print("\nat /\n")
-    con = querymaker.con()
-
     try:
         username = session["username"]
         role = session["role"]
@@ -105,18 +103,21 @@ def login():
         except TypeError:
             # TypeError: None is not subscriptable, as fetchone()
             # will return None if it has nothing to fetch
+            con.close()
             return "Username not found in database!", 404
 
         print("Given Hash:", given_hashed_password)
 
         if given_hashed_password != valid_hashed_password:
             # 403: Not authorized
+            con.close()
             return "INVALID USERNAME AND PASSWORD", 403
 
         session["username"] = username
         role = con.execute(
             "SELECT ROLE FROM USERS WHERE NAME = ?", (username,)
         ).fetchone()[0]
+        con.close()
         session["role"] = role
         # We can assume that this query will succeed since the last
         # one confirmed there's a user with that name in the db
@@ -203,6 +204,7 @@ def register():
             )
             con.commit()
             print("went through for some reason")
+        con.close()
     return render_template("register.html")
 
 
@@ -232,6 +234,7 @@ def student():
         - student.points
     )
 
+    con.close()
     return render_template(
         "student.html",
         pretty_points=f"{points:,}",
@@ -445,6 +448,7 @@ def api_attend():
     except sqlite3.IntegrityError:
         # Already exists
         pass
+    con.close()
     return "Ok! :)"
 
 
@@ -478,6 +482,7 @@ def save_student():
     )
 
     con.commit()
+    con.close()
 
     return "what is the point of these"
 
@@ -507,6 +512,7 @@ def save_new_student():
     )
 
     con.commit()
+    con.close()
 
     # querymaker.reindex_scores()
 
@@ -530,6 +536,7 @@ def delete_student():
     )
 
     con.commit()
+    con.close()
 
     return "dude idk"
 
