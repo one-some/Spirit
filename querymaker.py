@@ -10,7 +10,6 @@ GRADES = [9, 10, 11, 12]
 VALID_INT_OPERANDS = ["<", "<=", ">", ">=", "="]
 DATABASE_PATH = "data/spirit.db"
 
-
 class Connection(sqlite3.Connection):
     def __init__(self) -> None:
         super().__init__(DATABASE_PATH)
@@ -26,10 +25,11 @@ class Connection(sqlite3.Connection):
         params = params or tuple()
         return self.execute(query, params).fetchone()
 
+con_singleton = Connection()
 
 # Old holdover. TODO: Get rid of!
 def con():
-    return Connection()
+    return con_singleton
 
 
 def prize_dat():
@@ -77,7 +77,7 @@ class Student:
     @staticmethod
     def from_name(name: str) -> Student:
         return Student(
-            *Connection().nab_row(
+            *con().nab_row(
                 "SELECT NAME,POINTS,GRADE,ROWID FROM USERS WHERE NAME = ?;", (name,)
             )
         )
@@ -86,7 +86,7 @@ class Student:
         return self.__dict__
 
     def get_score_rank(self) -> int:
-        return Connection().nab(
+        return con().nab(
             "WITH cte AS (SELECT id, RANK() OVER (ORDER BY points DESC) rnk FROM STUDENTS)"
             + "SELECT id, rnk FROM cte WHERE id = ?;",
             (self.id,),
@@ -187,7 +187,7 @@ class Event:
     @staticmethod
     def from_id(event_id: int) -> Event:
         return Event(
-            *Connection().nab_row(
+            *con().nab_row(
                 "SELECT ID,NAME,LOCATION,DESCRIPTION,POINTS,TIME_START,TIME_END FROM EVENTS WHERE ID = ?;",
                 (event_id,),
             )
@@ -205,29 +205,29 @@ class Event:
         }
 
     def set_student_interest(self, student_id: int, interested: bool) -> None:
-        con = Connection()
+        connection = con()
         if interested:
-            con.execute(
+            connection.execute(
                 "INSERT INTO STUDENT_ATTENDANCE_INTENT(STUDENT_ID, EVENT_ID) VALUES(?, ?);",
                 (student_id, self.id),
             )
         else:
-            con.execute(
+            connection.execute(
                 "DELETE FROM STUDENT_ATTENDANCE_INTENT WHERE STUDENT_ID = ? AND EVENT_ID = ?;",
                 (student_id, self.id),
             )
-        con.commit()
+        connection.commit()
 
     def get_student_interest(self, student_id: int) -> bool:
         return bool(
-            Connection().nab(
+            con().nab(
                 "SELECT 1 FROM STUDENT_ATTENDANCE_INTENT WHERE STUDENT_ID = ? AND EVENT_ID = ?;",
                 (student_id, self.id),
             )
         )
 
     def get_aggregate_student_interest(self) -> int:
-        return Connection().nab(
+        return con().nab(
             "SELECT COUNT() FROM STUDENT_ATTENDANCE_INTENT WHERE EVENT_ID = ?;",
             (self.id,),
         )

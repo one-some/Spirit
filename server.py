@@ -211,7 +211,7 @@ def student():
     if "username" not in session or session.get("role") != "STUDENT":
         return redirect(url_for("login"))
 
-    con = querymaker.Connection()
+    con = querymaker.con()
     points = con.nab("SELECT POINTS FROM USERS WHERE NAME = ?", (session["username"],))
 
     POINT_GOAL_INCREMENTS = 15000
