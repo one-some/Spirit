@@ -69,6 +69,11 @@ class Student:
     grade: int
     id: int
 
+    def __post_init__(self) -> None:
+        self.points = int(self.points)
+        self.grade = int(self.grade)
+        self.id = int(self.id)
+
     @staticmethod
     def from_name(name: str) -> Student:
         return Student(
