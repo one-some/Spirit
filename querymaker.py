@@ -8,10 +8,25 @@ from typing import Optional
 
 GRADES = [9, 10, 11, 12]
 VALID_INT_OPERANDS = ["<", "<=", ">", ">=", "="]
+DATABASE_PATH = "data/spirit.db"
 
 
+class Connection(sqlite3.Connection):
+    def __init__(self) -> None:
+        super().__init__(DATABASE_PATH)
+
+    def nab(self, query: str, params: Optional[tuple] = None) -> Optional[list]:
+        params = params or tuple()
+        return self.nab_row(query, params)[0]
+
+    def nab_row(self, query: str, params: Optional[tuple] = None) -> Optional[list]:
+        params = params or tuple()
+        return self.execute(query, params).fetchone()
+
+
+# Old holdover. TODO: Get rid of!
 def con():
-    return sqlite3.connect("data/spirit.db")
+    return Connection()
 
 
 def prize_dat():
@@ -53,6 +68,14 @@ class Student:
 
     def to_json(self):
         return self.__dict__
+
+    @staticmethod
+    def from_name(name: str) -> Student:
+        return Student(
+            *Connection().nab_row(
+                "SELECT NAME,POINTS,GRADE,ROWID FROM USERS WHERE NAME = ?;", (name,)
+            )
+        )
 
 
 # TODO: string query -> Query Object -> SQL string -> people
@@ -248,6 +271,7 @@ def reindex_scores():
     c.commit()
     print("[db] Done!")
 
+
 @dataclass
 class Request:
     operation: str
@@ -261,12 +285,20 @@ class Request:
     def to_json(self) -> dict:
         return self.__dict__
 
+
 def get_mail(username):
     c = con()
-    school_id = c.execute(f"SELECT SCHOOL_ID FROM USERS WHERE NAME = '{username}'").fetchall()[0][0] # If you know how to make this one statement please show me
+    school_id = c.execute(
+        f"SELECT SCHOOL_ID FROM USERS WHERE NAME = '{username}'"
+    ).fetchall()[0][
+        0
+    ]  # If you know how to make this one statement please show me
     return [
         Request(*x)
-        for x in c.execute(f"SELECT OPERATION, NAME, EMAIL, PASSWORD, ROLE, ROWID FROM REQUESTS WHERE SCHOOL_ID = '{school_id}'")
+        for x in c.execute(
+            f"SELECT OPERATION, NAME, EMAIL, PASSWORD, ROLE, ROWID FROM REQUESTS WHERE SCHOOL_ID = '{school_id}'"
+        )
     ]
+
 
 reindex_scores()

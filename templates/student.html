@@ -44,12 +44,14 @@
                 wwwww
             </div>
             <div id="si-taunt-stats">
-                <span id="si-name">{{ session["username"] }}</span>
                 <span id="si-place">#2</span>
-                <span class="si-stat">Attended Events: 39212</span>
-                <span class="si-stat">Missed Events: 2</span>
-                <span class="si-stat">Points: {{ pretty_points }}</span>
-                <span class="si-stat">Distance to 1st Place: 31921</span>
+                <div id="si-stat-entry">
+                    <span id="si-name">{{ session["username"] }}</span>
+                    <span class="si-stat">Attended Events: {{ pretty_attended_events }}</span>
+                    <span class="si-stat">Missed Events: {{ pretty_missed_events }}</span>
+                    <span class="si-stat">Points: {{ pretty_points }}</span>
+                    <span class="si-stat">Distance to 1st Place: {{ pretty_distance_to_first }} points</span>
+                </div>
             </div>
         </div>
         <div id="event-side">

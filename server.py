@@ -160,24 +160,39 @@ def register():
 
 @app.route("/student")
 def student():
-    con = querymaker.con()
-    if "username" in session and session.get("role") == "STUDENT":
-        print("\nat student\n")
+    if "username" not in session or session.get("role") != "STUDENT":
+        return redirect(url_for("login"))
 
-        points = con.execute(
-            "SELECT POINTS FROM USERS WHERE NAME = ?", (session["username"],)
-        ).fetchone()[0]
+    con = querymaker.Connection()
+    points = con.nab("SELECT POINTS FROM USERS WHERE NAME = ?", (session["username"],))
 
-        POINT_GOAL_INCREMENTS = 15000
-        point_goal = POINT_GOAL_INCREMENTS * math.ceil(points / POINT_GOAL_INCREMENTS)
+    POINT_GOAL_INCREMENTS = 15000
+    point_goal = POINT_GOAL_INCREMENTS * math.ceil(points / POINT_GOAL_INCREMENTS)
 
-        return render_template(
-            "student.html",
-            pretty_points=f"{points:,}",
-            pretty_point_goal=f"{point_goal:,}",
-            progress_percent=(points / point_goal) * 100,
-        )
-    return redirect(url_for("login"))
+    student = querymaker.Student.from_name(session["username"])
+    attended_events = con.nab(
+        "SELECT COUNT() FROM STUDENT_ATTENDANCE WHERE STUDENT_ID = ?;", (student.id,)
+    )
+
+    missed_events = con.nab(
+        "SELECT COUNT() FROM EVENTS WHERE NOT EXISTS(SELECT 1 FROM STUDENT_ATTENDANCE WHERE EVENT_ID = ID AND STUDENT_ID = ?);",
+        (student.id,),
+    )
+
+    distance_to_first = (
+        con.nab("SELECT POINTS FROM STUDENTS ORDER BY POINTS DESC LIMIT 1;")
+        - student.points
+    )
+
+    return render_template(
+        "student.html",
+        pretty_points=f"{points:,}",
+        pretty_point_goal=f"{point_goal:,}",
+        progress_percent=(points / point_goal) * 100,
+        pretty_attended_events=f"{attended_events:,}",
+        pretty_missed_events=f"{missed_events:,}",
+        pretty_distance_to_first=f"{distance_to_first:,}",
+    )
 
 
 @app.route("/logout", methods=["GET", "POST"])

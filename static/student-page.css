@@ -97,11 +97,38 @@
 }
 
 /* Leaderboard */
-#si-taunt-leaderboard {}
+#si-taunt-leaderboard {
+    flex: 1;
+}
 
 /* Stats */
 #si-taunt-stats {
-    padding-left: 16px;
+    display: flex;
     padding-right: 16px;
-    padding-bottom: 8px;
+}
+
+#si-stat-entry {
+    margin-left: 20px;
+    margin-bottom: 16px;
+}
+
+#si-place {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 4em;
+    background-color: lightcoral;
+
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#si-name {
+    font-size: 2em;
+    margin-left: -10px;
+}
+
+.si-stat {
+    display: block;
 }
