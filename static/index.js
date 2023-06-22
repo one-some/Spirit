@@ -169,7 +169,9 @@ async function makeMail(parent, request) {
     bottomText = $e("div", right, { classes: ['bottom-text']})
     $e("span", bottomText, { innerText: "Name: " + request.name + "; " });
     $e("span", bottomText, { innerText: "Email: " + request.email + "; "});
-    $e("span", bottomText, { innerText: "Password: " + request.password + ";" });
+    if(request.grade != "NULL"){
+            $e("span", bottomText, { innerText: "Grade: " + request.grade + ";" });
+    }
 }
 
 async function confirmOrDenyAddStudent(ID, approval) {

@@ -277,8 +277,8 @@ class Request:
     operation: str
     name: str
     email: str
-    password: str
     # school_id: int
+    grade: int
     role: str
     id: int
 
@@ -295,9 +295,7 @@ def get_mail(username):
     ]  # If you know how to make this one statement please show me
     return [
         Request(*x)
-        for x in c.execute(
-            f"SELECT OPERATION, NAME, EMAIL, PASSWORD, ROLE, ROWID FROM REQUESTS WHERE SCHOOL_ID = '{school_id}'"
-        )
+        for x in c.execute(f"SELECT OPERATION, NAME, EMAIL, GRADE, ROLE, ROWID FROM REQUESTS WHERE SCHOOL_ID = '{school_id}'")
     ]
 
 

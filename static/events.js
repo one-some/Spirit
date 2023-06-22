@@ -117,7 +117,6 @@ function editEvent(eventData) {
 }
 
 $el("#add-student-button").addEventListener("click", async function() {
-    eventViewer.querySelector(".search-input").value = "";
     await fetch("/api/attend.json", {
         method: "POST",
         headers: {
@@ -125,6 +124,8 @@ $el("#add-student-button").addEventListener("click", async function() {
         },
         body: JSON.stringify({student_name: $el(".search-input").value, event_name: currentEvent.name})
     });
+    console.log($el(".search-input").value)
+    eventViewer.querySelector(".search-input").value = "";
     fetchLeaderboard();
 });
 
