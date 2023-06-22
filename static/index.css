@@ -112,6 +112,8 @@ table .column-header {
 
 #topbar {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
     height: 64px;
     background-color: var(--topbar);
 }
@@ -119,9 +121,9 @@ table .column-header {
 #topbar #logo {
     margin-top: 12px;
     margin-left: 10px;
+    margin-bottom: 6px;
     height: 32px;
     user-select: none;
-    cursor: df;
 }
 
 #topbar #logo img {
@@ -130,6 +132,16 @@ table .column-header {
 
 #topbar h1 {
     color: white;
+}
+
+#topbar #logout {
+    color: black;
+    background-color: white;
+    border-radius: 0px;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-right: 5px;
+    height: 30px;
 }
 
 h2 {

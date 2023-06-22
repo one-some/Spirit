@@ -1,4 +1,4 @@
-// From index.js
+// Leaderboard
 async function fetchLeaderboard(limitf = 25, scoreconditionf = ">0", rankconditionf = ">0", sortf = "points_desc",) {
     const r = await fetch(`/api/students.json?limit=${limitf}&sort=${sortf}&scorecondition=${scoreconditionf}&rankcondition=${rankconditionf}`);
     const j = await r.json();
@@ -42,5 +42,41 @@ function renderStudent(parent, place, student) {
     });
 }
 
-
 fetchLeaderboard();
+
+// Events
+const eventContainer = $el("#event-container");
+
+function makeEvent(event) {
+    const cont = $e("div", eventContainer, { classes: ["listing"], });
+    $e("span", cont, { innerText: event.name, classes: ["name"] });
+    $e("span", cont, { innerText: event.desc, classes: ["desc"] });
+    const bottom = $e("div", cont, {classes: ["event-bottom"]});
+    $e("span", bottom, { innerText: event.location, classes: ["location"] });
+    const imGoingButton = $e("button", bottom, { innerText: "I'm Going!" });
+
+    imGoingButton.addEventListener("click", function() {
+        imGoingButton.classList.toggle("going")
+    });
+}
+
+async function fetchEvents() {
+    let r = await fetch("/api/events.json");
+    let j = await r.json();
+
+    for (const el of eventContainer.querySelectorAll(".listing")) {
+        el.remove();
+    }
+
+    for (const event of j) {
+        makeEvent(event);
+    }
+}
+
+fetchEvents();
+
+// Auth
+async function Logout() {
+    await fetch("/logout");             // Sends for the server which deletes your session and thus logs you out.
+    window.location.replace("/login");  // Takes you to the login page.
+}
