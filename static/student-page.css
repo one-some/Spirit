@@ -10,8 +10,7 @@
 }
 
 /* Student Info Overview */
-#si-taunt-overview,
-#si-taunt-leaderboard {
+#si-taunt-overview {
     padding-left: 16px;
     padding-right: 16px;
     padding-bottom: 8px;
@@ -99,6 +98,16 @@
 /* Leaderboard */
 #si-taunt-leaderboard {
     flex: 1;
+}
+
+#si-taunt-leaderboard {
+    padding-bottom: 8px;
+    border-bottom: 2px solid lightgray;
+    margin-left: 0px;
+}
+
+.you {
+    background-color: rgba(255, 0, 0, 0.3) !important;
 }
 
 /* Stats */

@@ -1,19 +1,46 @@
+// From index.js
+async function fetchLeaderboard(limitf = 25, scoreconditionf = ">0", rankconditionf = ">0", sortf = "points_desc",) {
+    const r = await fetch(`/api/students.json?limit=${limitf}&sort=${sortf}&scorecondition=${scoreconditionf}&rankcondition=${rankconditionf}`);
+    const j = await r.json();
 
-const points = Number($el("#points").innerText);
-var goal = function (){ 
-    var foo;
-    for(var x = 0; x < points; x+= 5000){
-        foo = x;
-        console.log("foo: ", foo);
+    for (const el of document.querySelectorAll(`.leaderboard .listing`)) {
+        el.remove();
     }
-    return foo + 5000;
-}();
-console.log("points: ", points);
-console.log("goal: ",  goal);
-var elem = document.getElementById("myBar");
-var width = 1;
+
+    for (const el of document.querySelectorAll(`.leaderboard`)) {
+        let place = 1;
+        for (const student of j) {
+            renderStudent(el, place, student);
+            student.place = place;
+            place++;
+        }
+    }
+}
+
+function renderStudent(parent, place, student) {
+    const cont = $e("div", parent, { classes: ["listing"] });
+
+    const left = $e("div", cont);
+    const right = $e("div", cont);
+    $e("span", left, { innerText: place, classes: ["place"] });
+    const nameEl = $e("span", left, { innerText: student.name, classes: ["name"] });
+    $e("span", left, { innerText: `(${student.grade}th)`, classes: ["grade"] });
+    $e("span", right, {
+        innerText: student.points.toLocaleString(),
+        classes: ["points"],
+        title: "Points"
+    });
+
+    if (student.name === USERNAME) {
+        cont.classList.add("you");
+        nameEl.innerText = `${student.name} (You)`;
+        $el("#si-place").innerText = `#${place}`;
+    }
+
+    cont.addEventListener("click", function () {
+        editStudent(student);
+    });
+}
 
 
-elem.style.width = Math.round( 1000 * (points / goal + Number.EPSILON)) / 10 + "%"; // multiplies by 1000 to be accurate to 3 decimal places, but then divides by 10 (instead of / 1000 * 100) to turn into a percent.
-elem.style.borderRadius = '500px';
-
+fetchLeaderboard();

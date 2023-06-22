@@ -1,3 +1,4 @@
+import base64
 import math
 import json
 import sqlite3
@@ -225,6 +226,7 @@ def student():
         pretty_attended_events=f"{attended_events:,}",
         pretty_missed_events=f"{missed_events:,}",
         pretty_distance_to_first=f"{distance_to_first:,}",
+        b64encode=lambda x: base64.b64encode(x.encode("utf-8")).decode("utf-8"),
     )
 
 

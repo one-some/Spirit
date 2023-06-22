@@ -17,6 +17,10 @@
     <!-- <link rel="stylesheet" href="/static/libs/daterangepicker.css"> -->
     <script src="/static/util.js"></script>
 
+
+    <!-- Base64 to escape string -->
+    <script>const USERNAME = atob('{{ b64encode(session["username"]) }}');</script>
+
     <title>Homepage - Spirit</title>
 </head>
 
@@ -40,11 +44,9 @@
                     </div>
                 </div>
             </div>
-            <div id="si-taunt-leaderboard">
-                wwwww
-            </div>
+            <div id="si-taunt-leaderboard" class="leaderboard"></div>
             <div id="si-taunt-stats">
-                <span id="si-place">#2</span>
+                <span id="si-place">#{{ rank }}</span>
                 <div id="si-stat-entry">
                     <span id="si-name">{{ session["username"] }}</span>
                     <span class="si-stat">Attended Events: {{ pretty_attended_events }}</span>
@@ -59,7 +61,6 @@
         </div>
     </div>
     <script src="/static/student-page.js"></script>
-    <script src="/static/index.js"></script>
 </body>
 
 </html>

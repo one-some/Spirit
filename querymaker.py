@@ -66,15 +66,22 @@ class Student:
     grade: int
     id: int
 
-    def to_json(self):
-        return self.__dict__
-
     @staticmethod
     def from_name(name: str) -> Student:
         return Student(
             *Connection().nab_row(
                 "SELECT NAME,POINTS,GRADE,ROWID FROM USERS WHERE NAME = ?;", (name,)
             )
+        )
+
+    def to_json(self):
+        return self.__dict__
+
+    def get_score_rank(self) -> int:
+        return Connection().nab(
+            "WITH cte AS (SELECT id, RANK() OVER (ORDER BY points DESC) rnk FROM STUDENTS)"
+            + "SELECT id, rnk FROM cte WHERE id = ?;",
+            (self.id,),
         )
 
 
@@ -295,7 +302,9 @@ def get_mail(username):
     ]  # If you know how to make this one statement please show me
     return [
         Request(*x)
-        for x in c.execute(f"SELECT OPERATION, NAME, EMAIL, GRADE, ROLE, ROWID FROM REQUESTS WHERE SCHOOL_ID = '{school_id}'")
+        for x in c.execute(
+            f"SELECT OPERATION, NAME, EMAIL, GRADE, ROLE, ROWID FROM REQUESTS WHERE SCHOOL_ID = '{school_id}'"
+        )
     ]
 
 
