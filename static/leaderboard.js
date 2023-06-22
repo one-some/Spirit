@@ -200,11 +200,11 @@ async function fetchStats() {
     }
 
     const colors = [
-        "#540a03",
-        "#2e5403",
-        "#034654",
-        "#3a0354",
-    ]
+        "#ef9991",
+        "#c0ea91",
+        "#90c7d1",
+        "#c683e6",
+    ];
 
     for (const chart of [
         { id: "att-ratio-by-grade", type: "bar", key: "attendance_ratio_by_grade", label: "Attendance Percentage", map: x => Math.ceil(x * 100) },
