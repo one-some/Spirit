@@ -46,7 +46,7 @@ def sha256_hash(
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.secret_key = "thisisanexamplesecretkey"
-
+ALLOWED_EXTENSIONS = {'csv', 'xlx', '', '', '', ''}
 
 @app.route("/students")
 @app.route("/leaderboard")

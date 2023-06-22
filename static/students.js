@@ -46,7 +46,8 @@ async function saveNewStudent() {
         body: JSON.stringify({
             student_name: studentViewer.querySelector("#student-name").value,
             student_grade: studentViewer.querySelector("#student-grade").value,
-            student_points: studentViewer.querySelector("#student-points").value
+            student_points: studentViewer.querySelector("#student-points").value,
+            student_email: studentViewer.querySelector("#student-email").value
         })
     });
     createNotification("Success!", "New student saved successfully.");
@@ -71,7 +72,8 @@ async function saveStudent() {
             student_id: currentStudent.id,
             student_name: studentViewer.querySelector("#student-name").value,
             student_grade: studentViewer.querySelector("#student-grade").value,
-            student_points: studentViewer.querySelector("#student-points").value
+            student_points: studentViewer.querySelector("#student-points").value,
+            student_email: studentViewer.querySelector("#student-email").value
         })
     });
     createNotification("Success!", "Student saved successfully.");
@@ -83,12 +85,14 @@ function resetStudent() {
     studentViewer.querySelector("#student-name").value = studentData.name;
     studentViewer.querySelector("#student-points").value = studentData.points;
     studentViewer.querySelector("#student-grade").value = studentData.grade;
+    studentViewer.querySelector("#student-email").value = studentData.email;
 }
 
 function cancelStudent() {
     studentViewer.querySelector("#student-name").value = "";
     studentViewer.querySelector("#student-points").value = "";
     studentViewer.querySelector("#student-grade").value = "";
+    studentViewer.querySelector("#student-email").value = "";
     studentEditorButtons.style.display = "none";
     studentDefaultButtons.style.display = "block";
 
@@ -100,6 +104,7 @@ function cancelNewStudent() {
     studentViewer.querySelector("#student-name").value = "";
     studentViewer.querySelector("#student-points").value = "";
     studentViewer.querySelector("#student-grade").value = "";
+    studentViewer.querySelector("#student-email").value = "";
     studentDefaultButtons.style.display = "block";
     greyed = false;
 }
