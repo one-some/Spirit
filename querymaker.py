@@ -8,11 +8,26 @@ from typing import Optional
 
 GRADES = [9, 10, 11, 12]
 VALID_INT_OPERANDS = ["<", "<=", ">", ">=", "="]
+DATABASE_PATH = "data/spirit.db"
 
+class Connection(sqlite3.Connection):
+    def __init__(self) -> None:
+        super().__init__(DATABASE_PATH)
 
+    def nab(self, query: str, params: Optional[tuple] = None) -> Optional[list]:
+        params = params or tuple()
+        row = self.nab_row(query, params)
+        if not row:
+            return None
+        return row[0]
+
+    def nab_row(self, query: str, params: Optional[tuple] = None) -> Optional[list]:
+        params = params or tuple()
+        return self.execute(query, params).fetchone()
+
+# Old holdover. TODO: Get rid of!
 def con():
-    return sqlite3.connect("data/spirit.db")
-
+    return Connection()
 
 def prize_dat():
     with open("data/prizes.json", "r") as file:
@@ -51,8 +66,28 @@ class Student:
     grade: int
     id: int
 
+    def __post_init__(self) -> None:
+        self.points = int(self.points)
+        self.grade = int(self.grade)
+        self.id = int(self.id)
+
+    @staticmethod
+    def from_name(name: str) -> Student:
+        return Student(
+            *con().nab_row(
+                "SELECT NAME,POINTS,GRADE,ROWID FROM USERS WHERE NAME = ?;", (name,)
+            )
+        )
+
     def to_json(self):
         return self.__dict__
+
+    def get_score_rank(self) -> int:
+        return con().nab(
+            "WITH cte AS (SELECT id, RANK() OVER (ORDER BY points DESC) rnk FROM STUDENTS)"
+            + "SELECT id, rnk FROM cte WHERE id = ?;",
+            (self.id,),
+        )
 
 
 # TODO: string query -> Query Object -> SQL string -> people
@@ -146,6 +181,15 @@ class Event:
     time_start: int
     time_end: int
 
+    @staticmethod
+    def from_id(event_id: int) -> Event:
+        return Event(
+            *con().nab_row(
+                "SELECT ID,NAME,LOCATION,DESCRIPTION,POINTS,TIME_START,TIME_END FROM EVENTS WHERE ID = ?;",
+                (event_id,),
+            )
+        )
+
     def to_json(self) -> dict:
         return {
             "id": self.id,
@@ -156,6 +200,34 @@ class Event:
             "time_start": self.time_start,
             "time_end": self.time_end,
         }
+
+    def set_student_interest(self, student_id: int, interested: bool) -> None:
+        connection = con()
+        if interested:
+            connection.execute(
+                "INSERT INTO STUDENT_ATTENDANCE_INTENT(STUDENT_ID, EVENT_ID) VALUES(?, ?);",
+                (student_id, self.id),
+            )
+        else:
+            connection.execute(
+                "DELETE FROM STUDENT_ATTENDANCE_INTENT WHERE STUDENT_ID = ? AND EVENT_ID = ?;",
+                (student_id, self.id),
+            )
+        connection.commit()
+
+    def get_student_interest(self, student_id: int) -> bool:
+        return bool(
+            con().nab(
+                "SELECT 1 FROM STUDENT_ATTENDANCE_INTENT WHERE STUDENT_ID = ? AND EVENT_ID = ?;",
+                (student_id, self.id),
+            )
+        )
+
+    def get_aggregate_student_interest(self) -> int:
+        return con().nab(
+            "SELECT COUNT() FROM STUDENT_ATTENDANCE_INTENT WHERE EVENT_ID = ?;",
+            (self.id,),
+        )
 
 
 @dataclass
@@ -170,17 +242,6 @@ class Prize:
             "desc": self.desc,
             "points_required": self.points_required,
         }
-
-
-def get_event(event_id: int) -> Event:
-    return Event(
-        *next(
-            con().execute(
-                "SELECT ID,NAME,LOCATION,DESCRIPTION FROM EVENTS WHERE ID = ?;",
-                (event_id,),
-            )
-        )
-    )
 
 
 def get_upcoming_events() -> list[Event]:
@@ -248,6 +309,7 @@ def reindex_scores():
     c.commit()
     print("[db] Done!")
 
+
 @dataclass
 class Request:
     operation: str
@@ -261,12 +323,20 @@ class Request:
     def to_json(self) -> dict:
         return self.__dict__
 
+
 def get_mail(username):
     c = con()
-    school_id = c.execute(f"SELECT SCHOOL_ID FROM USERS WHERE NAME = '{username}'").fetchall()[0][0] # If you know how to make this one statement please show me
+    school_id = c.execute(
+        f"SELECT SCHOOL_ID FROM USERS WHERE NAME = '{username}'"
+    ).fetchall()[0][
+        0
+    ]  # If you know how to make this one statement please show me
     return [
         Request(*x)
-        for x in c.execute(f"SELECT OPERATION, NAME, EMAIL, GRADE, ROLE, ROWID FROM REQUESTS WHERE SCHOOL_ID = '{school_id}'")
+        for x in c.execute(
+            f"SELECT OPERATION, NAME, EMAIL, GRADE, ROLE, ROWID FROM REQUESTS WHERE SCHOOL_ID = '{school_id}'"
+        )
     ]
+
 
 reindex_scores()

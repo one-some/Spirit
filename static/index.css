@@ -112,6 +112,8 @@ table .column-header {
 
 #topbar {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
     height: 64px;
     background-color: var(--topbar);
 }
@@ -119,9 +121,9 @@ table .column-header {
 #topbar #logo {
     margin-top: 12px;
     margin-left: 10px;
+    margin-bottom: 6px;
     height: 32px;
     user-select: none;
-    cursor: df;
 }
 
 #topbar #logo img {
@@ -130,6 +132,16 @@ table .column-header {
 
 #topbar h1 {
     color: white;
+}
+
+#topbar #logout {
+    color: black;
+    background-color: white;
+    border-radius: 0px;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-right: 5px;
+    height: 30px;
 }
 
 h2 {
@@ -573,6 +585,23 @@ modal-content {
     font-style: italic;
     font-size: 14px;
     opacity: 0.7;
+}
+
+#mini-events .event-bottom {
+    display: flex;
+    justify-content: space-between;
+}
+
+#mini-events .listing .interest {
+    margin-right: 12px;;
+}
+
+#mini-events .listing .interest::before {
+    font-family: "Material Icons";
+    content: "group";
+    position: relative;
+    top: 2px;
+    right: 1px;
 }
 
 #mini-events .listing .location {
@@ -1026,6 +1055,7 @@ spacer {
     bottom: 0px;
     height: 100%;
     width: 256px;
+    pointer-events: none;
 }
 
 .notification {

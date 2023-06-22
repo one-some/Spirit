@@ -1,3 +1,4 @@
+import base64
 import math
 import json
 import sqlite3
@@ -9,6 +10,7 @@ from flask import Flask, jsonify, request, render_template, redirect, url_for, s
 import backup
 import audit_log
 import querymaker
+from querymaker import Student, Event
 
 # from pandas import DataFrame
 # from werkzeug.utils import secure_filename
@@ -56,8 +58,6 @@ ALLOWED_EXTENSIONS = {'csv', 'xlx', '', '', '', ''}
 @app.route("/")
 def index():
     print("\nat /\n")
-    con = querymaker.con()
-
     try:
         username = session["username"]
         role = session["role"]
@@ -103,18 +103,21 @@ def login():
         except TypeError:
             # TypeError: None is not subscriptable, as fetchone()
             # will return None if it has nothing to fetch
+            con.close()
             return "Username not found in database!", 404
 
         print("Given Hash:", given_hashed_password)
 
         if given_hashed_password != valid_hashed_password:
             # 403: Not authorized
+            con.close()
             return "INVALID USERNAME AND PASSWORD", 403
 
         session["username"] = username
         role = con.execute(
             "SELECT ROLE FROM USERS WHERE NAME = ?", (username,)
         ).fetchone()[0]
+        con.close()
         session["role"] = role
         # We can assume that this query will succeed since the last
         # one confirmed there's a user with that name in the db
@@ -139,13 +142,19 @@ def login():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        print(request.form.get("Create", "no value"), request.form.get("Create", 'no value') == 'on')
+        print(
+            request.form.get("Create", "no value"),
+            request.form.get("Create", "no value") == "on",
+        )
         con = querymaker.con()
 
         a = int(request.form["school-id"])
         atype = type(a)
         try:
-            c = con.execute("SELECT SCHOOL_ID FROM SCHOOLS WHERE SCHOOL_ID = ?", (request.form["school-id"],)).fetchall()[0][0]
+            c = con.execute(
+                "SELECT SCHOOL_ID FROM SCHOOLS WHERE SCHOOL_ID = ?",
+                (request.form["school-id"],),
+            ).fetchall()[0][0]
         except:
             c = None
         ctype = type(c)
@@ -153,9 +162,7 @@ def register():
 
         print(n, a, n, atype, n, c, n, ctype, n, a == c, n)
 
-
         if request.form.get("Create", False) != "on":
-
             print(request.form)
 
             con.execute(
@@ -172,45 +179,72 @@ def register():
             con.commit()
             # con.execute("")
 
-        
-        elif request.form.get("Create", False) == "on" and int(request.form["school-id"]) != c:
-
-            con.execute("INSERT INTO USERS (NAME, EMAIL, PASSWORD, SCHOOL_ID, ROLE, GRADE) VALUES (?, ?, ?, ?, ?, ?)",
-                        (
-                            request.form["username"],
-                            request.form["email"],
-                            sha256_hash(request.form["password"]),
-                            request.form["school-id"],
-                            request.form["role"],
-                            None,
-                        ))
+        elif (
+            request.form.get("Create", False) == "on"
+            and int(request.form["school-id"]) != c
+        ):
+            con.execute(
+                "INSERT INTO USERS (NAME, EMAIL, PASSWORD, SCHOOL_ID, ROLE, GRADE) VALUES (?, ?, ?, ?, ?, ?)",
+                (
+                    request.form["username"],
+                    request.form["email"],
+                    sha256_hash(request.form["password"]),
+                    request.form["school-id"],
+                    request.form["role"],
+                    None,
+                ),
+            )
             con.commit()
-            con.execute("INSERT INTO SCHOOLS (SCHOOL_ID, SCHOOL_NAME) VALUES (?, ?)", (request.form["school-id"], request.form["school-name"],))
+            con.execute(
+                "INSERT INTO SCHOOLS (SCHOOL_ID, SCHOOL_NAME) VALUES (?, ?)",
+                (
+                    request.form["school-id"],
+                    request.form["school-name"],
+                ),
+            )
             con.commit()
             print("went through for some reason")
+        con.close()
     return render_template("register.html")
 
 
 @app.route("/student")
 def student():
+    if "username" not in session or session.get("role") != "STUDENT":
+        return redirect(url_for("login"))
+
     con = querymaker.con()
-    if "username" in session and session.get("role") == "STUDENT":
-        print("\nat student\n")
+    points = con.nab("SELECT POINTS FROM USERS WHERE NAME = ?", (session["username"],))
 
-        points = con.execute(
-            "SELECT POINTS FROM USERS WHERE NAME = ?", (session["username"],)
-        ).fetchone()[0]
+    POINT_GOAL_INCREMENTS = 15000
+    point_goal = POINT_GOAL_INCREMENTS * math.ceil(points / POINT_GOAL_INCREMENTS)
 
-        POINT_GOAL_INCREMENTS = 15000
-        point_goal = POINT_GOAL_INCREMENTS * math.ceil(points / POINT_GOAL_INCREMENTS)
+    student = Student.from_name(session["username"])
+    attended_events = con.nab(
+        "SELECT COUNT() FROM STUDENT_ATTENDANCE WHERE STUDENT_ID = ?;", (student.id,)
+    )
 
-        return render_template(
-            "student.html",
-            pretty_points=f"{points:,}",
-            pretty_point_goal=f"{point_goal:,}",
-            progress_percent=(points / point_goal) * 100,
-        )
-    return redirect(url_for("login"))
+    missed_events = con.nab(
+        "SELECT COUNT() FROM EVENTS WHERE NOT EXISTS(SELECT 1 FROM STUDENT_ATTENDANCE WHERE EVENT_ID = ID AND STUDENT_ID = ?);",
+        (student.id,),
+    )
+
+    distance_to_first = (
+        con.nab("SELECT POINTS FROM STUDENTS ORDER BY POINTS DESC LIMIT 1;")
+        - student.points
+    )
+
+    con.close()
+    return render_template(
+        "student.html",
+        pretty_points=f"{points:,}",
+        pretty_point_goal=f"{point_goal:,}",
+        progress_percent=(points / point_goal) * 100,
+        pretty_attended_events=f"{attended_events:,}",
+        pretty_missed_events=f"{missed_events:,}",
+        pretty_distance_to_first=f"{distance_to_first:,}",
+        b64encode=lambda x: base64.b64encode(x.encode("utf-8")).decode("utf-8"),
+    )
 
 
 @app.route("/logout", methods=["GET", "POST"])
@@ -223,8 +257,7 @@ def logout():
 
 @app.route("/event/<int:event_id>")
 def event(event_id: int):
-    event = querymaker.get_event(event_id).to_json()
-
+    event = Event.from_id(event_id).to_json()
     return render_template("event.html", event=event)
 
 
@@ -286,7 +319,25 @@ def api_suggestions():
 
 @app.route("/api/events.json")
 def api_events():
-    return jsonify(querymaker.get_upcoming_events())
+    if session["role"] != "STUDENT":
+        out = []
+        for event in querymaker.get_upcoming_events():
+            out.append({
+                **event.__dict__,
+                "interested_count": event.get_aggregate_student_interest()
+            })
+        return jsonify(out)
+
+    student = Student.from_name(session["username"])
+    out = []
+    for event in querymaker.get_upcoming_events():
+        out.append({
+            **event.__dict__,
+            "interested": event.get_student_interest(student.id)
+        })
+    print([x["interested"] for x in out])
+
+    return jsonify(out)
 
 
 @app.route("/api/prizes.json")
@@ -364,7 +415,7 @@ def api_create_event():
             request.json["name"],
             request.json["location"],
             request.json["desc"],
-            request.json["points"],
+            int(request.json["points"]),
             request.json["time_start"],
             request.json["time_end"],
         ),
@@ -397,6 +448,7 @@ def api_attend():
     except sqlite3.IntegrityError:
         # Already exists
         pass
+    con.close()
     return "Ok! :)"
 
 
@@ -422,14 +474,15 @@ def save_student():
             """,
         (
             request.json["student_name"],
-            request.json["student_grade"],
-            request.json["student_points"],
-            request.json["student_points"],
+            int(request.json["student_grade"]),
+            int(request.json["student_points"]),
+            int(request.json["student_points"]),
             request.json["student_id"],
         ),
     )
 
     con.commit()
+    con.close()
 
     return "what is the point of these"
 
@@ -452,13 +505,14 @@ def save_new_student():
             """,
         (
             request.json["student_name"],
-            request.json["student_grade"],
-            request.json["student_points"],
-            request.json["student_points"],
+            int(request.json["student_grade"]),
+            int(request.json["student_points"]),
+            int(request.json["student_points"]),
         ),
     )
 
     con.commit()
+    con.close()
 
     # querymaker.reindex_scores()
 
@@ -482,6 +536,7 @@ def delete_student():
     )
 
     con.commit()
+    con.close()
 
     return "dude idk"
 
@@ -539,14 +594,16 @@ def deny():
     if role in ["TEACHER", "ADMINISTRATOR"]:
         print("\n", request.json, "\n")
         if c.execute(
-        f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\""
-    ).fetchone()[0] == int(
-        c.execute(
-            f"SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = ?",
-            (request.json["request_id"],),
-        ).fetchone()[0]
-    ):
-            c.execute("DELETE FROM REQUESTS WHERE ROWID = ?", (request.json["request_id"],))
+            f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\""
+        ).fetchone()[0] == int(
+            c.execute(
+                f"SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = ?",
+                (request.json["request_id"],),
+            ).fetchone()[0]
+        ):
+            c.execute(
+                "DELETE FROM REQUESTS WHERE ROWID = ?", (request.json["request_id"],)
+            )
             print("hi :)")
             c.commit()
             return ("", 204)
@@ -570,26 +627,73 @@ def accept_student_add():
         return redirect(url_for("login"))
 
     if role in ["TEACHER", "ADMINISTRATOR"]:
-
         a = c.execute(
-        f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\""
-    ).fetchone()[0]
-        b = (
-        c.execute(
+            f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\""
+        ).fetchone()[0]
+        b = c.execute(
             f'SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = \'{request.json["request_id"]}\''
-        ).fetchone()[0])
+        ).fetchone()[0]
         n = "\n\n"
-        print("HERE", n, "a: ", a, n, "type of a: ", type(a), n, "b: ", b, n, "type of b: ", type(b), n)
-
-
-        if c.execute(f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\"").fetchone()[0] == c.execute(f'SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = \'{request.json["request_id"]}\'').fetchone()[0]:
-            c.execute(
-            "INSERT INTO USERS (NAME, GRADE, EMAIL, PASSWORD, ROLE, SCHOOL_ID) SELECT NAME, GRADE, EMAIL, PASSWORD, ROLE, SCHOOL_ID FROM REQUESTS WHERE ROWID = ?",
-            (request.json["request_id"],),
+        print(
+            "HERE",
+            n,
+            "a: ",
+            a,
+            n,
+            "type of a: ",
+            type(a),
+            n,
+            "b: ",
+            b,
+            n,
+            "type of b: ",
+            type(b),
+            n,
         )
-            c.execute("DELETE FROM REQUESTS WHERE ROWID = ?", (request.json["request_id"],))
+
+        if (
+            c.execute(
+                f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\""
+            ).fetchone()[0]
+            == c.execute(
+                f'SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = \'{request.json["request_id"]}\''
+            ).fetchone()[0]
+        ):
+            c.execute(
+                "INSERT INTO USERS (NAME, GRADE, EMAIL, PASSWORD, ROLE, SCHOOL_ID) SELECT NAME, GRADE, EMAIL, PASSWORD, ROLE, SCHOOL_ID FROM REQUESTS WHERE ROWID = ?",
+                (request.json["request_id"],),
+            )
+            c.execute(
+                "DELETE FROM REQUESTS WHERE ROWID = ?", (request.json["request_id"],)
+            )
             c.commit()
         return ("", 204)
+
+
+@app.route("/api/events/<int:event_id>/interest.json", methods=["POST"])
+def set_event_interest(event_id: int):
+    if session.get("role") != "STUDENT" or "username" not in session:
+        return ("Only students may perform this action", 403)
+
+    try:
+        is_interested = bool(request.json["interested"])
+    except KeyError:
+        return ("Missing args", 400)
+
+    event = Event.from_id(event_id)
+    student = Student.from_name(session["username"])
+    event.set_student_interest(student.id, is_interested)
+    return ("", 201)
+
+
+@app.route("/api/events/<int:event_id>/interest.json", methods=["GET"])
+def get_event_interest(event_id: int):
+    if session.get("role") != "STUDENT" or "username" not in session:
+        return ("Only students may perform this action", 403)
+    
+    event = Event.from_id(event_id)
+    student = Student.from_name(session["username"])
+    return jsonify(event.get_student_interest(student.id))
 
 
 if __name__ == "__main__":

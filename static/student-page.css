@@ -10,8 +10,7 @@
 }
 
 /* Student Info Overview */
-#si-taunt-overview,
-#si-taunt-leaderboard {
+#si-taunt-overview {
     padding-left: 16px;
     padding-right: 16px;
     padding-bottom: 8px;
@@ -97,11 +96,110 @@
 }
 
 /* Leaderboard */
-#si-taunt-leaderboard {}
+#si-taunt-leaderboard {
+    flex: 1;
+}
+
+#si-taunt-leaderboard {
+    padding-bottom: 8px;
+    border-bottom: 2px solid lightgray;
+    margin-left: 0px;
+}
+
+.you {
+    background-color: rgba(255, 0, 0, 0.3) !important;
+}
 
 /* Stats */
 #si-taunt-stats {
-    padding-left: 16px;
+    display: flex;
     padding-right: 16px;
-    padding-bottom: 8px;
+}
+
+#si-stat-entry {
+    margin-left: 20px;
+    margin-bottom: 16px;
+}
+
+#si-place {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 4em;
+    background-color: lightcoral;
+
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#si-name {
+    font-size: 2em;
+    margin-left: -10px;
+}
+
+.si-stat {
+    display: block;
+}
+
+/* Events */
+#event-side {
+    display: flex;
+    flex-direction: column;
+}
+
+#event-container {
+    flex: 1;
+    overflow-y: auto;
+}
+
+#event-container .listing {
+    margin-left: 4px;
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+    background-color: rgba(220, 220, 220, 0.5);
+}
+
+#event-container .listing:nth-child(even) {
+    background-color: rgba(200, 200, 200, 0.5);
+}
+
+#event-container .listing .name {
+    font-weight: bold;
+    font-size: 24px;
+    display: block;
+}
+
+#event-container .listing .desc {
+    display: block;
+    font-style: italic;
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+#event-container .listing .location {
+    opacity: 0.8;
+}
+
+#event-container .listing .location::before {
+    font-family: "Material Icons";
+    content: "location_on";
+}
+
+#event-container button {
+    border-radius: 0px;
+    color: black;
+    background-color: white;
+    transition: background-color 0.3s;
+    font-size: 1.1em;
+}
+
+#event-container button.going {
+    background-color: lightgreen;
+}
+
+#event-container .event-bottom {
+    display: flex;
+    justify-content: space-between;
+    padding-right: 10px;
 }
