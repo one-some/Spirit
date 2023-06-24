@@ -39,7 +39,7 @@ def prize_from_points(points: int) -> Optional[str]:
     for prize in prizes:
         if points >= prize.points_required:
             return prize.name
-    
+
     # The poor user cannot afford any prizes. :^(
     return None
 
@@ -447,6 +447,20 @@ def api_attend():
     print(request.json)
     student, event = request.json["student_name"], request.json["event_name"]
 
+    with querymaker.con() as con:
+        exists = con.nab(
+            "SELECT 1 FROM STUDENT_ATTENDANCE WHERE STUDENT_ID = (SELECT ID FROM USERS WHERE NAME = ? LIMIT 1) AND EVENT_ID = (SELECT ID FROM EVENTS WHERE NAME = ?);",
+            (student, event),
+        )
+        if exists:
+            return "Already exists!", 200
+
+    audit_log.report_event(
+        user_name=session["username"],
+        action="Mark attendance",
+        details={"student": student, "event": event},
+    )
+
     try:
         with querymaker.con() as con:
             con.execute(
@@ -454,17 +468,13 @@ def api_attend():
                 (student, event),
             )
 
-            audit_log.report_event(
-                user_name=session["username"],
-                action="Mark attendance",
-                details={"student": student, "event": event},
-            )
             con.commit()
         querymaker.reindex_scores()
     except sqlite3.IntegrityError:
         # Already exists
+        print("integrity error")
         pass
-    return "OK"
+    return "OK", 201
 
 
 @app.route("/api/save_student.json", methods=["POST"])
@@ -558,17 +568,15 @@ def batch_add():
         user_name=session["username"], action="Batch add", allow_rollback=True
     )
 
-    con = querymaker.con()
-    # df = pd.read_excel(request, sheet_name=None)
     f = request.files["file"]
-    # filename = secure_filename(f.filename)
     f.save(os_path.join("input", "csv.csv"))
     df = pd_read_csv("input/csv.csv")
     df.rename(str.upper, axis="columns", inplace=True)
-    print("\n", df, "\n")
     if "SURPLUS" not in df.columns:
         df["SURPLUS"] = df["POINTS"]
-    df.to_sql("USERS", con, if_exists="append", index=False)
+
+    with querymaker.con() as con:
+        df.to_sql("USERS", con, if_exists="append", index=False)
     return ("", 204)
 
 

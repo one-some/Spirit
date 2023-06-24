@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import json
 import sqlite3
 from dataclasses import dataclass
@@ -9,6 +10,8 @@ from typing import Optional
 GRADES = [9, 10, 11, 12]
 VALID_INT_OPERANDS = ["<", "<=", ">", ">=", "="]
 DATABASE_PATH = "data/spirit.db"
+DEBUG_DB_CALLS = False
+
 
 class Connection(sqlite3.Connection):
     def __init__(self) -> None:
@@ -25,9 +28,14 @@ class Connection(sqlite3.Connection):
         params = params or tuple()
         return self.execute(query, params).fetchone()
 
-# Old holdover. TODO: Get rid of!
+
 def con():
+    if DEBUG_DB_CALLS:
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        print("[ConCall]", calframe[1][3])
     return Connection()
+
 
 def prize_dat():
     with open("data/prizes.json", "r") as file:
