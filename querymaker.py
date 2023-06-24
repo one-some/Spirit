@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import inspect
 import json
+import logging
 import random
 import sqlite3
 import time
 from dataclasses import dataclass
 from enum import Enum
-from logging import Logger
 from typing import Optional
 
 GRADES = [9, 10, 11, 12]
@@ -18,7 +18,7 @@ DEBUG_DB_CALLS = False
 MAXIMUM_COMMIT_RETRIES = 10
 MAXIMUM_COMMIT_BACKOFF_SECONDS = 10
 
-logger = Logger.getChild("database")
+logger = logging.getLogger("spirit.database")
 
 
 class Connection(sqlite3.Connection):
@@ -44,7 +44,7 @@ class Connection(sqlite3.Connection):
         params = params or tuple()
         return self.execute(query, params).fetchone()
 
-    def commit(*args, **kwargs):
+    def commit(self, *args, **kwargs):
         error_count = 0
 
         while True:
