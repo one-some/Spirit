@@ -331,24 +331,28 @@ def api_suggestions():
 
 @app.route("/api/events.json")
 def api_events():
-    if session["role"] != "STUDENT":
-        out = []
+    out = []
+
+    if session["role"] in ["ADMINISTRATOR", "TEACHER"]:
+        # Administrators/teachers can get an overview of how many students have
+        # expressed intent to attend specific events
         for event in querymaker.get_upcoming_events():
             out.append(
                 {
-                    **event.__dict__,
+                    **event.to_json(),
                     "interested_count": event.get_aggregate_student_interest(),
                 }
             )
-        return jsonify(out)
-
-    student = Student.from_name(session["username"])
-    out = []
-    for event in querymaker.get_upcoming_events():
-        out.append(
-            {**event.__dict__, "interested": event.get_student_interest(student.id)}
-        )
-    print([x["interested"] for x in out])
+    elif session["role"] == "STUDENT":
+        # Students need to know if they have already attended or not; this changes UI
+        # state on the "I'm Going" button.
+        student = Student.from_name(session["username"])
+        for event in querymaker.get_upcoming_events():
+            out.append(
+                {**event.to_json(), "interested": event.get_student_interest(student.id)}
+            )
+    else:
+        return jsonify({"error": "Unknown role!"}), 403
 
     return jsonify(out)
 
