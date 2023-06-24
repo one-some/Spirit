@@ -24,6 +24,7 @@ def test_register(client):
             "email": "micheal.jackson@whitehouse.gov",
             "role": "student",
             "grade": 9,
+            "Create": "on",
         },
     )
     assert r.status_code == 200

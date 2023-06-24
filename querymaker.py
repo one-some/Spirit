@@ -133,8 +133,8 @@ class Student:
     id: int
 
     def __post_init__(self) -> None:
-        self.points = int(self.points)
-        self.grade = int(self.grade)
+        self.points = int(self.points or 0)
+        self.grade = int(self.grade or 9)
         self.id = int(self.id)
 
     @staticmethod
@@ -418,7 +418,7 @@ def get_mail(username):
         return [
             Request(*x)
             for x in c.execute(
-                f"SELECT OPERATION, NAME, EMAIL, GRADE, ROLE, ROWID FROM REQUESTS WHERE SCHOOL_ID = (SELECT SCHOOL_ID FROM USERS WHERE_NAME = ?);",
+                f"SELECT OPERATION, NAME, EMAIL, GRADE, ROLE, ROWID FROM REQUESTS WHERE SCHOOL_ID = (SELECT SCHOOL_ID FROM USERS WHERE NAME = ?);",
                 (username,),
             )
         ]

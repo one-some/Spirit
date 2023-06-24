@@ -177,6 +177,7 @@ def register():
         n = "\n"
 
         print(n, a, n, atype, n, c, n, ctype, n, a == c, n)
+        print("AAAAAAA")
 
         if request.form.get("Create", False) != "on":
             print(request.form)
@@ -221,6 +222,7 @@ def register():
             con.commit()
             print("went through for some reason")
         con.close()
+    print("ALls good")
     return render_template("register.html")
 
 
