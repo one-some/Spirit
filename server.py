@@ -273,12 +273,6 @@ def logout():
     return redirect(url_for("login"))
 
 
-@app.route("/event/<int:event_id>")
-def event(event_id: int):
-    event = Event.from_id(event_id).to_json()
-    return render_template("event.html", event=event)
-
-
 @app.route("/api/students.json")
 def api_students():
     query = request.args.get("q", None)

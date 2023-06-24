@@ -1,7 +1,7 @@
 import pytest
-import requests
 
 import server
+from tests import TEST_STUDENT_NAME
 
 
 @pytest.fixture(scope="session")
@@ -11,7 +11,9 @@ def app():
 
 
 def test_login(client):
-    r = client.post("/login", data={"username": "Isabel Miles", "password": "password"})
+    r = client.post(
+        "/login", data={"username": TEST_STUDENT_NAME, "password": "password"}
+    )
     assert r.status_code == 302
 
 
@@ -28,3 +30,8 @@ def test_register(client):
         },
     )
     assert r.status_code == 200
+
+
+def test_logout(client):
+    r = client.post("/logout")
+    assert r.status_code == 302
