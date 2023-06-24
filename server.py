@@ -1,45 +1,60 @@
 import base64
-import math
-import json
-import sqlite3
 import hashlib
-from config import config, data_path
-from pandas import read_csv as pd_read_csv
-from flask import Flask, jsonify, request, render_template, redirect, url_for, session
-
-import backup
-import audit_log
-import querymaker
-from querymaker import Student, Event
-
-# from pandas import DataFrame
-# from werkzeug.utils import secure_filename
+import json
+import math
+import sqlite3
 from os import path as os_path
+from typing import Optional
 
-# from flask_wtf import FlaskForm
-# from wtforms import FileField, SubmitField
+from flask import Flask, jsonify, redirect, render_template, request, session, url_for
+from pandas import read_csv as pd_read_csv
+
+import audit_log
+import backup
+import querymaker
+from config import data_path
+from querymaker import Event, Student
 
 # Helper functions
 
 
-def prize_from_points(points: int) -> str:
+def prize_from_points(points: int) -> Optional[str]:
+    """Returns the highest value prize available for a user with the given points.
+
+    Args:
+        points (int): The points to be used to determine the appropriate prize.
+
+    Returns:
+        str: The name of the highest value prize available.
+    """
+
+    # Sort the prizes by points in descending order
     prizes = sorted(
         querymaker.get_prizes(), key=lambda p: p.points_required, reverse=True
     )
-    print(prizes)
 
+    # Walk through the prize list. Since they are in descending order, the first one
+    # with user_points >= prize.points_required will be the highest prize the user can
+    # recieve.
     for prize in prizes:
         if points >= prize.points_required:
             return prize.name
+    
+    # The poor user cannot afford any prizes. :^(
     return None
 
 
-def sha256_hash(
-    password: str,
-):  # hashes the password with hashlib, a default library. I don't know why the weird way of doing it.
+def sha256_hash(plaintext_password: str) -> str:
+    """Returns the hex form of the digest of a password hashed by SHA256.
+
+    Args:
+        password (str): The plaintext password
+
+    Returns:
+        str: The SHA256 digest, in hex form.
+    """
     sha256 = hashlib.sha256()
-    password = password.encode("utf-8")
-    sha256.update(password)
+    sha256.update(plaintext_password.encode("utf-8"))
     return sha256.hexdigest()
 
 
@@ -48,7 +63,8 @@ def sha256_hash(
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.secret_key = "thisisanexamplesecretkey"
-ALLOWED_EXTENSIONS = {'csv', 'xlx', '', '', '', ''}
+ALLOWED_EXTENSIONS = {"csv", "xlx", "", "", "", ""}
+
 
 @app.route("/students")
 @app.route("/leaderboard")
@@ -322,19 +338,20 @@ def api_events():
     if session["role"] != "STUDENT":
         out = []
         for event in querymaker.get_upcoming_events():
-            out.append({
-                **event.__dict__,
-                "interested_count": event.get_aggregate_student_interest()
-            })
+            out.append(
+                {
+                    **event.__dict__,
+                    "interested_count": event.get_aggregate_student_interest(),
+                }
+            )
         return jsonify(out)
 
     student = Student.from_name(session["username"])
     out = []
     for event in querymaker.get_upcoming_events():
-        out.append({
-            **event.__dict__,
-            "interested": event.get_student_interest(student.id)
-        })
+        out.append(
+            {**event.__dict__, "interested": event.get_student_interest(student.id)}
+        )
     print([x["interested"] for x in out])
 
     return jsonify(out)
@@ -428,28 +445,26 @@ def api_create_event():
 @app.route("/api/attend.json", methods=["POST"])
 def api_attend():
     print(request.json)
-    con = querymaker.con()
     student, event = request.json["student_name"], request.json["event_name"]
 
     try:
-        con.execute(
-            "INSERT INTO STUDENT_ATTENDANCE(STUDENT_ID, EVENT_ID) VALUES((SELECT ID FROM USERS WHERE NAME = ? LIMIT 1),(SELECT ID FROM EVENTS WHERE NAME = ?));",
-            (student, event),
-        )
+        with querymaker.con() as con:
+            con.execute(
+                "INSERT INTO STUDENT_ATTENDANCE(STUDENT_ID, EVENT_ID) VALUES((SELECT ID FROM USERS WHERE NAME = ? LIMIT 1),(SELECT ID FROM EVENTS WHERE NAME = ?));",
+                (student, event),
+            )
 
-        audit_log.report_event(
-            user_name=session["username"],
-            action="Mark attendance",
-            details={"student": student, "event": event},
-        )
-
-        con.commit()
+            audit_log.report_event(
+                user_name=session["username"],
+                action="Mark attendance",
+                details={"student": student, "event": event},
+            )
+            con.commit()
         querymaker.reindex_scores()
     except sqlite3.IntegrityError:
         # Already exists
         pass
-    con.close()
-    return "Ok! :)"
+    return "OK"
 
 
 @app.route("/api/save_student.json", methods=["POST"])
@@ -463,60 +478,53 @@ def save_student():
         allow_rollback=True,
     )
 
-    con = querymaker.con()
-    con.execute(
-        """UPDATE USERS
-            SET NAME = ?,
-               GRADE = ?,
-               SURPLUS = ? - (POINTS - SURPLUS),
-               POINTS = ?
-            WHERE ROWID = ?;
-            """,
-        (
-            request.json["student_name"],
-            int(request.json["student_grade"]),
-            int(request.json["student_points"]),
-            int(request.json["student_points"]),
-            request.json["student_id"],
-        ),
-    )
+    with querymaker.con() as con:
+        con.execute(
+            """UPDATE USERS
+                SET NAME = ?,
+                GRADE = ?,
+                SURPLUS = ? - (POINTS - SURPLUS),
+                POINTS = ?
+                WHERE ROWID = ?;
+                """,
+            (
+                request.json["student_name"],
+                int(request.json["student_grade"]),
+                int(request.json["student_points"]),
+                int(request.json["student_points"]),
+                request.json["student_id"],
+            ),
+        )
+        con.commit()
 
-    con.commit()
-    con.close()
-
-    return "what is the point of these"
+    return "OK"
 
 
 @app.route("/api/new_save_student.json", methods=["POST"])
 def save_new_student():
-    print(request.json)
-
     audit_log.report_event(
         user_name=session["username"],
         action="Add student",
         details=request.json,
     )
 
-    con = querymaker.con()
-    con.execute(
-        """INSERT INTO USERS (NAME, GRADE, POINTS, SURPLUS)
-            VALUES
-                (?, ?, ?, ?);
-            """,
-        (
-            request.json["student_name"],
-            int(request.json["student_grade"]),
-            int(request.json["student_points"]),
-            int(request.json["student_points"]),
-        ),
-    )
-
-    con.commit()
-    con.close()
-
+    with querymaker.con() as con:
+        con.execute(
+            """INSERT INTO USERS (NAME, GRADE, POINTS, SURPLUS)
+                VALUES
+                    (?, ?, ?, ?);
+                """,
+            (
+                request.json["student_name"],
+                int(request.json["student_grade"]),
+                int(request.json["student_points"]),
+                int(request.json["student_points"]),
+            ),
+        )
+        con.commit()
     # querymaker.reindex_scores()
 
-    return "Workjjing?"
+    return "OK!", 201
 
 
 @app.route("/api/delete_student.json", methods=["POST"])
@@ -528,17 +536,15 @@ def delete_student():
         allow_rollback=True,
     )
 
-    con = querymaker.con()
-    con.execute(
-        """DELETE FROM USERS
-           WHERE ROWID = ?;""",
-        (request.json["student_id"],),
-    )
+    with querymaker.con() as con:
+        con.execute(
+            """DELETE FROM USERS
+            WHERE ROWID = ?;""",
+            (request.json["student_id"],),
+        )
+        con.commit()
 
-    con.commit()
-    con.close()
-
-    return "dude idk"
+    return
 
 
 # class UploadFileForm(FlaskForm):
@@ -690,7 +696,7 @@ def set_event_interest(event_id: int):
 def get_event_interest(event_id: int):
     if session.get("role") != "STUDENT" or "username" not in session:
         return ("Only students may perform this action", 403)
-    
+
     event = Event.from_id(event_id)
     student = Student.from_name(session["username"])
     return jsonify(event.get_student_interest(student.id))
