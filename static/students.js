@@ -166,7 +166,7 @@ async function updateStudentSearch() {
     // Stuff from index.js
     let place = 1;
     for (const student of j) {
-        renderStudent(leaderboardStudents, place, student);
+        renderStudent(leaderboardStudents, student);
         student.place = place;
         place++;
     }
