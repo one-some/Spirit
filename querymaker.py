@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import inspect
 import json
+import logging
+import random
 import sqlite3
+import time
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
@@ -9,32 +13,94 @@ from typing import Optional
 GRADES = [9, 10, 11, 12]
 VALID_INT_OPERANDS = ["<", "<=", ">", ">=", "="]
 DATABASE_PATH = "data/spirit.db"
+PRIZE_DB_PATH = "data/prizes.json"
+DEBUG_DB_CALLS = False
+MAXIMUM_COMMIT_RETRIES = 10
+MAXIMUM_COMMIT_BACKOFF_SECONDS = 10
+
+logger = logging.getLogger("spirit.database")
+
 
 class Connection(sqlite3.Connection):
     def __init__(self) -> None:
         super().__init__(DATABASE_PATH)
 
     def nab(self, query: str, params: Optional[tuple] = None) -> Optional[list]:
-        params = params or tuple()
-        row = self.nab_row(query, params)
+        row = self.nab_row(query, params or tuple())
         if not row:
             return None
         return row[0]
 
     def nab_row(self, query: str, params: Optional[tuple] = None) -> Optional[list]:
+        """Convienience wrapper
+
+        Args:
+            query (str): _description_
+            params (Optional[tuple], optional): _description_. Defaults to None.
+
+        Returns:
+            Optional[list]: _description_
+        """
         params = params or tuple()
         return self.execute(query, params).fetchone()
 
-# Old holdover. TODO: Get rid of!
-def con():
+    def commit(self, *args, **kwargs):
+        error_count = 0
+
+        while True:
+            try:
+                # Return immediately upon success
+                return super().commit(*args, **kwargs)
+            except sqlite3.OperationalError as e:
+                # Otherwise, increment error counter
+                error_count += 1
+                logger.error(f"Failed to commit on try {error_count}: {e}")
+
+                # If we have too many retries, raise the error
+                if error_count >= MAXIMUM_COMMIT_RETRIES:
+                    logger.error("Reached maximum retry count. Raising error.")
+                    raise
+
+                # Exponential backoff: give competing threads a chance to commit
+                time.sleep(
+                    min(
+                        # Exponent base chosen via messing around in graphing calculator,
+                        # can be changed if appropriate. Random offset added to aid in
+                        # desyncing if multiple retries are being attempted in tandem.
+                        (1.3**error_count) + random.rand(),
+                        # Don't wait for too long
+                        MAXIMUM_COMMIT_BACKOFF_SECONDS,
+                    )
+                )
+
+
+def con() -> Connection:
+    """Shorthand wrapper for Connection() constructor with debug capabilities; use
+    this rather than instantiating a Connection directly.
+
+    Returns:
+        Connection: A database connection object.
+    """
+    if DEBUG_DB_CALLS:
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        logger.debug("[ConCall]", calframe[1][3])
     return Connection()
 
-def prize_dat():
-    with open("data/prizes.json", "r") as file:
+
+def prize_dat() -> dict:
+    """Convenience function for hot-loading prize data from the JSON file.
+
+    Returns:
+        dict: A dictionary of all the prizes in the prize file.
+    """
+    with open(PRIZE_DB_PATH, "r") as file:
         return json.load(file)
 
 
 class Sort(Enum):
+    """An enum representing database ORDER BY operations."""
+
     NAME_DESC = 0
     NAME_ASC = 1
     POINTS_DESC = 2
@@ -67,8 +133,8 @@ class Student:
     id: int
 
     def __post_init__(self) -> None:
-        self.points = int(self.points)
-        self.grade = int(self.grade)
+        self.points = int(self.points or 0)
+        self.grade = int(self.grade or 9)
         self.id = int(self.id)
 
     @staticmethod
@@ -83,6 +149,11 @@ class Student:
         return self.__dict__
 
     def get_score_rank(self) -> int:
+        """Returns what place the student is in when the databse is ranked by points descending.
+
+        Returns:
+            int: Student's rank (place).
+        """
         return con().nab(
             "WITH cte AS (SELECT id, RANK() OVER (ORDER BY points DESC) rnk FROM STUDENTS)"
             + "SELECT id, rnk FROM cte WHERE id = ?;",
@@ -90,14 +161,22 @@ class Student:
         )
 
 
-# TODO: string query -> Query Object -> SQL string -> people
-def get_students_matching(starting_with: str, limit=10):
+def get_students_matching(substring: str, limit=10) -> list[Student]:
+    """Returns {limit} students whose names include {substring}.
+
+    Args:
+        substring (str): Substring to check name inclusion.
+        limit (int, optional): Maximum amount of students to return. Defaults to 10.
+
+    Returns:
+        list[Student]: The students fetched by the operation.
+    """
     return [
         Student(*x)
         for x in con().execute(
             f"SELECT NAME,POINTS,GRADE,ROWID FROM USERS WHERE NAME LIKE ? LIMIT ?;",
             (
-                f"%{starting_with}%",
+                f"%{substring}%",
                 limit,
             ),
         )
@@ -114,16 +193,27 @@ def get_students(
     limit: int = 50,
     sort: Sort = Sort.NAME_DESC,
     score_condition: str = ">0",
-    # Unused
-    rank_condition: str = "",
     query: Optional[str] = None,
     grade_filters: Optional[dict] = None,
-):
-    # HACK: work around mutable type blehhhhing in non-default args
+) -> list[Student]:
+    """A monolithic query function to fetch a list of students matching certain criteria.
+
+    Args:
+        limit (int, optional): Maximum amount of students to return. Defaults to 50.
+        sort (Sort, optional): Query ORDER BY method. Defaults to Sort.NAME_DESC.
+        score_condition (str, optional): A string representing a numerical constraint on the score value. Defaults to ">0".
+        query (Optional[str], optional): A substring to match names to. Defaults to None.
+        grade_filters (Optional[dict], optional): A dict determining which grades should be allowed/disallowed from the results. Defaults to None.
+
+    Raises:
+        ValueError: _description_
+
+    Returns:
+        list[Student]: _description_
+    """
+
     grade_filters = grade_filters or {}
-
     sq = Sort.to_query(sort)
-
     where_clauses = []
 
     if query:
@@ -299,15 +389,15 @@ def get_aggregate_stats() -> dict:
     return stats
 
 
-def reindex_scores():
-    print("[db] Indexing scores...")
-    c = con()
-    c.execute(
-        """UPDATE USERS SET POINTS = (SELECT SUM(EVENTS.POINTS) FROM EVENTS WHERE EVENTS.ID IN (SELECT EVENT_ID FROM STUDENT_ATTENDANCE WHERE STUDENT_ID = USERS.ID)) + SURPLUS;"""
-    )
-    c.execute("UPDATE USERS SET POINTS = SURPLUS WHERE POINTS IS NULL;")
-    c.commit()
-    print("[db] Done!")
+def reindex_scores() -> None:
+    logger.debug("[db] Indexing scores...")
+    with con() as c:
+        c.execute(
+            """UPDATE USERS SET POINTS = (SELECT SUM(EVENTS.POINTS) FROM EVENTS WHERE EVENTS.ID IN (SELECT EVENT_ID FROM STUDENT_ATTENDANCE WHERE STUDENT_ID = USERS.ID)) + SURPLUS;"""
+        )
+        c.execute("UPDATE USERS SET POINTS = SURPLUS WHERE POINTS IS NULL;")
+        c.commit()
+    logger.debug("[db] Done!")
 
 
 @dataclass
@@ -315,7 +405,6 @@ class Request:
     operation: str
     name: str
     email: str
-    # school_id: int
     grade: int
     role: str
     id: int
@@ -325,18 +414,16 @@ class Request:
 
 
 def get_mail(username):
-    c = con()
-    school_id = c.execute(
-        f"SELECT SCHOOL_ID FROM USERS WHERE NAME = '{username}'"
-    ).fetchall()[0][
-        0
-    ]  # If you know how to make this one statement please show me
-    return [
-        Request(*x)
-        for x in c.execute(
-            f"SELECT OPERATION, NAME, EMAIL, GRADE, ROLE, ROWID FROM REQUESTS WHERE SCHOOL_ID = '{school_id}'"
-        )
-    ]
+    with con() as c:
+        return [
+            Request(*x)
+            for x in c.execute(
+                f"SELECT OPERATION, NAME, EMAIL, GRADE, ROLE, ROWID FROM REQUESTS WHERE SCHOOL_ID = (SELECT SCHOOL_ID FROM USERS WHERE NAME = ?);",
+                (username,),
+            )
+        ]
 
 
+# Reindex scores on startup to ensure database integrity after
+# potential edits outside the application.
 reindex_scores()
