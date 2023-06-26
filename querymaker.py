@@ -169,7 +169,7 @@ class Student:
         """
         return Student(
             *con().nab_row(
-                "SELECT NAME,POINTS,GRADE,ROWID FROM USERS WHERE NAME = ?;", (name,)
+                "SELECT NAME,POINTS,GRADE,ROWID,STUDENT_RANK FROM USERS WHERE NAME = ?;", (name,)
             )
         )
 
