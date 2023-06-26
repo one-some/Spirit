@@ -306,30 +306,30 @@ h2 {
     background-color: rgba(211, 211, 211, 0.5);
 }
 
-.leaderboard .listing:nth-child(1) .place {
-    background-color: var(--leaderboard-first);
-    color: white
+.leaderboard .rank1 {
+    background-color: var(--leaderboard-first) !important;
+    color: white !important;
 }
 
-.leaderboard .listing:nth-child(2) .place {
-    background-color: var(--leaderboard-second);
-    color: white
+.leaderboard .rank2 {
+    background-color: var(--leaderboard-second) !important;
+    color: white !important;
 }
 
-.leaderboard .listing:nth-child(3) .place {
-    background-color: var(--leaderboard-third);
-    color: white
+.leaderboard .rank3 {
+    background-color: var(--leaderboard-third) !important;
+    color: white !important;
 }
 
-.leaderboard .listing:nth-child(1) {
+.leaderboard .rank1 {
     background-color: rgba(255, 217, 0, 0.247);
 }
 
-.leaderboard .listing:nth-child(2) {
+.leaderboard .rank2 {
     background-color: rgba(192, 192, 192, 0.247);
 }
 
-.leaderboard .listing:nth-child(3) {
+.leaderboard .rank3 {
     background-color: rgb(165, 87, 42, 0.247);
     ;
 }

@@ -77,13 +77,16 @@ studentCreatorButtons.style.display = "none";       // They will appear when you
 // The function for these is in "students.js"
 
 
-function renderStudent(parent, place, student) {                                    // This is the function that takes the response from the server when you do fetchLeaderboard(), which is 
+function renderStudent(parent, student) {                                    // This is the function that takes the response from the server when you do fetchLeaderboard(), which is 
     //
 
     const cont = $e("div", parent, { classes: ["listing"] });
     const left = $e("div", cont);
     const right = $e("div", cont);
-    $e("span", left, { innerText: place, classes: ["place"] });
+    const rank = $e("span", left, { innerText: student.rank, classes: ["place"] });
+    if ([1,2,3].includes(student.rank)){
+        rank.classList.add(`rank${student.rank}`);
+    }
     $e("span", left, { innerText: student.name, classes: ["name"] });
     $e("span", left, { innerText: `(${student.grade}th)`, classes: ["grade"] });
     $e("span", right, {
@@ -128,7 +131,7 @@ async function fetchLeaderboard(limitf = 25, scoreconditionf = ">0", rankconditi
     for (const el of document.querySelectorAll(`.leaderboard`)) {
         let place = 1;
         for (const student of j) {
-            renderStudent(el, place, student);
+            renderStudent(el, student);
             student.place = place;
             place++;
         }

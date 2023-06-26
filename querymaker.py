@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from flask import session
 import inspect
 import json
 import logging
@@ -149,6 +149,7 @@ class Student:
     points: int
     grade: int
     id: int
+    rank: int
 
     def __post_init__(self) -> None:
         self.points = int(self.points or 0)
@@ -200,9 +201,10 @@ def get_students_matching(substring: str, limit=10) -> list[Student]:
     return [
         Student(*x)
         for x in con().execute(
-            f"SELECT NAME,POINTS,GRADE,ROWID FROM USERS WHERE NAME LIKE ? LIMIT ?;",
+            f"SELECT NAME,POINTS,GRADE,ROWID,STUDENT_RANK FROM USERS WHERE NAME LIKE ?, SCHOOL_ID = ? LIMIT ?;",
             (
                 f"%{substring}%",
+                session["school_id"],
                 limit,
             ),
         )
@@ -274,7 +276,8 @@ def get_students(
         where_clauses.append(
             WhereClause(condition=f"POINTS {score_operand} ?", args=[score_value])
         )
-
+    where_clauses.append(WhereClause(condition=f"SCHOOL_ID = ?", args=[session["school_id"]]))
+    where_clauses.append(WhereClause(condition=f"ROLE = ?", args=["STUDENT"]))
     where_clause = ""
     where_args = []
     if where_clauses:
@@ -285,7 +288,7 @@ def get_students(
     return [
         Student(*x)
         for x in con().execute(
-            f"SELECT NAME,POINTS,GRADE,ROWID FROM USERS {where_clause} ORDER BY {sq} LIMIT ?;",
+            f"SELECT NAME,POINTS,GRADE,ROWID,STUDENT_RANK FROM USERS {where_clause} ORDER BY {sq} LIMIT ?;",
             (
                 *where_args,
                 limit,
@@ -450,6 +453,7 @@ def reindex_scores() -> None:
             """UPDATE USERS SET POINTS = (SELECT SUM(EVENTS.POINTS) FROM EVENTS WHERE EVENTS.ID IN (SELECT EVENT_ID FROM STUDENT_ATTENDANCE WHERE STUDENT_ID = USERS.ID)) + SURPLUS;"""
         )
         c.execute("UPDATE USERS SET POINTS = SURPLUS WHERE POINTS IS NULL;")
+        c.execute("UPDATE USERS SET STUDENT_RANK = R FROM (SELECT ID, DENSE_RANK() OVER(ORDER BY POINTS DESC) R FROM USERS WHERE SCHOOL_ID = ? AND ROLE = 'STUDENT') X WHERE USERS.ID = X.ID", (session["school_id"],))
         c.commit()
     logger.debug("[db] Done!")
 
@@ -480,4 +484,3 @@ def get_mail(username):
 
 # Reindex scores on startup to ensure database integrity after
 # potential edits outside the application.
-reindex_scores()

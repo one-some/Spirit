@@ -133,8 +133,13 @@ def login():
         role = con.execute(
             "SELECT ROLE FROM USERS WHERE NAME = ?", (username,)
         ).fetchone()[0]
+
+        school_id = con.execute("SELECT SCHOOL_ID FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0]
+        
         con.close()
         session["role"] = role
+        session["school_id"] = school_id
+        print("RIGHT HERE \n", username, school_id)
         # We can assume that this query will succeed since the last
         # one confirmed there's a user with that name in the db
 
@@ -173,11 +178,6 @@ def register():
             ).fetchall()[0][0]
         except:
             c = None
-        ctype = type(c)
-        n = "\n"
-
-        print(n, a, n, atype, n, c, n, ctype, n, a == c, n)
-        print("AAAAAAA")
 
         if request.form.get("Create", False) != "on":
             print(request.form)
@@ -520,18 +520,21 @@ def save_new_student():
 
     with querymaker.con() as con:
         con.execute(
-            """INSERT INTO USERS (NAME, GRADE, POINTS, SURPLUS)
+            """INSERT INTO USERS (NAME, GRADE, POINTS, SURPLUS, EMAIL, SCHOOL_ID, ROLE)
                 VALUES
-                    (?, ?, ?, ?);
+                    (?, ?, ?, ?, ?, ?, 'STUDENT');
                 """,
             (
                 request.json["student_name"],
                 int(request.json["student_grade"]),
                 int(request.json["student_points"]),
                 int(request.json["student_points"]),
+                request.json["student_email"],
+                session["school_id"],
             ),
         )
         con.commit()
+        querymaker.reindex_scores()
     # querymaker.reindex_scores()
 
     return "OK!", 201
@@ -709,6 +712,10 @@ def get_event_interest(event_id: int):
     student = Student.from_name(session["username"])
     return jsonify(event.get_student_interest(student.id))
 
+@app.route("/api/reindex_scores")
+def reindex():
+    querymaker.reindex_scores()
+    return(redirect(url_for('index')))
 
 if __name__ == "__main__":
     backup.start_backup_loop()
