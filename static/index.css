@@ -1117,6 +1117,7 @@ spacer {
     background-color: rgba(211, 211, 211, 0.5);
 }
 
-#school-name {
-    display: block;
+.school-name {
+    display: none;
+    text-align: center;
 }
