@@ -697,14 +697,11 @@ modal-content {
     display: flex;
 }
 
-h1.login {
-    margin-top: 25px
-}
-
 .login {
     display: grid;
     margin-top: 0;
     justify-content: center;
+    margin-bottom: 3px;
 }
 
 .login-register-box {
@@ -713,11 +710,23 @@ h1.login {
     align-self: center;
     width: 33%;
     background-color: white;
-    border-radius: 10%;
-    outline-width: 1px;
-    outline-color: black;
-    display: grid;
+    border-radius: 20px;
+
+    outline: 1px solid black;
+
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+
+    text-align: center;
+
+    padding: 16px
 }
+
+#login-content #login {
+    margin-bottom: 12px;
+}
+
 
 .link {
     align-self: center;
@@ -967,15 +976,15 @@ h1.login {
     display: inline-block;
 }
 
+#choose-role {
+    padding: 16px;
+    text-align: center;
+}
+
 .choose-role-container {
     align-content: center;
     display: flex;
     margin-bottom: 20px;
-}
-
-h1 .choose-role-header {
-    align-self: center;
-    margin: 0 0 0 0;
 }
 
 .box-content {
