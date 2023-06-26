@@ -77,18 +77,16 @@ studentCreatorButtons.style.display = "none";       // They will appear when you
 // The function for these is in "students.js"
 
 
-function renderStudent(parent, student) {                                    // This is the function that takes the response from the server when you do fetchLeaderboard(), which is 
-    //
-
-    const cont = $e("div", parent, { classes: ["listing"] });
-    const left = $e("div", cont);
-    const right = $e("div", cont);
-    const rank = $e("span", left, { innerText: student.rank, classes: ["place"] });
+function renderStudent(parent, student) {                                    // This is the function that takes the response from the server when you do fetchLeaderboard(), which is a student represented as json,
+    const cont = $e("div", parent, { classes: ["listing"] });                // And then renders it as a listing in the leaderboard
+    const left = $e("div", cont);                                            // Creates a div for the left side of the listing for the rank, name, and grade
+    const right = $e("div", cont);                                          // Creates a div for the right side for the points
+    const rank = $e("span", left, { innerText: student.rank, classes: ["place"] });     // Creates a box for the place
     if ([1,2,3].includes(student.rank)){
-        rank.classList.add(`rank${student.rank}`);
+        rank.classList.add(`rank${student.rank}`);                                      // If you are 1st, 2nd, or 3rd, it adds a special class to color you gold, silver, or bronze
     }
     $e("span", left, { innerText: student.name, classes: ["name"] });
-    $e("span", left, { innerText: `(${student.grade}th)`, classes: ["grade"] });
+    $e("span", left, { innerText: `(${student.grade}th)`, classes: ["grade"] });        // Creates elements for the grade, rank, and name of the student
     $e("span", right, {
         innerText: student.points.toLocaleString(),
         classes: ["points"],
