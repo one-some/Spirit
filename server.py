@@ -554,7 +554,7 @@ def save_student():
             ),
         )
         con.commit()
-
+        querymaker.reindex_scores()
     return "OK"
 
 
