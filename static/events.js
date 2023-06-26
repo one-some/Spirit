@@ -125,7 +125,7 @@ function editEvent(eventData) {
 $el("#add-student-button").addEventListener("click", async function () {
     await fetch("/api/attend.json", {
         method: "POST",
-        headers: {
+        headers: { 
             "Content-Type": "application/json",
         },
         body: JSON.stringify({ student_name: $el(".search-input").value, event_name: currentEvent.name })

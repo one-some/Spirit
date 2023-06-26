@@ -694,7 +694,6 @@ def get_inbox():
 
 @app.route("/api/deny", methods=["POST"])
 def deny():
-    c = querymaker.con()
 
     try:
         username = session["username"]
@@ -709,27 +708,30 @@ def deny():
         print("No role!?!?! what???")
         return redirect(url_for("login"))
 
+    con = querymaker.con()
+
+
     if role in ["TEACHER", "ADMINISTRATOR"]:
         print("\n", request.json, "\n")
-        if c.execute(
-            f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\""
-        ).fetchone()[0] == int(
-            c.execute(
-                f"SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = ?",
+        if con.nab(
+            "SELECT SCHOOL_ID FROM USERS WHERE NAME = ?;", (session["username"],)
+        ) == int(
+            con.nab(
+                "SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = ?",
                 (request.json["request_id"],),
-            ).fetchone()[0]
+            )
         ):
-            c.execute(
+            con.execute(
                 "DELETE FROM REQUESTS WHERE ROWID = ?", (request.json["request_id"],)
             )
             print("hi :)")
-            c.commit()
+            con.commit()
             return ("", 204)
 
 
 @app.route("/api/accept_student_add", methods=["POST"])
 def accept_student_add():
-    c = querymaker.con()
+    con = querymaker.con()
 
     try:
         username = session["username"]
@@ -745,46 +747,43 @@ def accept_student_add():
         return redirect(url_for("login"))
 
     if role in ["TEACHER", "ADMINISTRATOR"]:
-        a = c.execute(
-            f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\""
-        ).fetchone()[0]
-        b = c.execute(
-            f'SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = \'{request.json["request_id"]}\''
-        ).fetchone()[0]
+        user_school_id = con.nab(
+            "SELECT SCHOOL_ID FROM USERS WHERE NAME = ?;",
+            (session['username'],)
+        )
+        requested_school_id = con.nab(
+            'SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = ?;', (request.json["request_id"])
+        )
         n = "\n\n"
         print(
             "HERE",
             n,
             "a: ",
-            a,
+            user_school_id,
             n,
             "type of a: ",
-            type(a),
+            type(user_school_id),
             n,
             "b: ",
-            b,
+            requested_school_id,
             n,
             "type of b: ",
-            type(b),
+            type(requested_school_id),
             n,
         )
 
         if (
-            c.execute(
-                f"SELECT SCHOOL_ID FROM USERS WHERE NAME = \"{session['username']}\""
-            ).fetchone()[0]
-            == c.execute(
-                f'SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = \'{request.json["request_id"]}\''
-            ).fetchone()[0]
+            user_school_id
+            == requested_school_id
         ):
-            c.execute(
+            con.execute(
                 "INSERT INTO USERS (NAME, GRADE, EMAIL, PASSWORD, ROLE, SCHOOL_ID) SELECT NAME, GRADE, EMAIL, PASSWORD, ROLE, SCHOOL_ID FROM REQUESTS WHERE ROWID = ?",
                 (request.json["request_id"],),
             )
-            c.execute(
+            con.execute(
                 "DELETE FROM REQUESTS WHERE ROWID = ?", (request.json["request_id"],)
             )
-            c.commit()
+            con.commit()
         return ("", 204)
 
 
