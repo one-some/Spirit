@@ -144,6 +144,7 @@ class Sort(Enum):
 @dataclass
 class Student:
     """A representation of a student within the database."""
+
     name: str
     points: int
     grade: int
@@ -212,6 +213,7 @@ def get_students_matching(substring: str, limit=10) -> list[Student]:
 class WhereClause:
     """A structure representing a single component of a WHERE clause (which
     evaluates to a boolean)."""
+
     condition: str
     args: list
 
@@ -294,6 +296,8 @@ def get_students(
 
 @dataclass
 class Event:
+    """A representation of an event within the database."""
+
     id: int
     name: str
     location: str
@@ -323,6 +327,12 @@ class Event:
         }
 
     def set_student_interest(self, student_id: int, interested: bool) -> None:
+        """Marks or unmarks the given student as interested in the event.
+
+        Args:
+            student_id (int): The ID of the student in question.
+            interested (bool): Whether or not the student is interested in attending.
+        """
         connection = con()
         if interested:
             connection.execute(
@@ -337,6 +347,14 @@ class Event:
         connection.commit()
 
     def get_student_interest(self, student_id: int) -> bool:
+        """Returns if a given student is interested in the event.
+
+        Args:
+            student_id (int): The ID of the student in question.
+
+        Returns:
+            bool: Whether or not the student is interested in attending.
+        """
         return bool(
             con().nab(
                 "SELECT 1 FROM STUDENT_ATTENDANCE_INTENT WHERE STUDENT_ID = ? AND EVENT_ID = ?;",
@@ -345,6 +363,11 @@ class Event:
         )
 
     def get_aggregate_student_interest(self) -> int:
+        """Returns the count of students interested in attending the event.
+
+        Returns:
+            int: The amount of students interested in attending.
+        """
         return con().nab(
             "SELECT COUNT() FROM STUDENT_ATTENDANCE_INTENT WHERE EVENT_ID = ?;",
             (self.id,),
