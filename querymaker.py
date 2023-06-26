@@ -155,6 +155,7 @@ class Student:
         self.points = int(self.points or 0)
         self.grade = int(self.grade or 9)
         self.id = int(self.id)
+        self.rank = int(self.rank)
 
     @staticmethod
     def from_name(name: str) -> Student:
@@ -169,6 +170,15 @@ class Student:
         return Student(
             *con().nab_row(
                 "SELECT NAME,POINTS,GRADE,ROWID FROM USERS WHERE NAME = ?;", (name,)
+            )
+        )
+
+    @staticmethod
+    def random_from_grade(grade: int) -> Student:
+        return Student(
+            *con().nab_row(
+                "SELECT NAME,POINTS,GRADE,ROWID,STUDENT_RANK FROM USERS WHERE GRADE = ? AND POINTS > 0 ORDER BY RANDOM() LIMIT 1;",
+                (grade,),
             )
         )
 
@@ -276,7 +286,9 @@ def get_students(
         where_clauses.append(
             WhereClause(condition=f"POINTS {score_operand} ?", args=[score_value])
         )
-    where_clauses.append(WhereClause(condition=f"SCHOOL_ID = ?", args=[session["school_id"]]))
+    where_clauses.append(
+        WhereClause(condition=f"SCHOOL_ID = ?", args=[session["school_id"]])
+    )
     where_clauses.append(WhereClause(condition=f"ROLE = ?", args=["STUDENT"]))
     where_clause = ""
     where_args = []
@@ -383,6 +395,9 @@ class Prize:
     desc: str
     points_required: int
 
+    def __post_init__(self) -> None:
+        self.points_required = int(self.points_required)
+
     def to_json(self) -> dict:
         return {
             "name": self.name,
@@ -398,16 +413,6 @@ def get_upcoming_events() -> list[Event]:
             "SELECT ID,NAME,LOCATION,DESCRIPTION,POINTS,TIME_START,TIME_END FROM EVENTS;",
         )
     ]
-
-
-def get_random_student(grade: int) -> Student:
-    dat = next(
-        con().execute(
-            "SELECT NAME,POINTS,GRADE,ROWID FROM USERS WHERE GRADE = ? AND POINTS > 0 ORDER BY RANDOM() LIMIT 1;",
-            (grade,),
-        )
-    )
-    return Student(*dat)
 
 
 def get_prizes() -> list[Prize]:
@@ -453,7 +458,10 @@ def reindex_scores() -> None:
             """UPDATE USERS SET POINTS = (SELECT SUM(EVENTS.POINTS) FROM EVENTS WHERE EVENTS.ID IN (SELECT EVENT_ID FROM STUDENT_ATTENDANCE WHERE STUDENT_ID = USERS.ID)) + SURPLUS;"""
         )
         c.execute("UPDATE USERS SET POINTS = SURPLUS WHERE POINTS IS NULL;")
-        c.execute("UPDATE USERS SET STUDENT_RANK = R FROM (SELECT ID, DENSE_RANK() OVER(ORDER BY POINTS DESC) R FROM USERS WHERE SCHOOL_ID = ? AND ROLE = 'STUDENT') X WHERE USERS.ID = X.ID", (session["school_id"],))
+        c.execute(
+            "UPDATE USERS SET STUDENT_RANK = R FROM (SELECT ID, DENSE_RANK() OVER(ORDER BY POINTS DESC) R FROM USERS WHERE SCHOOL_ID = ? AND ROLE = 'STUDENT') X WHERE USERS.ID = X.ID",
+            (session["school_id"],),
+        )
         c.commit()
     logger.debug("[db] Done!")
 

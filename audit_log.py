@@ -24,6 +24,7 @@ def get_rollback_id() -> str:
         rollback_id = "".join(random.sample(ALPHABET, ROLLBACK_ID_LENGTH))
     return rollback_id
 
+
 def to_str(object) -> str:
     if type(object) in [
         querymaker.Student,
@@ -31,8 +32,9 @@ def to_str(object) -> str:
         querymaker.Prize,
     ]:
         return object.name
-    
+
     return json.dumps(object.__dict__)
+
 
 def report_event(
     user_name: str,
@@ -62,8 +64,13 @@ def report_event(
             con.backup(rollback_db)
 
     con.execute(
-        "INSERT INTO audit_log(time, user, action, details, rollback_id) VALUES(UNIXEPOCH(), ?, ?, ?, ?)",
-        (user_name, action, json.dumps(details, default=to_str) if details else None, rollback_id),
+        "INSERT INTO audit_log(time, user, action, details, rollback_id) VALUES(STRFTIME('%s'), ?, ?, ?, ?)",
+        (
+            user_name,
+            action,
+            json.dumps(details, default=to_str) if details else None,
+            rollback_id,
+        ),
     )
     con.commit()
     con.close()
