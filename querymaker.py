@@ -99,7 +99,7 @@ def prize_dat() -> dict:
 
 
 class Sort(Enum):
-    """An enum representing database ORDER BY operations."""
+    """An enum representing database ORDER BY qualifiers."""
 
     NAME_DESC = 0
     NAME_ASC = 1
@@ -107,7 +107,15 @@ class Sort(Enum):
     POINTS_ASC = 3
 
     @staticmethod
-    def from_string(string: str):
+    def from_string(string: str) -> Sort:
+        """Returns a Sort enum from a preset string. Intended for use in converting user input to a Sort type.
+
+        Args:
+            string (str): The string mapping to a sort value.
+
+        Returns:
+            Sort: The sort for the given string. Sort.NAME_DESC is returned if the string does not map to a Sort.
+        """
         return {
             "name_desc": Sort.NAME_DESC,
             "name_asc": Sort.NAME_ASC,
@@ -116,7 +124,15 @@ class Sort(Enum):
         }.get(string, Sort.NAME_DESC)
 
     @staticmethod
-    def to_query(sort: Sort):
+    def to_query(sort: Sort) -> str:
+        """Converts a passed Sort enum to an ORDER BY clause qualifier.
+
+        Args:
+            sort (Sort): The sort in question.
+
+        Returns:
+            str: Column and direction for ORDER BY clause.
+        """
         return {
             Sort.NAME_DESC: "NAME DESC",
             Sort.NAME_ASC: "NAME ASC",
@@ -127,6 +143,8 @@ class Sort(Enum):
 
 @dataclass
 class Student:
+    """A representation of a student within the database."""
+
     name: str
     points: int
     grade: int
@@ -140,6 +158,14 @@ class Student:
 
     @staticmethod
     def from_name(name: str) -> Student:
+        """Returns a Student that has a given name.
+
+        Args:
+            name (str): The student's name.
+
+        Returns:
+            Student: The student with the given name.
+        """
         return Student(
             *con().nab_row(
                 "SELECT NAME,POINTS,GRADE,ROWID FROM USERS WHERE NAME = ?;", (name,)
@@ -187,6 +213,9 @@ def get_students_matching(substring: str, limit=10) -> list[Student]:
 
 @dataclass
 class WhereClause:
+    """A structure representing a single component of a WHERE clause (which
+    evaluates to a boolean)."""
+
     condition: str
     args: list
 
@@ -203,15 +232,19 @@ def get_students(
     Args:
         limit (int, optional): Maximum amount of students to return. Defaults to 50.
         sort (Sort, optional): Query ORDER BY method. Defaults to Sort.NAME_DESC.
-        score_condition (str, optional): A string representing a numerical constraint on the score value. Defaults to ">0".
+        score_condition (str, optional): A string representing a numerical constraint
+            on the score value. Defaults to ">0".
         query (Optional[str], optional): A substring to match names to. Defaults to None.
-        grade_filters (Optional[dict], optional): A dict determining which grades should be allowed/disallowed from the results. Defaults to None.
+        grade_filters (Optional[dict], optional): A dict determining which grades
+            should be allowed/disallowed from the results. Defaults to None.
 
     Raises:
-        ValueError: _description_
+        ValueError: Unexpected user input made it past other filters. This should
+            not be handled by the caller; instead the caller should process the
+            user input appropriately.
 
     Returns:
-        list[Student]: _description_
+        list[Student]: The students returned satisfying the constraints of the query.
     """
 
     grade_filters = grade_filters or {}
@@ -266,6 +299,8 @@ def get_students(
 
 @dataclass
 class Event:
+    """A representation of an event within the database."""
+
     id: int
     name: str
     location: str
@@ -295,6 +330,12 @@ class Event:
         }
 
     def set_student_interest(self, student_id: int, interested: bool) -> None:
+        """Marks or unmarks the given student as interested in the event.
+
+        Args:
+            student_id (int): The ID of the student in question.
+            interested (bool): Whether or not the student is interested in attending.
+        """
         connection = con()
         if interested:
             connection.execute(
@@ -309,6 +350,14 @@ class Event:
         connection.commit()
 
     def get_student_interest(self, student_id: int) -> bool:
+        """Returns if a given student is interested in the event.
+
+        Args:
+            student_id (int): The ID of the student in question.
+
+        Returns:
+            bool: Whether or not the student is interested in attending.
+        """
         return bool(
             con().nab(
                 "SELECT 1 FROM STUDENT_ATTENDANCE_INTENT WHERE STUDENT_ID = ? AND EVENT_ID = ?;",
@@ -317,6 +366,11 @@ class Event:
         )
 
     def get_aggregate_student_interest(self) -> int:
+        """Returns the count of students interested in attending the event.
+
+        Returns:
+            int: The amount of students interested in attending.
+        """
         return con().nab(
             "SELECT COUNT() FROM STUDENT_ATTENDANCE_INTENT WHERE EVENT_ID = ?;",
             (self.id,),
