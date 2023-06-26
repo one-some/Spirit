@@ -134,8 +134,10 @@ def login():
             "SELECT ROLE FROM USERS WHERE NAME = ?", (username,)
         ).fetchone()[0]
 
-        school_id = con.execute("SELECT SCHOOL_ID FROM USERS WHERE NAME = ?", (session["username"],)).fetchone()[0]
-        
+        school_id = con.execute(
+            "SELECT SCHOOL_ID FROM USERS WHERE NAME = ?", (session["username"],)
+        ).fetchone()[0]
+
         con.close()
         session["role"] = role
         session["school_id"] = school_id
@@ -308,7 +310,7 @@ def api_draw_results():
             )[0]
         else:
             # Criteria is grade number
-            student = querymaker.get_random_student(grade=criteria)
+            student = Student.random_from_grade(grade=criteria)
 
         winners[str(criteria)] = {
             "student": student,
@@ -349,7 +351,10 @@ def api_events():
         student = Student.from_name(session["username"])
         for event in querymaker.get_upcoming_events():
             out.append(
-                {**event.to_json(), "interested": event.get_student_interest(student.id)}
+                {
+                    **event.to_json(),
+                    "interested": event.get_student_interest(student.id),
+                }
             )
     else:
         return jsonify({"error": "Unknown role!"}), 403
@@ -390,28 +395,67 @@ def get_audit_log():
     return jsonify(dat)
 
 
-@app.route("/api/set_prizes.json", methods=["POST"])
-def api_set_prizes():
-    new_dat = []
-    for prize in request.json:
-        new_dat.append(
-            {
-                "name": prize["name"],
-                "desc": prize["desc"],
-                "points_required": prize["points"],
-            }
-        )
+@app.route("/api/prize.json", methods=["POST"])
+def api_new_prize():
+    new_prize = {
+        "name": request.json["name"],
+        "desc": request.json["desc"],
+        "points_required": request.json["points"],
+    }
+
+    prize_dat = querymaker.prize_dat()
+    prize_dat.append(new_prize)
 
     with open(data_path("prizes.json"), "w") as file:
-        json.dump(new_dat, file)
+        json.dump(prize_dat, file)
 
     audit_log.report_event(
         user_name=session["username"],
-        action="Set prizes",
-        details=new_dat,
+        action="Add prize",
+        details=new_prize,
     )
 
-    return "Ok! :)"
+    return jsonify(prize_dat)
+
+
+@app.route("/api/prize/<int:id>.json", methods=["PUT"])
+def api_edit_prize(id: int):
+    new_prize = {
+        "name": request.json["name"],
+        "desc": request.json["desc"],
+        "points_required": request.json["points"],
+    }
+
+    prize_dat = querymaker.prize_dat()
+    prize_dat[id] = new_prize
+
+    with open(data_path("prizes.json"), "w") as file:
+        json.dump(prize_dat, file)
+
+    audit_log.report_event(
+        user_name=session["username"],
+        action="Edit prize",
+        details=new_prize,
+    )
+
+    return jsonify(prize_dat)
+
+
+@app.route("/api/prize/<int:id>.json", methods=["DELETE"])
+def api_delete_prize(id: int):
+    prize_dat = querymaker.prize_dat()
+    old_prize = prize_dat.pop(id)
+
+    with open(data_path("prizes.json"), "w") as file:
+        json.dump(prize_dat, file)
+
+    audit_log.report_event(
+        user_name=session["username"],
+        action="Delete prize",
+        details=old_prize,
+    )
+
+    return jsonify(prize_dat)
 
 
 @app.route("/api/create_event.json", methods=["POST"])
@@ -712,10 +756,12 @@ def get_event_interest(event_id: int):
     student = Student.from_name(session["username"])
     return jsonify(event.get_student_interest(student.id))
 
+
 @app.route("/api/reindex_scores")
 def reindex():
     querymaker.reindex_scores()
-    return(redirect(url_for('index')))
+    return redirect(url_for("index"))
+
 
 if __name__ == "__main__":
     backup.start_backup_loop()
