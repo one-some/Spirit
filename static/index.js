@@ -86,14 +86,14 @@ function renderStudent(parent, student) {                                    // 
         rank.classList.add(`rank${student.rank}`);                                      // If you are 1st, 2nd, or 3rd, it adds a special class to color you gold, silver, or bronze
     }
     $e("span", left, { innerText: student.name, classes: ["name"] });
-    $e("span", left, { innerText: `(${student.grade}th)`, classes: ["grade"] });        // Creates elements for the grade, rank, and name of the student
+    $e("span", left, { innerText: `(${student.grade}th)`, classes: ["grade"] });        // Creates elements for the grade, rank, and name of the student for the leaderboard
     $e("span", right, {
         innerText: student.points.toLocaleString(),
         classes: ["points"],
         title: "Points"
     });
     cont.addEventListener("click", function () {
-        editStudent(student);
+        editStudent(student);                                                           // Creates an event listener so that when you click on a student their info shows in the editor
     });
 }
 
@@ -104,7 +104,7 @@ function editStudent(studentData) {
     studentEditorButtons.style.display = "block";
     if (greyed === false) {
         currentStudent = studentData;
-        studentViewer.querySelector("#student-name").value = studentData.name;
+        studentViewer.querySelector("#student-name").value = studentData.name;      //
         studentViewer.querySelector("#student-points").value = studentData.points;
         studentViewer.querySelector("#student-grade").value = studentData.grade;
         studentDefaultButtons.style.display = "none";

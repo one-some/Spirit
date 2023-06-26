@@ -6,8 +6,11 @@ import sqlite3
 from os import path as os_path
 from typing import Optional
 
-from flask import Flask, jsonify, redirect, render_template, request, session, url_for
+from flask import Flask, jsonify, redirect, render_template, request, session, url_for, flash
+from werkzeug.utils import secure_filename
+
 from pandas import read_csv as pd_read_csv
+from pandas import read_excel as pd_read_excel
 
 import audit_log
 import backup
@@ -57,13 +60,14 @@ def sha256_hash(plaintext_password: str) -> str:
     sha256.update(plaintext_password.encode("utf-8"))
     return sha256.hexdigest()
 
-
+def allowed_file(filename):
+    return ('.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS, filename.rsplit('.', 1)[1].lower())
 # Routing
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.secret_key = "thisisanexamplesecretkey"
-ALLOWED_EXTENSIONS = {"csv", "xlx", "", "", "", ""}
+ALLOWED_EXTENSIONS = {"csv", "xls", "xlsx", "xltx", "xltm"}
 
 
 @app.route("/students")
@@ -571,16 +575,69 @@ def batch_add():
         user_name=session["username"], action="Batch add", allow_rollback=True
     )
 
-    f = request.files["file"]
-    f.save(os_path.join("input", "csv.csv"))
-    df = pd_read_csv("input/csv.csv")
-    df.rename(str.upper, axis="columns", inplace=True)
-    if "SURPLUS" not in df.columns:
-        df["SURPLUS"] = df["POINTS"]
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # If the user does not select a file, the browser submits an
+        # empty file without a filename.
+        print(file.filename)
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename)[0]:
+            filename = secure_filename(file.filename)
+            extension = allowed_file(file.filename)[1]
 
-    with querymaker.con() as con:
-        df.to_sql("USERS", con, if_exists="append", index=False)
-    return ("", 204)
+            if extension == 'csv':
+                file.save(os_path.join("input", "csv.csv"))
+                df = pd_read_csv("input/csv.csv")
+            else:
+                file.save(os_path.join("input", f"{extension}.{extension}"))
+                df = pd_read_excel(f"input/{extension}.{extension}")
+
+            df.rename(str.upper, axis="columns", inplace=True)
+
+            print(df.columns, list(df.columns))
+
+            if 'NAME' not in list(df.columns):
+                flash("Error: No NAME column!")
+
+            elif 'GRADE' not in list(df.columns):
+                flash("Error: No GRADE column!")
+
+            elif 'EMAIL' not in list(df.columns):
+                flash("Error: No EMAIL column")
+
+            elif 'POINTS' not in list(df.columns):
+                df['POINTS'] = 0
+                df['SURPLUS'] = 0
+
+            if "SURPLUS" not in df.columns:
+                df["SURPLUS"] = df["POINTS"]
+
+            for key in df.columns:
+                print(key)
+                if key not in ['NAME', 'POINTS', 'GRADE', 'SURPLUS', 'EMAIL', 'PASSWORD']:
+                    df.drop(key, axis=1, inplace=True)
+            if 'PASSWORD' not in list(df.columns):
+                df["PASSWORD"] = sha256_hash('password')
+            else:
+                df["PASSWORD"] = sha256_hash(df["PASSWORD"])
+
+            df["SCHOOL_ID"] = session["school_id"]
+            df["ROLE"] = "STUDENT"
+
+            df.dropna(inplace=True)
+
+            print(df)
+
+            with querymaker.con() as con:
+                df.to_sql("USERS", con, if_exists="append", index=False)
+            querymaker.reindex_scores()
+            return ("", 204)
 
 
 @app.route("/api/get_inbox")
