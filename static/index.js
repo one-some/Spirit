@@ -82,7 +82,7 @@ function renderStudent(parent, student) {                                    // 
     const left = $e("div", cont);                                            // Creates a div for the left side of the listing for the rank, name, and grade
     const right = $e("div", cont);                                          // Creates a div for the right side for the points
     const rank = $e("span", left, { innerText: student.rank, classes: ["place"] });     // Creates a box for the place
-    if ([1,2,3].includes(student.rank)){
+    if ([1, 2, 3].includes(student.rank)) {
         rank.classList.add(`rank${student.rank}`);                                      // If you are 1st, 2nd, or 3rd, it adds a special class to color you gold, silver, or bronze
     }
     $e("span", left, { innerText: student.name, classes: ["name"] });
@@ -154,24 +154,25 @@ async function getInbox() {
 async function makeMail(parent, request) {
     listing = $e("div", parent, { classes: ["listing"] });
     right = $e("div", listing)
-    let acceptButton = $e("button", listing, { innerText: "check", classes: ["mail-confirm", "material-icons"]})
-    acceptButton.addEventListener("click", function () {
-        confirmOrDenyAddStudent(request.id, "accept");
-        getInbox();
+    let acceptButton = $e("button", listing, { innerText: "check", classes: ["mail-confirm", "material-icons"] })
+    acceptButton.addEventListener("click", async function () {
         listing.remove();
-    })
-    let denybutton = $e("button", listing, { innerText: "close", classes: ["mail-deny", "material-icons"]})
-    denybutton.addEventListener("click", function () {
-        confirmOrDenyAddStudent(request.id, "deny");
+        await confirmOrDenyAddStudent(request.id, "accept");
         getInbox();
     })
-    $e("span", right, { innerText: request.operation + " "});
+    let denybutton = $e("button", listing, { innerText: "close", classes: ["mail-deny", "material-icons"] })
+    denybutton.addEventListener("click", async function () {
+        listing.remove();
+        await confirmOrDenyAddStudent(request.id, "deny");
+        getInbox();
+    })
+    $e("span", right, { innerText: request.operation + " " });
     $e("span", right, { innerText: request.role });
-    bottomText = $e("div", right, { classes: ['bottom-text']})
+    bottomText = $e("div", right, { classes: ['bottom-text'] })
     $e("span", bottomText, { innerText: "Name: " + request.name + "; " });
-    $e("span", bottomText, { innerText: "Email: " + request.email + "; "});
-    if(request.grade != "NULL"){
-            $e("span", bottomText, { innerText: "Grade: " + request.grade + ";" });
+    $e("span", bottomText, { innerText: "Email: " + request.email + "; " });
+    if (request.grade != "NULL") {
+        $e("span", bottomText, { innerText: "Grade: " + request.grade + ";" });
     }
 }
 
@@ -190,7 +191,7 @@ async function confirmOrDenyAddStudent(ID, approval) {
             request_id: ID,
         }))
     }
-    else if(approval == "accept"){
+    else if (approval == "accept") {
         await fetch("/api/accept_student_add", {
             method: "POST",
             headers: {
@@ -204,7 +205,7 @@ async function confirmOrDenyAddStudent(ID, approval) {
             request_id: ID,
         }))
     }
-    
+
 }
 
 async function init() {
