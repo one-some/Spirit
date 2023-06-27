@@ -743,34 +743,17 @@ def accept_student_add():
     print(f"Username: {username}")
 
     if not role:
-        print("No role!?!?! what???")
+        print("No role!")
         return redirect(url_for("login"))
 
     if role in ["TEACHER", "ADMINISTRATOR"]:
-        user_school_id = con.nab(
+        user_school_id = int(con.nab(
             "SELECT SCHOOL_ID FROM USERS WHERE NAME = ?;",
             (session['username'],)
-        )
-        requested_school_id = con.nab(
-            'SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = ?;', (request.json["request_id"])
-        )
-        n = "\n\n"
-        print(
-            "HERE",
-            n,
-            "a: ",
-            user_school_id,
-            n,
-            "type of a: ",
-            type(user_school_id),
-            n,
-            "b: ",
-            requested_school_id,
-            n,
-            "type of b: ",
-            type(requested_school_id),
-            n,
-        )
+        ))
+        requested_school_id = int(con.nab(
+            'SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = ?;', (request.json["request_id"],)
+        ))
 
         if (
             user_school_id
