@@ -118,10 +118,12 @@ var rankCondition;
 var sort;
 
 
-async function fetchLeaderboard(limitf = 25, scoreconditionf = ">0", rankconditionf = ">0", sortf = "points_desc",) {
+async function fetchLeaderboard(limitf = 25, scoreconditionf = ">-1", rankconditionf = ">0", sortf = "points_desc",) {
 
     let r = await fetch(`/api/students.json?limit=${limitf}&sort=${sortf}&scorecondition=${scoreconditionf}&rankcondition=${rankconditionf}`);
     let j = await r.json();
+
+    console.log(j);
 
     for (const el of document.querySelectorAll(`.leaderboard .listing`)) {
         el.remove();
@@ -130,6 +132,7 @@ async function fetchLeaderboard(limitf = 25, scoreconditionf = ">0", rankconditi
         let place = 1;
         for (const student of j) {
             renderStudent(el, student);
+            console.log("rendered");
             student.place = place;
             place++;
         }

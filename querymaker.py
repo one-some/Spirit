@@ -233,7 +233,7 @@ class WhereClause:
 def get_students(
     limit: int = 50,
     sort: Sort = Sort.NAME_DESC,
-    score_condition: str = ">0",
+    score_condition: str = ">-1",
     query: Optional[str] = None,
     grade_filters: Optional[dict] = None,
 ) -> list[Student]:
