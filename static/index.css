@@ -593,7 +593,8 @@ modal-content {
 }
 
 #mini-events .listing .interest {
-    margin-right: 12px;;
+    margin-right: 12px;
+    ;
 }
 
 #mini-events .listing .interest::before {
@@ -955,18 +956,31 @@ modal-content {
 .row-setting {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     flex: 1;
     margin-top: 6px;
     column-gap: 10px;
 }
 
-.row-setting label {
+.row-setting label,
+.row-setting span {
     text-align: center;
+}
+
+.row-setting .row-top {
+    display: flex;
+    justify-content: center;
+    column-gap: 4px;
+    cursor: pointer;
+}
+
+.row-setting .row-top > * {
+    cursor: pointer;
 }
 
 #search-input {
     flex-grow: 1;
+    margin-right: 6px;
 }
 
 #grade-filter {

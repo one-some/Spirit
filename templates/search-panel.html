@@ -12,15 +12,25 @@
     </div>
     <div class="row padded-row">
         <div class="row-setting">
-            <label for="min-score">Min Score</label>
-            <input id="min-score" type="range" min="0" max="30000">
-            <span class="row-setting-value"></span>
+            <div class="row-top">
+                <label for="min-score-toggle">Min Score</label>
+                <input id="min-score-toggle" type="checkbox">
+            </div>
+            <div class="row-bottom">
+                <input id="min-score" class="main-setting-input" type="range" min="0" max="30000">
+                <span class="row-setting-value"></span>
+            </div>
         </div>
 
         <div class="row-setting">
-            <label for="min-rank">Min Rank</label>
-            <input id="min-rank" type="range" min="1" max="100">
-            <span class="row-setting-value"></span>
+            <div class="row-top">
+                <label for="min-rank-toggle">Min Rank</label>
+                <input id="min-rank-toggle" type="checkbox">
+            </div>
+            <div class="row-bottom">
+                <input id="min-rank" class="main-setting-input" type="range" min="1" max="100">
+                <span class="row-setting-value"></span>
+            </div>
         </div>
     </div>
 </div>
