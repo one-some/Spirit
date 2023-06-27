@@ -211,7 +211,7 @@ def get_students_matching(substring: str, limit=10) -> list[Student]:
     return [
         Student(*x)
         for x in con().execute(
-            f"SELECT NAME,POINTS,GRADE,ROWID,STUDENT_RANK FROM USERS WHERE NAME LIKE ?, SCHOOL_ID = ? LIMIT ?;",
+            f"SELECT NAME,POINTS,GRADE,ROWID,STUDENT_RANK FROM USERS WHERE NAME LIKE ? AND SCHOOL_ID = ? LIMIT ?;",
             (
                 f"%{substring}%",
                 session["school_id"],
