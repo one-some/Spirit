@@ -937,8 +937,32 @@ modal-content {
 
 #search-panel {
     display: flex;
+    flex-direction: column;
     margin-left: 10px;
     background-color: rgba(211, 211, 211, 0.5);
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.padded-row {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.row-setting {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+    margin-top: 6px;
+    column-gap: 10px;
+}
+
+.row-setting label {
+    text-align: center;
 }
 
 #search-input {
