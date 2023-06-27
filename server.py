@@ -801,6 +801,24 @@ def reindex():
     querymaker.reindex_scores()
     return redirect(url_for("index"))
 
+@app.route("/api/delete_seniors")
+def delete_seniors():
+    if session.get("role", None) == "ADMINISTRATOR":
+        with querymaker.con() as con:
+            con.execute("DELETE FROM USERS WHERE GRADE = 12")
+            con.commit()
+        querymaker.reindex_scores()
+    return("", 204)
+
+@app.route("/api/zero_scores")
+def zero_scores():
+    if session.get("role", None) == "ADMINISTRATOR":
+        with querymaker.con() as con:
+            con.execute("UPDATE USERS SET POINTS = 0, SURPLUS = 0")
+            con.execute("DELETE FROM STUDENT_ATTENDANCE")
+            con.commit()
+        querymaker.reindex_scores()
+    return ("", 204)
 
 if __name__ == "__main__":
     backup.start_backup_loop()
