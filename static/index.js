@@ -208,6 +208,32 @@ async function confirmOrDenyAddStudent(ID, approval) {
 
 }
 
+// Search criteria settings updater
+for (const rowEl of document.querySelectorAll(".row-setting")) {
+    const topEl = rowEl.querySelector(".row-top");
+    const bottomEl = rowEl.querySelector(".row-bottom");
+    const checkboxEl = topEl.querySelector('input[type="checkbox"]');
+    const inputEl = rowEl.querySelector("input.main-setting-input");
+    const valueEl = rowEl.querySelector(".row-setting-value");
+
+    rowEl.addEventListener("click", function (event) {
+        if (event.target !== this) return;
+        checkboxEl.click();
+    });
+
+    inputEl.addEventListener("input", function () {
+        valueEl.innerText = this.value;
+    });
+
+    checkboxEl.addEventListener("input", function () {
+        bottomEl.classList.toggle("hidden", !checkboxEl.checked);
+    });
+
+    valueEl.innerText = inputEl.value;
+    bottomEl.classList.toggle("hidden", !checkboxEl.checked);
+}
+
+
 async function init() {
     fetchLeaderboard(limit, scoreCondition, rankCondition, sort);
     getInbox();

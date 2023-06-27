@@ -1,11 +1,36 @@
 <div id="search-panel">
-    <input id="search-input" placeholder="Search for students">
-    <div id="grade-filter">
-        {% for grade in [9, 10, 11, 12]%}
+    <div class="row">
+        <input id="search-input" placeholder="Search for students">
+        <div id="grade-filter">
+            {% for grade in [9, 10, 11, 12]%}
             <div class="grade-filter-row">
                 <label for="search-grade-{{ grade }}th">{{ grade }}th Grade</label>
                 <input id="search-grade-{{ grade }}th" type="checkbox" checked>
             </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+    <div class="row padded-row">
+        <div class="row-setting">
+            <div class="row-top">
+                <label for="min-score-toggle">Min Score</label>
+                <input id="min-score-toggle" type="checkbox">
+            </div>
+            <div class="row-bottom">
+                <input id="min-score" class="main-setting-input" type="range" min="0" max="30000">
+                <span class="row-setting-value"></span>
+            </div>
+        </div>
+
+        <div class="row-setting">
+            <div class="row-top">
+                <label for="min-rank-toggle">Min Rank</label>
+                <input id="min-rank-toggle" type="checkbox">
+            </div>
+            <div class="row-bottom">
+                <input id="min-rank" class="main-setting-input" type="range" min="1" max="100">
+                <span class="row-setting-value"></span>
+            </div>
+        </div>
     </div>
 </div>
