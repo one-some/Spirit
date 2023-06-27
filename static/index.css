@@ -1130,3 +1130,7 @@ spacer {
     display: none;
     text-align: center;
 }
+
+.advanced-buttons {
+    display: inline-block;
+}
