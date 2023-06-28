@@ -5,6 +5,7 @@ import math
 import sqlite3
 from os import path as os_path
 from typing import Optional
+import random
 
 from flask import Flask, jsonify, redirect, render_template, request, session, url_for, flash
 from werkzeug.utils import secure_filename
@@ -17,6 +18,7 @@ import backup
 import querymaker
 from config import data_path
 from querymaker import Event, Student
+import spiritmail
 
 # Helper functions
 
@@ -566,11 +568,14 @@ def save_new_student():
         details=request.json,
     )
 
+    
+    password = "".join(random.sample(audit_log.ALPHABET, k=10))
+
     with querymaker.con() as con:
         con.execute(
-            """INSERT INTO USERS (NAME, GRADE, POINTS, SURPLUS, EMAIL, SCHOOL_ID, ROLE)
+            """INSERT INTO USERS (NAME, GRADE, POINTS, SURPLUS, EMAIL, SCHOOL_ID, ROLE, PASSWORD)
                 VALUES
-                    (?, ?, ?, ?, ?, ?, 'STUDENT');
+                    (?, ?, ?, ?, ?, ?, 'STUDENT', ?);
                 """,
             (
                 request.json["student_name"],
@@ -579,11 +584,16 @@ def save_new_student():
                 int(request.json["student_points"]),
                 request.json["student_email"],
                 session["school_id"],
+                sha256_hash(password),
             ),
         )
         con.commit()
         querymaker.reindex_scores()
     # querymaker.reindex_scores()
+
+
+    spiritmail.sendPassword(request.json["student_email"], request.json["student_name"], password)
+
 
     return "OK!", 201
 
@@ -646,11 +656,13 @@ def batch_add():
 
             print(df.columns, list(df.columns))
 
+            
             if 'NAME' not in list(df.columns):
                 flash("Error: No NAME column!")
 
             elif 'GRADE' not in list(df.columns):
                 flash("Error: No GRADE column!")
+                print("error occured")
 
             elif 'EMAIL' not in list(df.columns):
                 flash("Error: No EMAIL column")
@@ -667,7 +679,9 @@ def batch_add():
                 if key not in ['NAME', 'POINTS', 'GRADE', 'SURPLUS', 'EMAIL', 'PASSWORD']:
                     df.drop(key, axis=1, inplace=True)
             if 'PASSWORD' not in list(df.columns):
-                df["PASSWORD"] = sha256_hash('password')
+                for index, row in df.iterrows():
+                    password = "".join(random.sample(audit_log.ALPHABET, k=10))
+                    spiritmail.sendPassword(row['EMAIL'], row["NAME"], password)
             else:
                 df["PASSWORD"] = sha256_hash(df["PASSWORD"])
 
@@ -675,8 +689,6 @@ def batch_add():
             df["ROLE"] = "STUDENT"
 
             df.dropna(inplace=True)
-
-            print(df)
 
             with querymaker.con() as con:
                 df.to_sql("USERS", con, if_exists="append", index=False)
