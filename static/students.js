@@ -146,9 +146,37 @@ async function batchAdd() {
     closeModals();
 }
 
+function getFilters() {
+    let rankCondition = ">0";
+    if ($el("#min-rank-toggle").checked) {
+        const rankThreshold = parseInt($el("#min-rank").value);
+        rankCondition = `<${rankThreshold + 1}`;
+    }
+
+    let scoreCondition = ">-1";
+    if ($el("#min-score-toggle").checked) {
+        const scoreThreshold = $el("#min-score").value;
+        scoreCondition = `>${scoreThreshold - 1}`;
+    }
+
+    return { rank: rankCondition, score: scoreCondition }
+}
+
 async function updateStudentSearch() {
     // TODO: Fix placement to use values from server instead of just nth result
     let queryBits = [`q=${studentSearchInput.value}`, "limit=25", "sort=points_desc"];
+
+    const filters = getFilters();
+
+    if (filters.score) {
+        queryBits.push(`scorecondition=${filters.score}`)
+    }
+
+    if (filters.rank) {
+        queryBits.push(`rankcondition=${filters.rank}`)
+    }
+
+    // let r = await fetch(`/api/students.json?limit=${limitf}&sort=${sortf}&scorecondition=${scoreconditionf}&rankcondition=${rankconditionf}`);
 
     for (const [grade, checkbox] of Object.entries(gradeCheckboxes)) {
         console.log(grade, checkbox);
@@ -187,4 +215,34 @@ for (const checkbox of Object.values(gradeCheckboxes)) {
 
     // Update search when its changed
     checkbox.addEventListener("change", updateStudentSearch);
+}
+
+// Search criteria settings updater
+for (const rowEl of document.querySelectorAll(".row-setting")) {
+    const topEl = rowEl.querySelector(".row-top");
+    const bottomEl = rowEl.querySelector(".row-bottom");
+    const checkboxEl = topEl.querySelector('input[type="checkbox"]');
+    const inputEl = rowEl.querySelector("input.main-setting-input");
+    const valueEl = rowEl.querySelector(".row-setting-value");
+
+    rowEl.addEventListener("click", function (event) {
+        if (event.target !== this) return;
+        checkboxEl.click();
+    });
+
+    inputEl.addEventListener("input", function () {
+        valueEl.innerText = this.value;
+    });
+
+    inputEl.addEventListener("change", function() {
+        updateStudentSearch();
+    });
+
+    checkboxEl.addEventListener("input", function () {
+        bottomEl.classList.toggle("hidden", !checkboxEl.checked);
+        updateStudentSearch();
+    });
+
+    valueEl.innerText = inputEl.value;
+    bottomEl.classList.toggle("hidden", !checkboxEl.checked);
 }
