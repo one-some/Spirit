@@ -89,6 +89,8 @@ async function fetchLeaderboard(
     let r = await fetch(`/api/students.json?limit=${limitf}&sort=${sortf}&scorecondition=${scoreconditionf}&rankcondition=${rankconditionf}`);
     let j = await r.json();
 
+    console.log(j);
+
     for (const el of document.querySelectorAll(`.leaderboard .listing`)) {
         el.remove();
     }
@@ -96,6 +98,7 @@ async function fetchLeaderboard(
         let place = 1;
         for (const student of j) {
             renderStudent(el, student);
+            console.log("rendered");
             student.place = place;
             place++;
         }

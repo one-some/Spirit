@@ -37,6 +37,24 @@ $el("#delete-student-button").addEventListener("click", async function () {
     }
 });
 
+$el("#delete-seniors").addEventListener("click", async function () {
+    const doIt = await modalConfirm("Are you sure you want to delete all seniors?", "Delete", "Cancel");
+
+    if (doIt) {
+        await fetch("/api/delete_seniors");
+    }
+    fetchLeaderboard();
+});
+
+$el("#zero-scores").addEventListener("click", async function () {
+    const doIt = await modalConfirm("Are you sure you want to set all scores to zero?", "Zero", "Cancel");
+
+    if (doIt) {
+        await fetch("/api/zero_scores");
+    }
+    fetchLeaderboard();
+});
+
 async function saveNewStudent() {
     await fetch("/api/new_save_student.json", {
         method: "POST",
