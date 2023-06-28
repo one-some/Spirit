@@ -734,7 +734,19 @@ modal-content {
 }
 
 #login-body {
-    background-image: url('/static/edited_login_photo_background.jpg');
+    background-image: url('/static/login_photo_background.jpg');
+    background-size: cover;
+}
+
+#login-dark {
+    z-index: -1;
+    pointer-events: none;
+    background-color: rgba(0, 0, 0, 0.7);
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0px;
+    top: 0px;
 }
 
 /* Interactive Q&A */

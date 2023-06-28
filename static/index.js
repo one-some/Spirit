@@ -29,44 +29,6 @@ document.addEventListener("click", (function (event) {
 }));                                                                              // Makes it so that the dropdown menu for filtering students disappears when you click outside of the menu
 
 
-
-function applyFilters() {
-    tempScore = document.getElementById("score").closest("#score").value;               // Gets the value in the text boxes in the leaderboard filtering munu, in this case it is for the score filter
-    let patterna = /^[><=][0-9][0-9]*$/;
-    let patternb = /^[><]=[0-9][0-9]*$/;                                                // These are regex patterns for the leaderboard filtering
-    // One is for inputs like ">300" and the other is for inputs like ">=300"
-
-    if (tempScore.match(patterna) || tempScore.match(patternb)) {
-        scoreCondition = tempScore;                                                      // If the input is valid, ie they match the pattern, the input is assigned to a global variables
-    }                                                                                   // That is always for fetching the leaderboard. In this case the score found in the textbox is being
-    else if (tempScore == "") {                                                           // assigned to the global variable that is used in the fetchLeaderboard() function (see below), for filtering scores
-        scoreCondition = undefined;                                                     // If no input, the variable is left undefined and the fetchLeaderboard() function (see below), will use default values
-    }
-    else {
-        document.getElementById("score").closest("#score").value = "Invalid Value!";     // If the inputs do not match the pattern then an invalid message shows in the box and no filter for that category is applied
-    }
-
-    tempRank = document.getElementById("rank").closest("#rank").value;                  // This process is repeated for the input in the text box for rank
-    if (tempRank.match(patterna) || tempRank.match(patternb)) {
-        rankCondition = tempRank;
-    }
-    else if (tempRank == "") {
-        rankCondition = undefined;
-    }
-    else {
-        document.getElementById("rank").closest("#Rank").value = "Invalid Value!";
-    }
-
-    if (limit = "") {
-        limit = undefined;
-    }                                                                                   // The input for limit does not need checking since the html input type is set to number
-    else {                                                                               // Thus it is impossible for someone to put an invalid value.
-        limit = document.getElementById("limit").closest("#limit").value;
-    }
-    fetchLeaderboard(limit, scoreCondition, rankCondition);                             // Updates the leaderboard (see below)
-}
-
-
 async function Logout() {
     await fetch("/logout");             // Sends for the server which deletes your session and thus logs you out.
     window.location.replace("/login");  // Takes you to the login page.
@@ -118,8 +80,12 @@ var rankCondition;
 var sort;
 
 
-async function fetchLeaderboard(limitf = 25, scoreconditionf = ">-1", rankconditionf = ">0", sortf = "points_desc",) {
-
+async function fetchLeaderboard(
+    limitf = 25,
+    scoreconditionf = ">-1",
+    rankconditionf = ">-1",
+    sortf = "points_desc"
+) {
     let r = await fetch(`/api/students.json?limit=${limitf}&sort=${sortf}&scorecondition=${scoreconditionf}&rankcondition=${rankconditionf}`);
     let j = await r.json();
 
@@ -206,31 +172,6 @@ async function confirmOrDenyAddStudent(ID, approval) {
         }))
     }
 
-}
-
-// Search criteria settings updater
-for (const rowEl of document.querySelectorAll(".row-setting")) {
-    const topEl = rowEl.querySelector(".row-top");
-    const bottomEl = rowEl.querySelector(".row-bottom");
-    const checkboxEl = topEl.querySelector('input[type="checkbox"]');
-    const inputEl = rowEl.querySelector("input.main-setting-input");
-    const valueEl = rowEl.querySelector(".row-setting-value");
-
-    rowEl.addEventListener("click", function (event) {
-        if (event.target !== this) return;
-        checkboxEl.click();
-    });
-
-    inputEl.addEventListener("input", function () {
-        valueEl.innerText = this.value;
-    });
-
-    checkboxEl.addEventListener("input", function () {
-        bottomEl.classList.toggle("hidden", !checkboxEl.checked);
-    });
-
-    valueEl.innerText = inputEl.value;
-    bottomEl.classList.toggle("hidden", !checkboxEl.checked);
 }
 
 

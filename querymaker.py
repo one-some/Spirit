@@ -169,7 +169,8 @@ class Student:
         """
         return Student(
             *con().nab_row(
-                "SELECT NAME,POINTS,GRADE,ROWID,STUDENT_RANK FROM USERS WHERE NAME = ?;", (name,)
+                "SELECT NAME,POINTS,GRADE,ROWID,STUDENT_RANK FROM USERS WHERE NAME = ?;",
+                (name,),
             )
         )
 
@@ -234,6 +235,7 @@ def get_students(
     limit: int = 50,
     sort: Sort = Sort.NAME_DESC,
     score_condition: str = ">-1",
+    rank_condition: str = ">0",
     query: Optional[str] = None,
     grade_filters: Optional[dict] = None,
 ) -> list[Student]:
@@ -244,6 +246,8 @@ def get_students(
         sort (Sort, optional): Query ORDER BY method. Defaults to Sort.NAME_DESC.
         score_condition (str, optional): A string representing a numerical constraint
             on the score value. Defaults to ">0".
+        rank_condition (str, optional): A string representing a numerical constraint
+            on the rank value. Defaults to ">0".
         query (Optional[str], optional): A substring to match names to. Defaults to None.
         grade_filters (Optional[dict], optional): A dict determining which grades
             should be allowed/disallowed from the results. Defaults to None.
@@ -286,6 +290,21 @@ def get_students(
         where_clauses.append(
             WhereClause(condition=f"POINTS {score_operand} ?", args=[score_value])
         )
+
+    if rank_condition:
+        rank_operand = rank_condition[0]
+        if rank_operand not in VALID_INT_OPERANDS:
+            raise ValueError("Evil operand!")
+
+        try:
+            rank_value = int(rank_condition[1:])
+        except ValueError:
+            raise
+
+        where_clauses.append(
+            WhereClause(condition=f"STUDENT_RANK {rank_operand} ?", args=[rank_value])
+        )
+
     where_clauses.append(
         WhereClause(condition=f"SCHOOL_ID = ?", args=[session["school_id"]])
     )

@@ -7,7 +7,16 @@ from os import path as os_path
 from typing import Optional
 import random
 
-from flask import Flask, jsonify, redirect, render_template, request, session, url_for, flash
+from flask import (
+    Flask,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+    flash,
+)
 from werkzeug.utils import secure_filename
 
 from pandas import read_csv as pd_read_csv
@@ -62,8 +71,14 @@ def sha256_hash(plaintext_password: str) -> str:
     sha256.update(plaintext_password.encode("utf-8"))
     return sha256.hexdigest()
 
+
 def allowed_file(filename):
-    return ('.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS, filename.rsplit('.', 1)[1].lower())
+    return (
+        "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS,
+        filename.rsplit(".", 1)[1].lower(),
+    )
+
+
 # Routing
 
 app = Flask(__name__)
@@ -290,6 +305,8 @@ def api_students():
 
     sort = querymaker.Sort.from_string(request.args.get("sort", "name_desc"))
     score_condition = request.args.get("scorecondition")
+    rank_condition = request.args.get("rankcondition")
+
     try:
         limit = min(300, int(request.args.get("limit")))
     except (ValueError, TypeError):
@@ -299,6 +316,7 @@ def api_students():
             limit=limit,
             sort=sort,
             score_condition=score_condition,
+            rank_condition=rank_condition,
             query=query,
             grade_filters=grade_filters,
         )
@@ -629,23 +647,23 @@ def batch_add():
         user_name=session["username"], action="Batch add", allow_rollback=True
     )
 
-    if request.method == 'POST':
+    if request.method == "POST":
         # check if the post request has the file part
-        if 'file' not in request.files:
-            flash('No file part')
+        if "file" not in request.files:
+            flash("No file part")
             return redirect(request.url)
-        file = request.files['file']
+        file = request.files["file"]
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
         print(file.filename)
-        if file.filename == '':
-            flash('No selected file')
+        if file.filename == "":
+            flash("No selected file")
             return redirect(request.url)
         if file and allowed_file(file.filename)[0]:
             filename = secure_filename(file.filename)
             extension = allowed_file(file.filename)[1]
 
-            if extension == 'csv':
+            if extension == "csv":
                 file.save(os_path.join("input", "csv.csv"))
                 df = pd_read_csv("input/csv.csv")
             else:
@@ -657,31 +675,36 @@ def batch_add():
             print(df.columns, list(df.columns))
 
             
-            if 'NAME' not in list(df.columns):
+            if "NAME" not in list(df.columns):
                 flash("Error: No NAME column!")
 
-            elif 'GRADE' not in list(df.columns):
+            elif "GRADE" not in list(df.columns):
                 flash("Error: No GRADE column!")
                 print("error occured")
 
-            elif 'EMAIL' not in list(df.columns):
+            elif "EMAIL" not in list(df.columns):
                 flash("Error: No EMAIL column")
 
-            elif 'POINTS' not in list(df.columns):
-                df['POINTS'] = 0
-                df['SURPLUS'] = 0
+            elif "POINTS" not in list(df.columns):
+                df["POINTS"] = 0
+                df["SURPLUS"] = 0
 
             if "SURPLUS" not in df.columns:
                 df["SURPLUS"] = df["POINTS"]
 
             for key in df.columns:
                 print(key)
-                if key not in ['NAME', 'POINTS', 'GRADE', 'SURPLUS', 'EMAIL', 'PASSWORD']:
+                if key not in [
+                    "NAME",
+                    "POINTS",
+                    "GRADE",
+                    "SURPLUS",
+                    "EMAIL",
+                    "PASSWORD",
+                ]:
                     df.drop(key, axis=1, inplace=True)
             if 'PASSWORD' not in list(df.columns):
-                for index, row in df.iterrows():
-                    password = "".join(random.sample(audit_log.ALPHABET, k=10))
-                    spiritmail.sendPassword(row['EMAIL'], row["NAME"], password)
+                df["PASSWORD"] = sha256_hash('password')
             else:
                 df["PASSWORD"] = sha256_hash(df["PASSWORD"])
 
@@ -706,7 +729,6 @@ def get_inbox():
 
 @app.route("/api/deny", methods=["POST"])
 def deny():
-
     try:
         username = session["username"]
         role = session["role"]
@@ -721,7 +743,6 @@ def deny():
         return redirect(url_for("login"))
 
     con = querymaker.con()
-
 
     if role in ["TEACHER", "ADMINISTRATOR"]:
         print("\n", request.json, "\n")
@@ -759,18 +780,19 @@ def accept_student_add():
         return redirect(url_for("login"))
 
     if role in ["TEACHER", "ADMINISTRATOR"]:
-        user_school_id = int(con.nab(
-            "SELECT SCHOOL_ID FROM USERS WHERE NAME = ?;",
-            (session['username'],)
-        ))
-        requested_school_id = int(con.nab(
-            'SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = ?;', (request.json["request_id"],)
-        ))
+        user_school_id = int(
+            con.nab(
+                "SELECT SCHOOL_ID FROM USERS WHERE NAME = ?;", (session["username"],)
+            )
+        )
+        requested_school_id = int(
+            con.nab(
+                "SELECT SCHOOL_ID FROM REQUESTS WHERE ROWID = ?;",
+                (request.json["request_id"],),
+            )
+        )
 
-        if (
-            user_school_id
-            == requested_school_id
-        ):
+        if user_school_id == requested_school_id:
             con.execute(
                 "INSERT INTO USERS (NAME, GRADE, EMAIL, PASSWORD, ROLE, SCHOOL_ID) SELECT NAME, GRADE, EMAIL, PASSWORD, ROLE, SCHOOL_ID FROM REQUESTS WHERE ROWID = ?",
                 (request.json["request_id"],),
