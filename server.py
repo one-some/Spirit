@@ -376,8 +376,18 @@ def api_draw_results():
 
 @app.route("/api/suggest.json")
 def api_suggestions():
+    """(API) Returns a list of matching students.
+
+    Returns: {
+        name: str
+        points: int
+        grade: int
+        id: int
+        rank: int
+    }
+    """
+
     query = request.args.get("q")
-    print(query)
     return jsonify(querymaker.get_students_matching(query))
 
 
@@ -428,11 +438,26 @@ def api_events():
 
 @app.route("/api/prizes.json")
 def api_prizes():
+    """(API) Returns a list of prizes.
+
+    Returns: {
+        id: int,
+        name: str,
+        points_required: int,
+    }
+    """
     return jsonify(querymaker.get_prizes())
 
 
 @app.route("/api/stats.json")
 def api_stats():
+    """(API) Returns a series of aggregate statistics.
+
+    Returns: {
+        points_per_grade: array,
+        average_percentage_per_grade: array
+    }
+    """
     return jsonify(querymaker.get_aggregate_stats())
 
 
