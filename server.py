@@ -58,19 +58,37 @@ def prize_from_points(points: int) -> Optional[str]:
     return None
 
 
-def sha256_hash(plaintext_password: str) -> str:
-    """Returns the hex form of the digest of a password hashed by SHA256.
+def sha256_hash_generate(plaintext_password: str) -> str:
+    """Returns the hex form of the digest of a password + salt hashed by SHA256, and the salt.
 
     Args:
         password (str): The plaintext password
 
     Returns:
-        str: The SHA256 digest, in hex form.
+        (str: The SHA256 digest in hex form., str: The salt)
     """
+    salt = "".join(random.sample(audit_log.ALPHABET, k=32))
+
     sha256 = hashlib.sha256()
-    sha256.update(plaintext_password.encode("utf-8"))
+    sha256.update((plaintext_password + salt).encode("utf-8"))
+    return (sha256.hexdigest(), salt)
+
+def sha256_hash_check(plaintext_password: str, salt: str):
+    '''Returns the hex form of the digest of a password + salt
+    
+    Args:
+        password (str): the plaintext password
+        salt (str): the salt
+    '''
+    sha256 = hashlib.sha256()
+    sha256.update((plaintext_password + salt).encode("utf-8"))
     return sha256.hexdigest()
 
+# with querymaker.con() as con:
+#     for row in con.execute("SELECT ID FROM USERS").fetchall():
+#         password, salt = sha256_hash_generate('password')
+#         con.execute("UPDATE USERS SET PASSWORD = ?, SALT = ? WHERE ID = ?", (password, salt, row[0]))
+#         con.commit()
 
 def allowed_file(filename):
     return (
@@ -129,9 +147,12 @@ def login():
             given_plaintext_password = request.form["password"]
         except KeyError:
             return "No password given!", 400
-        given_hashed_password = sha256_hash(given_plaintext_password)
-
         con = querymaker.con()
+
+        salt = con.execute('SELECT SALT FROM USERS WHERE NAME = ?', (username,)).fetchone()[0]
+        given_hashed_password = sha256_hash_check(given_plaintext_password, salt)
+
+        
 
         try:
             valid_hashed_password = con.execute(
@@ -205,15 +226,18 @@ def register():
         if request.form.get("Create", False) != "on":
             print(request.form)
 
+            password, salt = sha256_hash_generate(request.form['password'])
+
             con.execute(
-                "INSERT INTO REQUESTS(OPERATION, NAME, EMAIL, PASSWORD, SCHOOL_ID, ROLE, GRADE) VALUES ('ADD', ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO REQUESTS(OPERATION, NAME, EMAIL, PASSWORD, SCHOOL_ID, ROLE, GRADE, SALT) VALUES ('ADD', ?, ?, ?, ?, ?, ?, ?)",
                 (
                     request.form["username"],
                     request.form["email"],
-                    sha256_hash(request.form["password"]),
+                    password,
                     request.form["school-id"],
                     request.form["role"],
                     request.form.get("grade", None),
+                    salt,
                 ),
             )
             con.commit()
@@ -223,15 +247,17 @@ def register():
             request.form.get("Create", False) == "on"
             and int(request.form["school-id"]) != c
         ):
+            password, salt = sha256_hash_generate(request.form['password'])
             con.execute(
-                "INSERT INTO USERS (NAME, EMAIL, PASSWORD, SCHOOL_ID, ROLE, GRADE) VALUES (?, ?, ?, ?, ?, ?)",
+                "INSERT INTO USERS (NAME, EMAIL, PASSWORD, SCHOOL_ID, ROLE, GRADE, SALT) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 (
                     request.form["username"],
                     request.form["email"],
-                    sha256_hash(request.form["password"]),
+                    password,
                     request.form["school-id"],
                     request.form["role"],
                     None,
+                    salt,
                 ),
             )
             con.commit()
@@ -587,13 +613,13 @@ def save_new_student():
     )
 
     
-    password = "".join(random.sample(audit_log.ALPHABET, k=10))
+    password, salt = sha256_hash_generate("".join(random.sample(audit_log.ALPHABET, k=10)))
 
     with querymaker.con() as con:
         con.execute(
-            """INSERT INTO USERS (NAME, GRADE, POINTS, SURPLUS, EMAIL, SCHOOL_ID, ROLE, PASSWORD)
+            """INSERT INTO USERS (NAME, GRADE, POINTS, SURPLUS, EMAIL, SCHOOL_ID, ROLE, PASSWORD, SALT)
                 VALUES
-                    (?, ?, ?, ?, ?, ?, 'STUDENT', ?);
+                    (?, ?, ?, ?, ?, ?, 'STUDENT', ?, ?);
                 """,
             (
                 request.json["student_name"],
@@ -602,7 +628,8 @@ def save_new_student():
                 int(request.json["student_points"]),
                 request.json["student_email"],
                 session["school_id"],
-                sha256_hash(password),
+                password,
+                salt,
             ),
         )
         con.commit()
@@ -704,9 +731,11 @@ def batch_add():
                 ]:
                     df.drop(key, axis=1, inplace=True)
             if 'PASSWORD' not in list(df.columns):
-                df["PASSWORD"] = sha256_hash('password')
+                for index, row in df.iterrows():
+                    row["PASSWORD"], row["SALT"] = sha256_hash_generate("".join(random.sample(audit_log.ALPHABET, k=10)))
             else:
-                df["PASSWORD"] = sha256_hash(df["PASSWORD"])
+                for index, row in df.iterrows():
+                    row["PASSWORD"], row["SALT"] = sha256_hash_generate(df["PASSWORD"])
 
             df["SCHOOL_ID"] = session["school_id"]
             df["ROLE"] = "STUDENT"
@@ -853,6 +882,11 @@ def zero_scores():
             con.commit()
         querymaker.reindex_scores()
     return ("", 204)
+
+@app.route("/forgot_password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        spiritmail.sendForgotPassword()
 
 if __name__ == "__main__":
     backup.start_backup_loop()

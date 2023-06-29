@@ -43,3 +43,25 @@ Welcome to Spirit!'''
 
     sendEmail(message=message, recipient=recipient)
 
+def sendForgotPassword(recipient, link):
+    message_cont = f'''Please click this link to reset your password:
+    
+{link}
+    
+If you did request this, it is safe to ignore this email'''
+
+
+
+
+
+    message = MIMEMultipart()
+
+    message["From"] = "noreply.spiritfbla@gmail.com"
+    message["To"] = recipient
+    message["Subject"] = "Spirit - Forgot Password"
+
+    message.attach(MIMEText(message_cont), 'plain')
+
+    message = message.as_string()
+
+    sendEmail(message=message, recipient=recipient)
