@@ -383,6 +383,20 @@ def api_suggestions():
 
 @app.route("/api/events.json")
 def api_events():
+    """(API) Returns a list of upcoming events.
+
+    Returns: {
+        id: int,
+        name: str,
+        location: str,
+        desc: str,
+        points: int,
+        time_start: int,
+        time_end: int,
+        interested_count: int (TEACHER/ADMINISTRATOR),
+        interested: bool (STUDENT),
+    }
+    """
     out = []
 
     if session["role"] in ["ADMINISTRATOR", "TEACHER"]:
