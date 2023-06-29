@@ -154,15 +154,12 @@ def login():
             return "No password given!", 400
         con = querymaker.con()
 
-        salt = con.execute('SELECT SALT FROM USERS WHERE NAME = ?', (username,)).fetchone()[0]
-        given_hashed_password = sha256_hash_check(given_plaintext_password, salt)
-
-        
-
         try:
             valid_hashed_password = con.execute(
                 "SELECT PASSWORD FROM USERS WHERE NAME = ?", (username,)
             ).fetchone()[0]
+            salt = con.execute('SELECT SALT FROM USERS WHERE NAME = ?', (username,)).fetchone()[0]
+            given_hashed_password = sha256_hash_check(given_plaintext_password, salt)
         except TypeError:
             # TypeError: None is not subscriptable, as fetchone()
             # will return None if it has nothing to fetch
