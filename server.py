@@ -90,6 +90,11 @@ def sha256_hash_check(plaintext_password: str, salt: str):
 #         con.execute("UPDATE USERS SET PASSWORD = ?, SALT = ? WHERE ID = ?", (password, salt, row[0]))
 #         con.commit()
 
+with querymaker.con() as con:
+    for row in con.execute("SELECT ROWID FROM USERS").fetchall():
+        password, salt = sha256_hash_generate('password')
+        con.execute(f"UPDATE USERS SET PASSWORD = '{password}', SALT = '{salt}' WHERE ROWID = '{row[0]}'")
+
 def allowed_file(filename):
     return (
         "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS,
@@ -922,10 +927,36 @@ def zero_scores():
         querymaker.reindex_scores()
     return ("", 204)
 
+
+confirmarg = ""
+
 @app.route("/forgot_password", methods=["GET", "POST"])
 def forgot_password():
     if request.method == "POST":
-        spiritmail.sendForgotPassword()
+        confirmarg = "".join(random.sample(audit_log.ALPHABET, k=64))
+
+        link = f"/reset_password?args={confirmarg}"
+
+
+        spiritmail.sendForgotPassword(recipient=request.form["email"], link=link)
+    
+
+@app.route("/reset_password", methods=["GET", "POST"])
+def reset_password():
+    if request.method == "GET":
+        if request.args.get("confirmarg", None) == confirmarg:
+            return render_template("reset_password.html", confirmarg=confirmarg)
+        else:
+            return redirect(url_for("login"))
+    if request.method == "POST":
+        if request.form.get("confirmarg", None) == confirmarg:
+            with querymaker.con() as con:
+                password, salt = sha256_hash_generate(request.form["password"])
+                con.execute("UPDATE TABLE USERS SET PASSWORD = ?, SALT = ? WHERE NAME = ?", (password, salt, request.form["username"]))
+                con.commit()
+                con.close()
+        else:
+            return redirect(url_for("login"))
 
 if __name__ == "__main__":
     backup.start_backup_loop()
